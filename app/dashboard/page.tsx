@@ -8,6 +8,17 @@ interface VideoItem {
   thumbnail: string
 }
 
+interface PlaylistApiItem {
+  snippet: {
+    resourceId: { videoId: string }
+    title: string
+    thumbnails: {
+      medium?: { url: string }
+      default?: { url: string }
+    }
+  }
+}
+
 export default async function Dashboard() {
   const { userId } = await auth()
 
@@ -48,17 +59,17 @@ export default async function Dashboard() {
           const videosJson = await videosRes.json()
 
           if (videosJson.items) {
-            videos = videosJson.items.map((v: any) => ({
+            videos = videosJson.items.map((v: PlaylistApiItem) => ({
               id: v.snippet.resourceId.videoId,
               title: v.snippet.title,
-              thumbnail: v.snippet.thumbnails?.medium?.url || v.snippet.thumbnails?.default?.url,
+              thumbnail: v.snippet.thumbnails?.medium?.url || v.snippet.thumbnails?.default?.url || '',
             }))
           }
         }
       } else {
         errorMsg = 'No YouTube channel found on this Google account.'
       }
-    } catch (err) {
+    } catch {
       errorMsg = 'Could not fetch YouTube channel data.'
     }
   } else {
