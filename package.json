@@ -12,6 +12,7 @@
     "@clerk/nextjs": "^7.5.6",
     "@clerk/themes": "^2.4.57",
     "@supabase/supabase-js": "^2.108.2",
+    "deepl-node": "^1.27.0",
     "lucide-react": "^1.21.0",
     "next": "^15.5.19",
     "openai": "^6.44.0",
