@@ -1,6 +1,7 @@
 ﻿import { auth, clerkClient } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import DashboardHeader from './header'
+import Link from 'next/link'
 
 interface VideoItem {
   id: string
@@ -82,13 +83,17 @@ export default async function Dashboard() {
 
       {channelData ? (
         <>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: '#f5f5f5', padding: '1.5rem', borderRadius: '12px', maxWidth: '500px', marginBottom: '2rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: '#f5f5f5', padding: '1.5rem', borderRadius: '12px', maxWidth: '500px', marginBottom: '1.5rem' }}>
             <img src={channelData.thumbnail} alt="Channel avatar" style={{ width: '64px', height: '64px', borderRadius: '50%', flexShrink: 0 }} />
             <div style={{ minWidth: 0 }}>
               <p style={{ fontSize: '0.85rem', color: '#666', margin: 0 }}>Connected YouTube channel</p>
               <p style={{ fontSize: '1.2rem', fontWeight: 600, margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{channelData.title}</p>
             </div>
           </div>
+
+          <Link href="/dashboard/transcribe" style={{ display: 'inline-block', background: '#1D9E75', color: 'white', padding: '0.75rem 1.5rem', borderRadius: '8px', textDecoration: 'none', fontSize: '0.95rem', marginBottom: '2rem' }}>
+            Transcribe a video →
+          </Link>
 
           <h2 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '1rem' }}>Your videos</h2>
 
