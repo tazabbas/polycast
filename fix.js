@@ -1,0 +1,1 @@
+require('fs').writeFileSync('app/dashboard/transcribe/page.tsx',require('fs').readFileSync('app/page.tsx','utf8').replace('Break the language barrier on YouTube','MARKER'),'utf8')
