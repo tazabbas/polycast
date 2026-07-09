@@ -17,21 +17,32 @@ export async function POST(request: NextRequest) {
       process.env.ELEVENLABS_VOICE_ID!,
       {
         text,
-        model_id: 'eleven_multilingual_v2',
-        output_format: 'mp3_44100_128',
+        modelId: 'eleven_multilingual_v2',
+        outputFormat: 'mp3_44100_128',
       }
     )
 
-    const chunks: Buffer[] = []
-    for await (const chunk of audioStream) {
-      chunks.push(Buffer.from(chunk))
+    const reader = (audioStream as ReadableStream<Uint8Array>).getReader()
+    const chunks: Uint8Array[] = []
+
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+      if (value) chunks.push(value)
     }
-    const audioBuffer = Buffer.concat(chunks)
+
+    const totalLength = chunks.reduce((acc, chunk) => acc + chunk.length, 0)
+    const audioBuffer = new Uint8Array(totalLength)
+    let offset = 0
+    for (const chunk of chunks) {
+      audioBuffer.set(chunk, offset)
+      offset += chunk.length
+    }
 
     return new NextResponse(audioBuffer, {
       headers: {
         'Content-Type': 'audio/mpeg',
-        'Content-Length': audioBuffer.length.toString(),
+        'Content-Length': totalLength.toString(),
       },
     })
   } catch (error) {

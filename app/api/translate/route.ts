@@ -1,41 +1,42 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { ElevenLabsClient } from '@elevenlabs/elevenlabs-js'
+﻿import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@supabase/supabase-js'
+import { auth } from '@clerk/nextjs/server'
+import * as deepl from 'deepl-node'
 
 export async function POST(request: NextRequest) {
   try {
-    const { text } = await request.json()
-
-    if (!text) {
-      return NextResponse.json({ error: 'No text provided' }, { status: 400 })
+    const { userId } = await auth()
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const client = new ElevenLabsClient({
-      apiKey: process.env.ELEVENLABS_API_KEY!,
-    })
+    const { text, target_language, transcription_id } = await request.json()
 
-    const audioStream = await client.textToSpeech.convert(
-      process.env.ELEVENLABS_VOICE_ID!,
-      {
-        text,
-        modelId: 'eleven_multilingual_v2',
-        outputFormat: 'mp3_44100_128',
-      }
+    const translator = new deepl.Translator(process.env.DEEPL_API_KEY!)
+
+    const result = await translator.translateText(
+      text,
+      null,
+      target_language as deepl.TargetLanguageCode
     )
 
-    const chunks: Buffer[] = []
-    for await (const chunk of audioStream) {
-      chunks.push(Buffer.from(chunk))
-    }
-    const audioBuffer = Buffer.concat(chunks)
+    const translated_text = Array.isArray(result) ? result[0].text : result.text
 
-    return new NextResponse(audioBuffer, {
-      headers: {
-        'Content-Type': 'audio/mpeg',
-        'Content-Length': audioBuffer.length.toString(),
-      },
-    })
+    try {
+      const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+      )
+      await supabase
+        .from('translations')
+        .insert({ user_id: userId, transcription_id, target_language, translated_text })
+    } catch (dbError) {
+      console.error('DB save failed (non-fatal):', dbError)
+    }
+
+    return NextResponse.json({ translated_text })
   } catch (error) {
-    console.error('Voice synthesis error:', error)
-    return NextResponse.json({ error: 'Voice synthesis failed' }, { status: 500 })
+    console.error('Translation error:', error)
+    return NextResponse.json({ error: 'Translation failed' }, { status: 500 })
   }
 }
