@@ -1,13 +1,15 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { ElevenLabsClient } from '@elevenlabs/elevenlabs-js'
 
 export async function POST(request: NextRequest) {
   try {
-    const { text } = await request.json()
+    const { text: rawText } = await request.json()
 
-    if (!text) {
+    if (!rawText) {
       return NextResponse.json({ error: 'No text provided' }, { status: 400 })
     }
+
+    const text = rawText.length > 800 ? rawText.substring(0, 800) : rawText
 
     const client = new ElevenLabsClient({
       apiKey: process.env.ELEVENLABS_API_KEY!,
