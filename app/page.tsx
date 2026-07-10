@@ -5,12 +5,9 @@ export default function Home() {
   return (
     <main style={{ fontFamily: 'sans-serif', background: '#0a0a0a', minHeight: '100vh', color: 'white' }}>
 
-      {/* Navigation */}
       <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.25rem 2rem', borderBottom: '1px solid #1a1a1a', position: 'sticky', top: 0, background: 'rgba(10,10,10,0.95)', backdropFilter: 'blur(10px)', zIndex: 100 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <div style={{ width: '32px', height: '32px', background: '#1D9E75', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <span style={{ fontSize: '16px' }}>🎙</span>
-          </div>
+          <img src="/logo.svg" alt="PolyCast logo" style={{ width: '36px', height: '36px' }} />
           <span style={{ fontWeight: 700, fontSize: '1.2rem', color: 'white' }}>PolyCast</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
@@ -37,7 +34,6 @@ export default function Home() {
         </div>
       </nav>
 
-      {/* Hero Section */}
       <section style={{ textAlign: 'center', padding: '5rem 2rem 4rem', maxWidth: '900px', margin: '0 auto' }}>
         <div style={{ display: 'inline-block', background: '#1a2e1a', border: '1px solid #1D9E75', borderRadius: '20px', padding: '6px 16px', fontSize: '13px', color: '#1D9E75', marginBottom: '1.5rem', fontWeight: 500 }}>
           🌍 Now supporting 50+ languages
@@ -49,8 +45,6 @@ export default function Home() {
         <p style={{ fontSize: '1.2rem', color: '#888', maxWidth: '600px', margin: '0 auto 2.5rem', lineHeight: 1.7 }}>
           PolyCast uses AI to transcribe, translate, and dub your YouTube videos in your own cloned voice — automatically uploaded back to your channel in every language you choose.
         </p>
-
-        {/* Play Button CTA */}
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '1rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
           <Show when="signed-out">
             <SignUpButton mode="modal">
@@ -77,7 +71,6 @@ export default function Home() {
         <p style={{ fontSize: '0.85rem', color: '#555' }}>No credit card required · Free to start · Cancel anytime</p>
       </section>
 
-      {/* How it works */}
       <section style={{ padding: '4rem 2rem', maxWidth: '1000px', margin: '0 auto' }}>
         <h2 style={{ textAlign: 'center', fontSize: '2rem', fontWeight: 700, marginBottom: '0.75rem' }}>How PolyCast works</h2>
         <p style={{ textAlign: 'center', color: '#666', marginBottom: '3rem', fontSize: '1rem' }}>From one video to a global audience in minutes</p>
@@ -99,7 +92,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Features */}
       <section style={{ padding: '4rem 2rem', maxWidth: '1000px', margin: '0 auto' }}>
         <h2 style={{ textAlign: 'center', fontSize: '2rem', fontWeight: 700, marginBottom: '3rem' }}>Why creators choose PolyCast</h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem' }}>
@@ -120,7 +112,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Pricing */}
       <section style={{ padding: '4rem 2rem', maxWidth: '800px', margin: '0 auto', textAlign: 'center' }}>
         <h2 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '0.75rem' }}>Simple pricing</h2>
         <p style={{ color: '#666', marginBottom: '3rem' }}>Start free. Scale as you grow.</p>
@@ -147,7 +138,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* CTA Banner */}
       <section style={{ padding: '4rem 2rem', textAlign: 'center' }}>
         <div style={{ maxWidth: '600px', margin: '0 auto', background: 'linear-gradient(135deg, #0d2e1e, #111)', border: '1px solid #1D9E75', borderRadius: '24px', padding: '3rem 2rem' }}>
           <h2 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '1rem' }}>Ready to go global?</h2>
@@ -169,7 +159,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Footer */}
       <footer style={{ borderTop: '1px solid #1a1a1a', padding: '2rem', textAlign: 'center', color: '#444', fontSize: '0.85rem' }}>
         <p>© 2026 PolyCast. Built for creators, by creators.</p>
       </footer>
