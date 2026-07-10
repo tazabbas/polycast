@@ -3,8 +3,12 @@ import { ClerkProvider } from '@clerk/nextjs'
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "PolyCast — Break the language barrier",
-  description: "Stream and watch YouTube videos in any language, with the creator's own voice.",
+  title: "PolyCast — Your voice. Every language. Zero effort.",
+  description: "PolyCast uses AI to transcribe, translate, and dub your YouTube videos in your own cloned voice — automatically uploaded back to your channel in every language you choose.",
+  icons: {
+    icon: '/logo.svg',
+    apple: '/logo.svg',
+  }
 };
 
 export default function RootLayout({
