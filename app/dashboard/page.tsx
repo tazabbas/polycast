@@ -86,7 +86,7 @@ export default async function Dashboard() {
     <main
       style={{
         minHeight: '100vh',
-        background: '#15151C',
+        background: '#26262F',
         color: '#F2F2F5',
         fontFamily: "'DM Sans', sans-serif",
         padding: '0 0 4rem',
@@ -164,8 +164,8 @@ export default async function Dashboard() {
               {/* Stat: video count */}
               <div
                 style={{
-                  background: '#1C1C25',
-                  border: '1px solid #2C2C38',
+                  background: '#31313D',
+                  border: '1px solid #40404E',
                   borderRadius: '14px',
                   padding: '1.25rem 1.5rem',
                   display: 'flex',
@@ -190,8 +190,8 @@ export default async function Dashboard() {
               {/* Stat: plan + upgrade */}
               <div
                 style={{
-                  background: '#1C1C25',
-                  border: '1px solid #2C2C38',
+                  background: '#31313D',
+                  border: '1px solid #40404E',
                   borderRadius: '14px',
                   padding: '1.25rem 1.5rem',
                   display: 'flex',
@@ -228,8 +228,8 @@ export default async function Dashboard() {
             {/* Usage bar */}
             <div
               style={{
-                background: '#1C1C25',
-                border: '1px solid #2C2C38',
+                background: '#31313D',
+                border: '1px solid #40404E',
                 borderRadius: '14px',
                 padding: '1.25rem 1.5rem',
                 marginBottom: '1.75rem',
@@ -255,7 +255,7 @@ export default async function Dashboard() {
                   width: '100%',
                   height: '8px',
                   borderRadius: '999px',
-                  background: '#2C2C38',
+                  background: '#40404E',
                   overflow: 'hidden',
                 }}
               >
@@ -314,10 +314,10 @@ export default async function Dashboard() {
                 {videos.map((video) => (
                   <a key={video.id} href={`https://www.youtube.com/watch?v=${video.id}`} target="_blank" rel="noopener noreferrer"
                     style={{
-                      border: '1px solid #2C2C38',
+                      border: '1px solid #40404E',
                       borderRadius: '12px',
                       overflow: 'hidden',
-                      background: '#1C1C25',
+                      background: '#31313D',
                       textDecoration: 'none',
                       color: 'inherit',
                       display: 'block',
