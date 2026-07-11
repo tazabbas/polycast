@@ -9,8 +9,8 @@ export default function DashboardHeader() {
         justifyContent: 'space-between',
         alignItems: 'center',
         padding: '1.25rem 2rem',
-        borderBottom: '1px solid #26262F',
-        background: '#101016',
+        borderBottom: '1px solid #40404E',
+        background: '#1D1D26',
         marginBottom: '0',
       }}
     >
