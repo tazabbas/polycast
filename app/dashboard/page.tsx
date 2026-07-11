@@ -77,11 +77,16 @@ export default async function Dashboard() {
     errorMsg = 'No Google access token found — try signing out and in again.'
   }
 
+  // Free plan limit — usage tracking isn't wired up yet, so this starts at 0.
+  const minutesUsed = 0
+  const minutesLimit = 30
+  const usagePercent = Math.min(100, (minutesUsed / minutesLimit) * 100)
+
   return (
     <main
       style={{
         minHeight: '100vh',
-        background: '#0B0B0F',
+        background: '#15151C',
         color: '#F2F2F5',
         fontFamily: "'DM Sans', sans-serif",
         padding: '0 0 4rem',
@@ -108,9 +113,9 @@ export default async function Dashboard() {
             <div
               style={{
                 display: 'grid',
-                gridTemplateColumns: 'minmax(280px, 1.3fr) repeat(2, 1fr)',
+                gridTemplateColumns: 'minmax(260px, 1.1fr) repeat(2, 1fr)',
                 gap: '1rem',
-                marginBottom: '1.75rem',
+                marginBottom: '1rem',
               }}
             >
               {/* Connected channel card */}
@@ -119,7 +124,7 @@ export default async function Dashboard() {
                   display: 'flex',
                   alignItems: 'center',
                   gap: '1rem',
-                  background: 'linear-gradient(135deg, #14231D 0%, #0F1613 100%)',
+                  background: 'linear-gradient(135deg, #1B2E26 0%, #16221C 100%)',
                   border: '1px solid #1D9E75',
                   padding: '1.25rem 1.5rem',
                   borderRadius: '14px',
@@ -159,8 +164,8 @@ export default async function Dashboard() {
               {/* Stat: video count */}
               <div
                 style={{
-                  background: '#15151C',
-                  border: '1px solid #232330',
+                  background: '#1C1C25',
+                  border: '1px solid #2C2C38',
                   borderRadius: '14px',
                   padding: '1.25rem 1.5rem',
                   display: 'flex',
@@ -168,7 +173,7 @@ export default async function Dashboard() {
                   justifyContent: 'center',
                 }}
               >
-                <p style={{ fontSize: '0.78rem', color: '#8A8A99', margin: '0 0 6px' }}>Videos synced</p>
+                <p style={{ fontSize: '0.78rem', color: '#9A9AA8', margin: '0 0 6px' }}>Videos synced</p>
                 <p
                   style={{
                     fontSize: '1.8rem',
@@ -182,11 +187,11 @@ export default async function Dashboard() {
                 </p>
               </div>
 
-              {/* Stat: plan */}
+              {/* Stat: plan + upgrade */}
               <div
                 style={{
-                  background: '#15151C',
-                  border: '1px solid #232330',
+                  background: '#1C1C25',
+                  border: '1px solid #2C2C38',
                   borderRadius: '14px',
                   padding: '1.25rem 1.5rem',
                   display: 'flex',
@@ -194,18 +199,74 @@ export default async function Dashboard() {
                   justifyContent: 'center',
                 }}
               >
-                <p style={{ fontSize: '0.78rem', color: '#8A8A99', margin: '0 0 6px' }}>Current plan</p>
+                <p style={{ fontSize: '0.78rem', color: '#9A9AA8', margin: '0 0 6px' }}>Current plan</p>
                 <p
                   style={{
                     fontSize: '1.4rem',
                     fontWeight: 800,
-                    margin: 0,
+                    margin: '0 0 6px',
                     fontFamily: "'Syne', sans-serif",
                     color: '#B7ACF6',
                   }}
                 >
                   Free
                 </p>
+                <Link
+                  href="/pricing"
+                  style={{
+                    fontSize: '0.8rem',
+                    fontWeight: 600,
+                    color: '#B7ACF6',
+                    textDecoration: 'none',
+                  }}
+                >
+                  Upgrade to Pro →
+                </Link>
+              </div>
+            </div>
+
+            {/* Usage bar */}
+            <div
+              style={{
+                background: '#1C1C25',
+                border: '1px solid #2C2C38',
+                borderRadius: '14px',
+                padding: '1.25rem 1.5rem',
+                marginBottom: '1.75rem',
+              }}
+            >
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'baseline',
+                  marginBottom: '0.6rem',
+                }}
+              >
+                <p style={{ fontSize: '0.85rem', fontWeight: 600, margin: 0, color: '#E8E8ED' }}>
+                  Usage this month
+                </p>
+                <p style={{ fontSize: '0.8rem', margin: 0, color: '#9A9AA8' }}>
+                  {minutesUsed} / {minutesLimit} mins
+                </p>
+              </div>
+              <div
+                style={{
+                  width: '100%',
+                  height: '8px',
+                  borderRadius: '999px',
+                  background: '#2C2C38',
+                  overflow: 'hidden',
+                }}
+              >
+                <div
+                  style={{
+                    width: `${usagePercent}%`,
+                    height: '100%',
+                    borderRadius: '999px',
+                    background: 'linear-gradient(90deg, #1D9E75, #9FE1CB)',
+                  }}
+                />
               </div>
             </div>
 
@@ -251,16 +312,12 @@ export default async function Dashboard() {
                 }}
               >
                 {videos.map((video) => (
-                  <a
-                    key={video.id}
-                    href={`https://www.youtube.com/watch?v=${video.id}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <a key={video.id} href={`https://www.youtube.com/watch?v=${video.id}`} target="_blank" rel="noopener noreferrer"
                     style={{
-                      border: '1px solid #232330',
+                      border: '1px solid #2C2C38',
                       borderRadius: '12px',
                       overflow: 'hidden',
-                      background: '#15151C',
+                      background: '#1C1C25',
                       textDecoration: 'none',
                       color: 'inherit',
                       display: 'block',
@@ -307,11 +364,11 @@ export default async function Dashboard() {
             ) : (
               <div
                 style={{
-                  border: '1px dashed #333340',
+                  border: '1px dashed #3A3A48',
                   borderRadius: '12px',
                   padding: '3rem 2rem',
                   textAlign: 'center',
-                  color: '#8A8A99',
+                  color: '#9A9AA8',
                 }}
               >
                 <p style={{ margin: 0 }}>No videos found on this channel yet.</p>
