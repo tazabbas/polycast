@@ -1,4 +1,4 @@
-﻿import { auth, clerkClient } from '@clerk/nextjs/server'
+import { auth, clerkClient } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import DashboardHeader from './header'
 import Link from 'next/link'
@@ -78,43 +78,267 @@ export default async function Dashboard() {
   }
 
   return (
-    <main style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
+    <main
+      style={{
+        minHeight: '100vh',
+        background: '#0B0B0F',
+        color: '#F2F2F5',
+        fontFamily: "'DM Sans', sans-serif",
+        padding: '0 0 4rem',
+      }}
+    >
       <DashboardHeader />
 
-      {channelData ? (
-        <>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: '#f5f5f5', padding: '1.5rem', borderRadius: '12px', maxWidth: '500px', marginBottom: '1.5rem' }}>
-            <img src={channelData.thumbnail} alt="Channel avatar" style={{ width: '64px', height: '64px', borderRadius: '50%', flexShrink: 0 }} />
-            <div style={{ minWidth: 0 }}>
-              <p style={{ fontSize: '0.85rem', color: '#666', margin: 0 }}>Connected YouTube channel</p>
-              <p style={{ fontSize: '1.2rem', fontWeight: 600, margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{channelData.title}</p>
+      <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '2rem 2rem 0' }}>
+        <h1
+          style={{
+            fontFamily: "'Syne', sans-serif",
+            fontSize: '1.8rem',
+            fontWeight: 800,
+            letterSpacing: '-0.5px',
+            marginBottom: '1.75rem',
+          }}
+        >
+          Dashboard
+        </h1>
+
+        {channelData ? (
+          <>
+            {/* Channel + stats row */}
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'minmax(280px, 1.3fr) repeat(2, 1fr)',
+                gap: '1rem',
+                marginBottom: '1.75rem',
+              }}
+            >
+              {/* Connected channel card */}
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '1rem',
+                  background: 'linear-gradient(135deg, #14231D 0%, #0F1613 100%)',
+                  border: '1px solid #1D9E75',
+                  padding: '1.25rem 1.5rem',
+                  borderRadius: '14px',
+                }}
+              >
+                <img
+                  src={channelData.thumbnail}
+                  alt="Channel avatar"
+                  style={{
+                    width: '56px',
+                    height: '56px',
+                    borderRadius: '50%',
+                    flexShrink: 0,
+                    border: '2px solid #1D9E75',
+                  }}
+                />
+                <div style={{ minWidth: 0 }}>
+                  <p style={{ fontSize: '0.78rem', color: '#7FBFA6', margin: 0, letterSpacing: '0.02em' }}>
+                    Connected channel
+                  </p>
+                  <p
+                    style={{
+                      fontSize: '1.1rem',
+                      fontWeight: 700,
+                      margin: 0,
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      fontFamily: "'Syne', sans-serif",
+                    }}
+                  >
+                    {channelData.title}
+                  </p>
+                </div>
+              </div>
+
+              {/* Stat: video count */}
+              <div
+                style={{
+                  background: '#15151C',
+                  border: '1px solid #232330',
+                  borderRadius: '14px',
+                  padding: '1.25rem 1.5rem',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'center',
+                }}
+              >
+                <p style={{ fontSize: '0.78rem', color: '#8A8A99', margin: '0 0 6px' }}>Videos synced</p>
+                <p
+                  style={{
+                    fontSize: '1.8rem',
+                    fontWeight: 800,
+                    margin: 0,
+                    fontFamily: "'Syne', sans-serif",
+                    color: '#9FE1CB',
+                  }}
+                >
+                  {videos.length}
+                </p>
+              </div>
+
+              {/* Stat: plan */}
+              <div
+                style={{
+                  background: '#15151C',
+                  border: '1px solid #232330',
+                  borderRadius: '14px',
+                  padding: '1.25rem 1.5rem',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'center',
+                }}
+              >
+                <p style={{ fontSize: '0.78rem', color: '#8A8A99', margin: '0 0 6px' }}>Current plan</p>
+                <p
+                  style={{
+                    fontSize: '1.4rem',
+                    fontWeight: 800,
+                    margin: 0,
+                    fontFamily: "'Syne', sans-serif",
+                    color: '#B7ACF6',
+                  }}
+                >
+                  Free
+                </p>
+              </div>
             </div>
+
+            {/* CTA */}
+            <Link
+              href="/dashboard/transcribe"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                background: 'linear-gradient(135deg, #1D9E75 0%, #17805F 100%)',
+                color: 'white',
+                padding: '0.9rem 1.75rem',
+                borderRadius: '10px',
+                textDecoration: 'none',
+                fontSize: '0.95rem',
+                fontWeight: 600,
+                marginBottom: '2.5rem',
+                boxShadow: '0 4px 20px rgba(29, 158, 117, 0.25)',
+              }}
+            >
+              Transcribe a video →
+            </Link>
+
+            <h2
+              style={{
+                fontFamily: "'Syne', sans-serif",
+                fontSize: '1.1rem',
+                fontWeight: 700,
+                marginBottom: '1.1rem',
+                color: '#E8E8ED',
+              }}
+            >
+              Your videos
+            </h2>
+
+            {videos.length > 0 ? (
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
+                  gap: '1.25rem',
+                }}
+              >
+                {videos.map((video) => (
+                  <a
+                    key={video.id}
+                    href={`https://www.youtube.com/watch?v=${video.id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      border: '1px solid #232330',
+                      borderRadius: '12px',
+                      overflow: 'hidden',
+                      background: '#15151C',
+                      textDecoration: 'none',
+                      color: 'inherit',
+                      display: 'block',
+                      transition: 'transform 0.15s ease, border-color 0.15s ease',
+                    }}
+                    className="polycast-video-card"
+                  >
+                    <div style={{ position: 'relative', paddingBottom: '56.25%', background: '#000' }}>
+                      <img
+                        src={video.thumbnail}
+                        alt={video.title}
+                        style={{
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover',
+                          display: 'block',
+                        }}
+                      />
+                    </div>
+                    <div style={{ padding: '0.85rem 1rem' }}>
+                      <p
+                        style={{
+                          fontSize: '0.9rem',
+                          fontWeight: 500,
+                          margin: 0,
+                          lineHeight: 1.4,
+                          color: '#E8E8ED',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          display: '-webkit-box',
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: 'vertical',
+                        }}
+                      >
+                        {video.title}
+                      </p>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            ) : (
+              <div
+                style={{
+                  border: '1px dashed #333340',
+                  borderRadius: '12px',
+                  padding: '3rem 2rem',
+                  textAlign: 'center',
+                  color: '#8A8A99',
+                }}
+              >
+                <p style={{ margin: 0 }}>No videos found on this channel yet.</p>
+              </div>
+            )}
+          </>
+        ) : (
+          <div
+            style={{
+              border: '1px solid #4A2020',
+              background: '#1A1214',
+              borderRadius: '12px',
+              padding: '1.5rem',
+              color: '#F0997B',
+            }}
+          >
+            {errorMsg}
           </div>
+        )}
+      </div>
 
-          <Link href="/dashboard/transcribe" style={{ display: 'inline-block', background: '#1D9E75', color: 'white', padding: '0.75rem 1.5rem', borderRadius: '8px', textDecoration: 'none', fontSize: '0.95rem', marginBottom: '2rem' }}>
-            Transcribe a video →
-          </Link>
-
-          <h2 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '1rem' }}>Your videos</h2>
-
-          {videos.length > 0 ? (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '1.25rem' }}>
-              {videos.map((video) => (
-                <a key={video.id} href={`https://www.youtube.com/watch?v=${video.id}`} target="_blank" rel="noopener noreferrer" style={{ border: '1px solid #eee', borderRadius: '10px', overflow: 'hidden', background: '#fff', textDecoration: 'none', color: 'inherit', display: 'block' }}>
-                  <img src={video.thumbnail} alt={video.title} style={{ width: '100%', display: 'block' }} />
-                  <div style={{ padding: '0.75rem' }}>
-                    <p style={{ fontSize: '0.9rem', fontWeight: 500, margin: 0, lineHeight: 1.4 }}>{video.title}</p>
-                  </div>
-                </a>
-              ))}
-            </div>
-          ) : (
-            <p style={{ color: '#666' }}>No videos found on this channel yet.</p>
-          )}
-        </>
-      ) : (
-        <p style={{ color: '#c00' }}>{errorMsg}</p>
-      )}
+      <style>{`
+        .polycast-video-card:hover {
+          transform: translateY(-3px);
+          border-color: #1D9E75 !important;
+        }
+      `}</style>
     </main>
   );
 }
