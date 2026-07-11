@@ -1,168 +1,93 @@
 import { Show, SignInButton, SignUpButton, UserButton } from '@clerk/nextjs'
 import Link from 'next/link'
 
-export default function Home() {
-  return (
-    <main style={{ fontFamily: 'sans-serif', background: '#0a0a0a', minHeight: '100vh', color: 'white' }}>
-
-      <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.25rem 2rem', borderBottom: '1px solid #1a1a1a', position: 'sticky', top: 0, background: 'rgba(10,10,10,0.95)', backdropFilter: 'blur(10px)', zIndex: 100 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <img src="/logo.svg" alt="PolyCast logo" style={{ width: '36px', height: '36px' }} />
-          <span style={{ fontWeight: 700, fontSize: '1.2rem', color: 'white' }}>PolyCast</span>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <Show when="signed-out">
-            <SignInButton mode="modal">
-              <button style={{ background: 'transparent', color: '#999', border: '1px solid #333', padding: '0.5rem 1.25rem', borderRadius: '8px', fontSize: '0.9rem', cursor: 'pointer' }}>
-                Sign in
-              </button>
-            </SignInButton>
-            <SignUpButton mode="modal">
-              <button style={{ background: '#1D9E75', color: 'white', border: 'none', padding: '0.5rem 1.25rem', borderRadius: '8px', fontSize: '0.9rem', cursor: 'pointer', fontWeight: 500 }}>
-                Get started free
-              </button>
-            </SignUpButton>
-          </Show>
-          <Show when="signed-in">
-            <Link href="/dashboard">
-              <button style={{ background: '#1D9E75', color: 'white', border: 'none', padding: '0.5rem 1.25rem', borderRadius: '8px', fontSize: '0.9rem', cursor: 'pointer' }}>
-                Dashboard
-              </button>
-            </Link>
-            <UserButton />
-          </Show>
-        </div>
-      </nav>
-
-      <section style={{ textAlign: 'center', padding: '5rem 2rem 4rem', maxWidth: '900px', margin: '0 auto' }}>
-        <div style={{ display: 'inline-block', background: '#1a2e1a', border: '1px solid #1D9E75', borderRadius: '20px', padding: '6px 16px', fontSize: '13px', color: '#1D9E75', marginBottom: '1.5rem', fontWeight: 500 }}>
-          🌍 Now supporting 50+ languages
-        </div>
-        <h1 style={{ fontSize: 'clamp(2.5rem, 6vw, 4rem)', fontWeight: 800, lineHeight: 1.1, marginBottom: '1.5rem', background: 'linear-gradient(135deg, #ffffff 0%, #999 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-          Your voice.<br />Every language.<br />
-          <span style={{ background: 'linear-gradient(135deg, #1D9E75, #0fd494)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Zero effort.</span>
-        </h1>
-        <p style={{ fontSize: '1.2rem', color: '#888', maxWidth: '600px', margin: '0 auto 2.5rem', lineHeight: 1.7 }}>
-          PolyCast uses AI to transcribe, translate, and dub your YouTube videos in your own cloned voice — automatically uploaded back to your channel in every language you choose.
-        </p>
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '1rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
-          <Show when="signed-out">
-            <SignUpButton mode="modal">
-              <button style={{ display: 'flex', alignItems: 'center', gap: '10px', background: '#1D9E75', color: 'white', border: 'none', padding: '1rem 2rem', borderRadius: '50px', fontSize: '1.05rem', cursor: 'pointer', fontWeight: 600, boxShadow: '0 0 40px rgba(29,158,117,0.4)' }}>
-                <span style={{ width: '28px', height: '28px', background: 'rgba(255,255,255,0.2)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px' }}>▶</span>
-                Start dubbing for free
-              </button>
-            </SignUpButton>
-          </Show>
-          <Show when="signed-in">
-            <Link href="/dashboard">
-              <button style={{ display: 'flex', alignItems: 'center', gap: '10px', background: '#1D9E75', color: 'white', border: 'none', padding: '1rem 2rem', borderRadius: '50px', fontSize: '1.05rem', cursor: 'pointer', fontWeight: 600, boxShadow: '0 0 40px rgba(29,158,117,0.4)' }}>
-                <span style={{ width: '28px', height: '28px', background: 'rgba(255,255,255,0.2)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px' }}>▶</span>
-                Go to dashboard
-              </button>
-            </Link>
-          </Show>
-          <Link href="/watch">
-            <button style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'transparent', color: '#ccc', border: '1px solid #333', padding: '1rem 2rem', borderRadius: '50px', fontSize: '1.05rem', cursor: 'pointer' }}>
-              Watch a demo
-            </button>
-          </Link>
-        </div>
-        <p style={{ fontSize: '0.85rem', color: '#555' }}>No credit card required · Free to start · Cancel anytime</p>
-      </section>
-
-      <section style={{ padding: '4rem 2rem', maxWidth: '1000px', margin: '0 auto' }}>
-        <h2 style={{ textAlign: 'center', fontSize: '2rem', fontWeight: 700, marginBottom: '0.75rem' }}>How PolyCast works</h2>
-        <p style={{ textAlign: 'center', color: '#666', marginBottom: '3rem', fontSize: '1rem' }}>From one video to a global audience in minutes</p>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem' }}>
-          {[
-            { step: '1', icon: '🎥', title: 'Upload your video', desc: 'Connect your YouTube channel and select any video you want to translate.' },
-            { step: '2', icon: '📝', title: 'AI transcribes it', desc: 'Whisper AI converts your speech to text with near-perfect accuracy.' },
-            { step: '3', icon: '🌍', title: 'DeepL translates', desc: 'Your transcript is translated into up to 50 languages with natural phrasing.' },
-            { step: '4', icon: '🎙', title: 'Your voice, dubbed', desc: 'ElevenLabs clones your voice and speaks the translation — it sounds like you.' },
-            { step: '5', icon: '📤', title: 'Auto-uploaded', desc: 'The dubbed video is automatically uploaded to your YouTube channel.' },
-          ].map((item) => (
-            <div key={item.step} style={{ background: '#111', border: '1px solid #1a1a1a', borderRadius: '16px', padding: '1.5rem', textAlign: 'center' }}>
-              <div style={{ fontSize: '2rem', marginBottom: '0.75rem' }}>{item.icon}</div>
-              <div style={{ fontSize: '11px', color: '#1D9E75', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.5rem' }}>Step {item.step}</div>
-              <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '0.5rem' }}>{item.title}</h3>
-              <p style={{ fontSize: '0.85rem', color: '#666', lineHeight: 1.6 }}>{item.desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section style={{ padding: '4rem 2rem', maxWidth: '1000px', margin: '0 auto' }}>
-        <h2 style={{ textAlign: 'center', fontSize: '2rem', fontWeight: 700, marginBottom: '3rem' }}>Why creators choose PolyCast</h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem' }}>
-          {[
-            { icon: '🎙', title: 'Voice cloning', desc: 'Your audience hears you — not a generic robot voice. PolyCast clones your exact voice, tone, and personality.' },
-            { icon: '⚡', title: 'Fully automated', desc: 'Upload once, get dubbed videos in every language automatically uploaded back to your channel.' },
-            { icon: '🌍', title: '50+ languages', desc: 'Reach Spanish, Hindi, Arabic, Chinese, French, Portuguese speakers — and 45 more language markets.' },
-            { icon: '📊', title: 'Growth analytics', desc: 'See exactly which languages are driving new subscribers and watch time across every market.' },
-            { icon: '🔒', title: 'You own your voice', desc: 'Your voice model belongs to you. Enable or disable languages anytime. Delete your data anytime.' },
-            { icon: '💰', title: 'Grow your revenue', desc: 'More views in more markets means more ad revenue, sponsorships, and subscribers — on autopilot.' },
-          ].map((f) => (
-            <div key={f.title} style={{ background: '#111', border: '1px solid #1a1a1a', borderRadius: '16px', padding: '1.5rem' }}>
-              <div style={{ fontSize: '1.75rem', marginBottom: '0.75rem' }}>{f.icon}</div>
-              <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '0.5rem' }}>{f.title}</h3>
-              <p style={{ fontSize: '0.85rem', color: '#666', lineHeight: 1.6 }}>{f.desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section style={{ padding: '4rem 2rem', maxWidth: '800px', margin: '0 auto', textAlign: 'center' }}>
-        <h2 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '0.75rem' }}>Simple pricing</h2>
-        <p style={{ color: '#666', marginBottom: '3rem' }}>Start free. Scale as you grow.</p>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.5rem' }}>
-          {[
-            { name: 'Starter', price: 'Free', desc: 'Perfect to try PolyCast', features: ['3 languages', '30 mins/month', 'Generic TTS voice', 'Basic analytics'], highlight: false },
-            { name: 'Creator', price: '£29/mo', desc: 'For growing channels', features: ['15 languages', '10 hours/month', 'Voice cloning included', 'Audience dashboard', 'No watermark'], highlight: true },
-            { name: 'Pro', price: '£149/mo', desc: 'For serious creators', features: ['50+ languages', 'Unlimited audio', 'Live stream translation', 'Priority support'], highlight: false },
-          ].map((plan) => (
-            <div key={plan.name} style={{ background: plan.highlight ? '#0d2e1e' : '#111', border: `1px solid ${plan.highlight ? '#1D9E75' : '#1a1a1a'}`, borderRadius: '16px', padding: '1.75rem', position: 'relative' }}>
-              {plan.highlight && <div style={{ position: 'absolute', top: '-12px', left: '50%', transform: 'translateX(-50%)', background: '#1D9E75', color: 'white', fontSize: '11px', fontWeight: 600, padding: '4px 12px', borderRadius: '20px' }}>MOST POPULAR</div>}
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '0.25rem' }}>{plan.name}</h3>
-              <div style={{ fontSize: '1.75rem', fontWeight: 700, color: plan.highlight ? '#1D9E75' : 'white', margin: '0.5rem 0' }}>{plan.price}</div>
-              <p style={{ fontSize: '0.8rem', color: '#666', marginBottom: '1.25rem' }}>{plan.desc}</p>
-              <ul style={{ listStyle: 'none', padding: 0, textAlign: 'left' }}>
-                {plan.features.map((f) => (
-                  <li key={f} style={{ fontSize: '0.85rem', color: '#999', padding: '4px 0', display: 'flex', gap: '8px' }}>
-                    <span style={{ color: '#1D9E75' }}>✓</span> {f}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section style={{ padding: '4rem 2rem', textAlign: 'center' }}>
-        <div style={{ maxWidth: '600px', margin: '0 auto', background: 'linear-gradient(135deg, #0d2e1e, #111)', border: '1px solid #1D9E75', borderRadius: '24px', padding: '3rem 2rem' }}>
-          <h2 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '1rem' }}>Ready to go global?</h2>
-          <p style={{ color: '#888', marginBottom: '2rem', lineHeight: 1.7 }}>Join thousands of creators already reaching new audiences in every language — in their own voice.</p>
-          <Show when="signed-out">
-            <SignUpButton mode="modal">
-              <button style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', background: '#1D9E75', color: 'white', border: 'none', padding: '1rem 2.5rem', borderRadius: '50px', fontSize: '1.05rem', cursor: 'pointer', fontWeight: 600 }}>
-                <span>▶</span> Start for free today
-              </button>
-            </SignUpButton>
-          </Show>
-          <Show when="signed-in">
-            <Link href="/dashboard">
-              <button style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', background: '#1D9E75', color: 'white', border: 'none', padding: '1rem 2.5rem', borderRadius: '50px', fontSize: '1.05rem', cursor: 'pointer', fontWeight: 600 }}>
-                <span>▶</span> Go to dashboard
-              </button>
-            </Link>
-          </Show>
-        </div>
-      </section>
-
-      <footer style={{ borderTop: '1px solid #1a1a1a', padding: '2rem', textAlign: 'center', color: '#444', fontSize: '0.85rem' }}>
-        <p>© 2026 PolyCast. Built for creators, by creators.</p>
-      </footer>
-
-    </main>
-  )
-}
+const translations: Record<string, {
+  badge: string, h1a: string, h1b: string, h1c: string,
+  desc: string, cta: string, demo: string, fine: string,
+  howTitle: string, howSub: string, whyTitle: string,
+  step1: string, step2: string, step3: string, step4: string, step5: string,
+  s1d: string, s2d: string, s3d: string, s4d: string, s5d: string,
+  f1: string, f2: string, f3: string, f4: string, f5: string, f6: string,
+  f1d: string, f2d: string, f3d: string, f4d: string, f5d: string, f6d: string,
+  pricing: string, footer: string
+}> = {
+  en: {
+    badge: '🌍 Now supporting 50+ languages',
+    h1a: 'Your voice.', h1b: 'Every language.', h1c: 'Zero effort.',
+    desc: 'PolyCast uses AI to transcribe, translate, and dub your YouTube videos in your own cloned voice — automatically uploaded back to your channel in every language you choose.',
+    cta: 'Start dubbing for free', demo: 'Watch a demo', fine: 'No credit card required · Free to start · Cancel anytime',
+    howTitle: 'How PolyCast works', howSub: 'From one video to a global audience in minutes',
+    whyTitle: 'Why creators choose PolyCast',
+    step1: 'Upload your video', step2: 'AI transcribes it', step3: 'DeepL translates', step4: 'Your voice, dubbed', step5: 'Auto-uploaded',
+    s1d: 'Connect your YouTube channel and select any video you want to translate.',
+    s2d: 'Whisper AI converts your speech to text with near-perfect accuracy in 99 languages.',
+    s3d: 'Your transcript is translated into up to 50 languages with natural phrasing.',
+    s4d: 'ElevenLabs clones your voice and speaks the translation — it sounds like you.',
+    s5d: 'The dubbed video is automatically uploaded to your YouTube channel.',
+    f1: 'Voice cloning', f2: 'Fully automated', f3: '50+ languages', f4: 'Growth analytics', f5: 'You own your voice', f6: 'Grow your revenue',
+    f1d: 'Your audience hears you — not a robot. PolyCast clones your exact voice, tone, and personality.',
+    f2d: 'Upload once, get dubbed videos in every language automatically uploaded to your channel.',
+    f3d: 'Reach Arabic, Hindi, Chinese, Korean, Japanese, Spanish speakers — and 45 more markets.',
+    f4d: 'See exactly which languages are driving new subscribers and watch time across every market.',
+    f5d: 'Your voice model belongs to you. Enable or disable languages anytime. Delete anytime.',
+    f6d: 'More views in more markets means more ad revenue, sponsorships, and subscribers — on autopilot.',
+    pricing: 'Pricing', footer: '© 2026 PolyCast. Built for creators, by creators.'
+  },
+  ar: {
+    badge: '🌍 يدعم الآن أكثر من 50 لغة',
+    h1a: 'صوتك.', h1b: 'كل لغة.', h1c: 'بلا جهد.',
+    desc: 'تستخدم PolyCast الذكاء الاصطناعي لنسخ مقاطع YouTube وترجمتها ومضاعفتها بصوتك المستنسخ — يتم رفعها تلقائياً إلى قناتك بكل لغة تختارها.',
+    cta: 'ابدأ مجاناً', demo: 'شاهد عرضاً', fine: 'لا تحتاج بطاقة ائتمانية · مجاني للبدء · إلغاء في أي وقت',
+    howTitle: 'كيف تعمل PolyCast', howSub: 'من فيديو واحد إلى جمهور عالمي في دقائق',
+    whyTitle: 'لماذا يختار المبدعون PolyCast',
+    step1: 'ارفع الفيديو', step2: 'يفسّر الذكاء الاصطناعي', step3: 'ترجمة DeepL', step4: 'صوتك المدبلج', step5: 'رفع تلقائي',
+    s1d: 'اربط قناتك على يوتيوب واختر أي فيديو تريد ترجمته.',
+    s2d: 'يحوّل Whisper AI كلامك إلى نص بدقة شبه مثالية في 99 لغة.',
+    s3d: 'تتم ترجمة النص إلى ما يصل إلى 50 لغة بعبارات طبيعية.',
+    s4d: 'تستنسخ ElevenLabs صوتك وتتحدث بالترجمة — يبدو وكأنك أنت.',
+    s5d: 'يتم رفع الفيديو المدبلج تلقائياً إلى قناتك على يوتيوب.',
+    f1: 'استنساخ الصوت', f2: 'مؤتمت بالكامل', f3: 'أكثر من 50 لغة', f4: 'تحليلات النمو', f5: 'صوتك ملكك', f6: 'زِد دخلك',
+    f1d: 'يسمع جمهورك صوتك — لا روبوت. تستنسخ PolyCast صوتك ونبرتك وشخصيتك.',
+    f2d: 'ارفع مرة واحدة، واحصل على مقاطع مدبلجة بكل لغة مرفوعة تلقائياً.',
+    f3d: 'تواصل مع المتحدثين بالعربية والهندية والصينية والكورية واليابانية والإسبانية.',
+    f4d: 'اعرف بالضبط أي اللغات تجلب مشتركين جدداً.',
+    f5d: 'نموذج صوتك ملكك. فعّل أو عطّل اللغات في أي وقت.',
+    f6d: 'المزيد من المشاهدات يعني المزيد من الإيرادات والمشتركين — تلقائياً.',
+    pricing: 'الأسعار', footer: '© 2026 PolyCast. مصنوع للمبدعين، من قِبل المبدعين.'
+  },
+  zh: {
+    badge: '🌍 现已支持50多种语言',
+    h1a: '您的声音。', h1b: '每种语言。', h1c: '零努力。',
+    desc: 'PolyCast 使用人工智能转录、翻译和配音您的 YouTube 视频，使用您自己克隆的声音——自动上传回您的频道，支持您选择的每种语言。',
+    cta: '免费开始配音', demo: '观看演示', fine: '无需信用卡 · 免费开始 · 随时取消',
+    howTitle: 'PolyCast 如何工作', howSub: '几分钟内从一个视频到全球观众',
+    whyTitle: '创作者为何选择 PolyCast',
+    step1: '上传视频', step2: 'AI 转录', step3: 'DeepL 翻译', step4: '您的声音配音', step5: '自动上传',
+    s1d: '连接您的 YouTube 频道并选择您想翻译的任何视频。',
+    s2d: 'Whisper AI 以近乎完美的准确度将您的语音转换为99种语言的文字。',
+    s3d: '您的文字稿被翻译成多达50种语言，措辞自然。',
+    s4d: 'ElevenLabs 克隆您的声音并朗读翻译——听起来就像您在说话。',
+    s5d: '配音视频自动上传回您的 YouTube 频道。',
+    f1: '声音克隆', f2: '全自动化', f3: '50多种语言', f4: '增长分析', f5: '您拥有自己的声音', f6: '增加收入',
+    f1d: '您的观众听到的是您的声音——而不是机器人。PolyCast 克隆您的声音、语调和个性。',
+    f2d: '上传一次，获得每种语言的配音视频，自动上传到您的频道。',
+    f3d: '接触阿拉伯语、印地语、中文、韩语、日语、西班牙语使用者。',
+    f4d: '准确了解哪些语言正在带来新订阅者和观看时间。',
+    f5d: '您的声音模型属于您。随时启用或禁用语言。随时删除。',
+    f6d: '更多市场的更多观看意味着更多广告收入、赞助和订阅者——自动完成。',
+    pricing: '价格', footer: '© 2026 PolyCast. 为创作者打造，由创作者打造。'
+  },
+  hi: {
+    badge: '🌍 अब 50+ भाषाओं का समर्थन',
+    h1a: 'आपकी आवाज़।', h1b: 'हर भाषा।', h1c: 'बिना किसी प्रयास के।',
+    desc: 'PolyCast AI का उपयोग करके आपके YouTube वीडियो को आपकी खुद की क्लोन की गई आवाज़ में ट्रांसक्राइब, अनुवाद और डब करता है — आपके चैनल पर हर चुनी गई भाषा में स्वचालित रूप से अपलोड किया जाता है।',
+    cta: 'मुफ्त में डबिंग शुरू करें', demo: 'डेमो देखें', fine: 'क्रेडिट कार्ड की जरूरत नहीं · मुफ्त में शुरू · कभी भी रद्द करें',
+    howTitle: 'PolyCast कैसे काम करता है', howSub: 'एक वीडियो से मिनटों में वैश्विक दर्शक',
+    whyTitle: 'क्रिएटर्स PolyCast क्यों चुनते हैं',
+    step1: 'वीडियो अपलोड करें', step2: 'AI ट्रांसक्राइब करता है', step3: 'DeepL अनुवाद', step4: 'आपकी आवाज़, डब', step5: 'स्वचालित अपलोड',
+    s1d: 'अपना YouTube चैनल कनेक्ट करें और कोई भी वीडियो चुनें जिसे आप अनुवाद करना चाहते हैं।',
+    s2d: 'Whisper AI 99 भाषाओं में लगभग परफेक्ट सटीकता के साथ आपकी बोली को टेक्स्ट में बदलता है।',
+    s3d: 'आपके ट्रांसक्रिप्ट का 50 भाषाओं में प्राकृतिक वाक्यांशों के साथ अनुवाद किया जाता है।',
+    s4d: 'ElevenLabs आपकी आवाज़ क्लोन करता है और अनुवाद बोलता है — यह आप जैसा लगता है।',
+    s5d: 'डब किया गया वीडियो स्वचालित रूप से आपके YouTube चैनल पर अपलोड हो जाता है।',
+    f1: 'आवाज़ क्लोनिंग', f2: 'पूरी तरह स्वचालित',
