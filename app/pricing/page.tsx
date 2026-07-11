@@ -30,7 +30,7 @@ export default function PricingPage() {
   return (
     <main style={{ minHeight: '100vh', background: '#0a0a0a', fontFamily: 'sans-serif', color: 'white', padding: '4rem 2rem' }}>
       <div style={{ maxWidth: '900px', margin: '0 auto', textAlign: 'center' }}>
-        <a href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', marginBottom: '3rem', color: '#666', textDecoration: 'none', fontSize: '0.9rem' }}>Back to home</a>
+        <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', marginBottom: '3rem', color: '#666', textDecoration: 'none', fontSize: '0.9rem' }}>Back to home</Link>
         <h1 style={{ fontSize: '2.5rem', fontWeight: 700, marginBottom: '0.75rem' }}>Simple pricing</h1>
         <p style={{ color: '#666', marginBottom: '3rem', fontSize: '1.1rem' }}>Start free. Scale as you grow. Cancel anytime.</p>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
