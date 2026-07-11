@@ -1,19 +1,33 @@
-﻿'use client'
+'use client'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import Link from 'next/link'
+
 export default function PricingPage() {
   const router = useRouter()
-  const [loading, setLoading] = useState(false)
-  async function handleSubscribe() {
-    setLoading(true)
+  const [loading, setLoading] = useState<string | null>(null)
+
+  async function handleSubscribe(priceId: string, planName: string) {
+    setLoading(planName)
     try {
-      const res = await fetch('/api/create-checkout-session', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID }) })
+      const res = await fetch('/api/create-checkout-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ priceId })
+      })
       const data = await res.json()
-      if (data.url) { window.location.href = data.url } else if (data.error === 'Unauthorized') { router.push('/sign-in') }
-    } catch { alert('Something went wrong. Please try again.') }
-    finally { setLoading(false) }
+      if (data.url) {
+        window.location.href = data.url
+      } else if (data.error === 'Unauthorized') {
+        router.push('/sign-in')
+      }
+    } catch {
+      alert('Something went wrong. Please try again.')
+    } finally {
+      setLoading(null)
+    }
   }
+
   return (
     <main style={{ minHeight: '100vh', background: '#0a0a0a', fontFamily: 'sans-serif', color: 'white', padding: '4rem 2rem' }}>
       <div style={{ maxWidth: '900px', margin: '0 auto', textAlign: 'center' }}>
@@ -21,36 +35,63 @@ export default function PricingPage() {
         <h1 style={{ fontSize: '2.5rem', fontWeight: 700, marginBottom: '0.75rem' }}>Simple pricing</h1>
         <p style={{ color: '#666', marginBottom: '3rem', fontSize: '1.1rem' }}>Start free. Scale as you grow. Cancel anytime.</p>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
+
           <div style={{ background: '#111', border: '1px solid #1a1a1a', borderRadius: '16px', padding: '2rem' }}>
             <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '0.25rem' }}>Starter</h3>
             <div style={{ fontSize: '2rem', fontWeight: 700, margin: '0.75rem 0' }}>Free</div>
             <p style={{ fontSize: '0.85rem', color: '#666', marginBottom: '1.5rem' }}>Perfect to try PolyCast</p>
             <ul style={{ listStyle: 'none', padding: 0, textAlign: 'left', marginBottom: '1.5rem' }}>
-              {['3 languages', '30 mins/month', 'Generic TTS voice', 'Basic analytics'].map(f => (<li key={f} style={{ fontSize: '0.85rem', color: '#999', padding: '5px 0', display: 'flex', gap: '8px' }}><span style={{ color: '#1D9E75' }}>✓</span> {f}</li>))}
+              {['3 languages', '30 mins/month', 'Generic TTS voice', 'Basic analytics'].map(f => (
+                <li key={f} style={{ fontSize: '0.85rem', color: '#999', padding: '5px 0', display: 'flex', gap: '8px' }}>
+                  <span style={{ color: '#1D9E75' }}>✓</span> {f}
+                </li>
+              ))}
             </ul>
-            <Link href="/dashboard" style={{ display: 'block', background: 'transparent', color: '#666', border: '1px solid #333', padding: '0.75rem', borderRadius: '8px', textAlign: 'center', textDecoration: 'none', fontSize: '0.9rem' }}>Get started free</Link>
+            <Link href="/dashboard" style={{ display: 'block', background: 'transparent', color: '#666', border: '1px solid #333', padding: '0.875rem', borderRadius: '8px', textAlign: 'center', textDecoration: 'none', fontSize: '0.9rem' }}>
+              Get started free
+            </Link>
           </div>
+
           <div style={{ background: '#0d2e1e', border: '2px solid #1D9E75', borderRadius: '16px', padding: '2rem', position: 'relative' }}>
             <div style={{ position: 'absolute', top: '-14px', left: '50%', transform: 'translateX(-50%)', background: '#1D9E75', color: 'white', fontSize: '11px', fontWeight: 600, padding: '4px 14px', borderRadius: '20px' }}>MOST POPULAR</div>
             <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '0.25rem' }}>Creator</h3>
             <div style={{ fontSize: '2rem', fontWeight: 700, color: '#1D9E75', margin: '0.75rem 0' }}>£29<span style={{ fontSize: '1rem', fontWeight: 400, color: '#666' }}>/mo</span></div>
             <p style={{ fontSize: '0.85rem', color: '#666', marginBottom: '1.5rem' }}>For growing channels</p>
             <ul style={{ listStyle: 'none', padding: 0, textAlign: 'left', marginBottom: '1.5rem' }}>
-              {['15 languages', '10 hours/month', 'Voice cloning included', 'Audience dashboard', 'No watermark', 'Priority support'].map(f => (<li key={f} style={{ fontSize: '0.85rem', color: '#999', padding: '5px 0', display: 'flex', gap: '8px' }}><span style={{ color: '#1D9E75' }}>✓</span> {f}</li>))}
+              {['15 languages', '10 hours/month', 'Voice cloning included', 'Audience dashboard', 'No watermark', 'Priority support'].map(f => (
+                <li key={f} style={{ fontSize: '0.85rem', color: '#999', padding: '5px 0', display: 'flex', gap: '8px' }}>
+                  <span style={{ color: '#1D9E75' }}>✓</span> {f}
+                </li>
+              ))}
             </ul>
-            <button onClick={handleSubscribe} disabled={loading} style={{ display: 'block', width: '100%', background: loading ? '#ccc' : '#1D9E75', color: 'white', border: 'none', padding: '0.875rem', borderRadius: '8px', fontSize: '0.95rem', fontWeight: 600, cursor: loading ? 'not-allowed' : 'pointer' }}>
-              {loading ? 'Loading...' : 'Subscribe now — £29/mo'}
+            <button
+              onClick={() => handleSubscribe(process.env.NEXT_PUBLIC_STRIPE_PRICE_ID!, 'creator')}
+              disabled={loading === 'creator'}
+              style={{ display: 'block', width: '100%', background: loading === 'creator' ? '#ccc' : '#1D9E75', color: 'white', border: 'none', padding: '0.875rem', borderRadius: '8px', fontSize: '0.95rem', fontWeight: 600, cursor: loading === 'creator' ? 'not-allowed' : 'pointer' }}>
+              {loading === 'creator' ? 'Loading...' : 'Subscribe now — £29/mo'}
             </button>
           </div>
-          <div style={{ background: '#111', border: '1px solid #1a1a1a', borderRadius: '16px', padding: '2rem' }}>
+
+          <div style={{ background: '#0a0a1e', border: '1px solid #533AB7', borderRadius: '16px', padding: '2rem', position: 'relative' }}>
+            <div style={{ position: 'absolute', top: '-14px', left: '50%', transform: 'translateX(-50%)', background: '#533AB7', color: 'white', fontSize: '11px', fontWeight: 600, padding: '4px 14px', borderRadius: '20px' }}>PREMIUM</div>
             <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '0.25rem' }}>Pro</h3>
-            <div style={{ fontSize: '2rem', fontWeight: 700, margin: '0.75rem 0' }}>£149<span style={{ fontSize: '1rem', fontWeight: 400, color: '#666' }}>/mo</span></div>
+            <div style={{ fontSize: '2rem', fontWeight: 700, color: '#8B7CF6', margin: '0.75rem 0' }}>£149<span style={{ fontSize: '1rem', fontWeight: 400, color: '#666' }}>/mo</span></div>
             <p style={{ fontSize: '0.85rem', color: '#666', marginBottom: '1.5rem' }}>For serious creators</p>
             <ul style={{ listStyle: 'none', padding: 0, textAlign: 'left', marginBottom: '1.5rem' }}>
-              {['50+ languages', 'Unlimited audio', 'Live stream translation', 'Lip sync coming soon', 'Dedicated support'].map(f => (<li key={f} style={{ fontSize: '0.85rem', color: '#999', padding: '5px 0', display: 'flex', gap: '8px' }}><span style={{ color: '#1D9E75' }}>✓</span> {f}</li>))}
+              {['50+ languages', 'Unlimited audio', 'Live stream translation', 'Lip sync coming soon', 'Auto YouTube upload', 'Dedicated support'].map(f => (
+                <li key={f} style={{ fontSize: '0.85rem', color: '#999', padding: '5px 0', display: 'flex', gap: '8px' }}>
+                  <span style={{ color: '#8B7CF6' }}>✓</span> {f}
+                </li>
+              ))}
             </ul>
-            <a href="mailto:hello@polycast.ai" style={{ display: 'block', background: 'transparent', color: '#666', border: '1px solid #333', padding: '0.75rem', borderRadius: '8px', textAlign: 'center', textDecoration: 'none', fontSize: '0.9rem' }}>Contact us</a>
+            <button
+              onClick={() => handleSubscribe(process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID!, 'pro')}
+              disabled={loading === 'pro'}
+              style={{ display: 'block', width: '100%', background: loading === 'pro' ? '#ccc' : '#533AB7', color: 'white', border: 'none', padding: '0.875rem', borderRadius: '8px', fontSize: '0.95rem', fontWeight: 600, cursor: loading === 'pro' ? 'not-allowed' : 'pointer' }}>
+              {loading === 'pro' ? 'Loading...' : 'Subscribe now — £149/mo'}
+            </button>
           </div>
+
         </div>
         <p style={{ color: '#444', fontSize: '0.85rem' }}>14-day money back guarantee · Secure payments by Stripe · Cancel anytime</p>
       </div>
