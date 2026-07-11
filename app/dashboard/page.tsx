@@ -86,8 +86,8 @@ export default async function Dashboard() {
     <main
       style={{
         minHeight: '100vh',
-        background: '#26262F',
-        color: '#F2F2F5',
+        background: '#FFFFFF',
+        color: '#1A1A1A',
         fontFamily: "'DM Sans', sans-serif",
         padding: '0 0 4rem',
       }}
@@ -102,6 +102,7 @@ export default async function Dashboard() {
             fontWeight: 800,
             letterSpacing: '-0.5px',
             marginBottom: '1.75rem',
+            color: '#1A1A1A',
           }}
         >
           Dashboard
@@ -124,7 +125,7 @@ export default async function Dashboard() {
                   display: 'flex',
                   alignItems: 'center',
                   gap: '1rem',
-                  background: 'linear-gradient(135deg, #1B2E26 0%, #16221C 100%)',
+                  background: '#F0FAF6',
                   border: '1px solid #1D9E75',
                   padding: '1.25rem 1.5rem',
                   borderRadius: '14px',
@@ -142,7 +143,7 @@ export default async function Dashboard() {
                   }}
                 />
                 <div style={{ minWidth: 0 }}>
-                  <p style={{ fontSize: '0.78rem', color: '#7FBFA6', margin: 0, letterSpacing: '0.02em' }}>
+                  <p style={{ fontSize: '0.78rem', color: '#1D9E75', margin: 0, letterSpacing: '0.02em' }}>
                     Connected channel
                   </p>
                   <p
@@ -154,6 +155,7 @@ export default async function Dashboard() {
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
                       fontFamily: "'Syne', sans-serif",
+                      color: '#1A1A1A',
                     }}
                   >
                     {channelData.title}
@@ -164,8 +166,8 @@ export default async function Dashboard() {
               {/* Stat: video count */}
               <div
                 style={{
-                  background: '#31313D',
-                  border: '1px solid #40404E',
+                  background: '#F7F7F8',
+                  border: '1px solid #E5E5EA',
                   borderRadius: '14px',
                   padding: '1.25rem 1.5rem',
                   display: 'flex',
@@ -173,14 +175,14 @@ export default async function Dashboard() {
                   justifyContent: 'center',
                 }}
               >
-                <p style={{ fontSize: '0.78rem', color: '#9A9AA8', margin: '0 0 6px' }}>Videos synced</p>
+                <p style={{ fontSize: '0.78rem', color: '#6B6B76', margin: '0 0 6px' }}>Videos synced</p>
                 <p
                   style={{
                     fontSize: '1.8rem',
                     fontWeight: 800,
                     margin: 0,
                     fontFamily: "'Syne', sans-serif",
-                    color: '#9FE1CB',
+                    color: '#1D9E75',
                   }}
                 >
                   {videos.length}
@@ -190,8 +192,8 @@ export default async function Dashboard() {
               {/* Stat: plan + upgrade */}
               <div
                 style={{
-                  background: '#31313D',
-                  border: '1px solid #40404E',
+                  background: '#F7F7F8',
+                  border: '1px solid #E5E5EA',
                   borderRadius: '14px',
                   padding: '1.25rem 1.5rem',
                   display: 'flex',
@@ -199,14 +201,14 @@ export default async function Dashboard() {
                   justifyContent: 'center',
                 }}
               >
-                <p style={{ fontSize: '0.78rem', color: '#9A9AA8', margin: '0 0 6px' }}>Current plan</p>
+                <p style={{ fontSize: '0.78rem', color: '#6B6B76', margin: '0 0 6px' }}>Current plan</p>
                 <p
                   style={{
                     fontSize: '1.4rem',
                     fontWeight: 800,
                     margin: '0 0 6px',
                     fontFamily: "'Syne', sans-serif",
-                    color: '#B7ACF6',
+                    color: '#1A1A1A',
                   }}
                 >
                   Free
@@ -216,7 +218,7 @@ export default async function Dashboard() {
                   style={{
                     fontSize: '0.8rem',
                     fontWeight: 600,
-                    color: '#B7ACF6',
+                    color: '#1D9E75',
                     textDecoration: 'none',
                   }}
                 >
@@ -228,8 +230,8 @@ export default async function Dashboard() {
             {/* Usage bar */}
             <div
               style={{
-                background: '#31313D',
-                border: '1px solid #40404E',
+                background: '#F7F7F8',
+                border: '1px solid #E5E5EA',
                 borderRadius: '14px',
                 padding: '1.25rem 1.5rem',
                 marginBottom: '1.75rem',
@@ -243,10 +245,10 @@ export default async function Dashboard() {
                   marginBottom: '0.6rem',
                 }}
               >
-                <p style={{ fontSize: '0.85rem', fontWeight: 600, margin: 0, color: '#E8E8ED' }}>
+                <p style={{ fontSize: '0.85rem', fontWeight: 600, margin: 0, color: '#1A1A1A' }}>
                   Usage this month
                 </p>
-                <p style={{ fontSize: '0.8rem', margin: 0, color: '#9A9AA8' }}>
+                <p style={{ fontSize: '0.8rem', margin: 0, color: '#6B6B76' }}>
                   {minutesUsed} / {minutesLimit} mins
                 </p>
               </div>
@@ -255,7 +257,7 @@ export default async function Dashboard() {
                   width: '100%',
                   height: '8px',
                   borderRadius: '999px',
-                  background: '#40404E',
+                  background: '#E5E5EA',
                   overflow: 'hidden',
                 }}
               >
@@ -264,7 +266,7 @@ export default async function Dashboard() {
                     width: `${usagePercent}%`,
                     height: '100%',
                     borderRadius: '999px',
-                    background: 'linear-gradient(90deg, #1D9E75, #9FE1CB)',
+                    background: 'linear-gradient(90deg, #1D9E75, #4FC79A)',
                   }}
                 />
               </div>
@@ -277,7 +279,7 @@ export default async function Dashboard() {
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '8px',
-                background: 'linear-gradient(135deg, #1D9E75 0%, #17805F 100%)',
+                background: '#1D9E75',
                 color: 'white',
                 padding: '0.9rem 1.75rem',
                 borderRadius: '10px',
@@ -285,7 +287,7 @@ export default async function Dashboard() {
                 fontSize: '0.95rem',
                 fontWeight: 600,
                 marginBottom: '2.5rem',
-                boxShadow: '0 4px 20px rgba(29, 158, 117, 0.25)',
+                boxShadow: '0 4px 20px rgba(29, 158, 117, 0.2)',
               }}
             >
               Transcribe a video →
@@ -297,7 +299,7 @@ export default async function Dashboard() {
                 fontSize: '1.1rem',
                 fontWeight: 700,
                 marginBottom: '1.1rem',
-                color: '#E8E8ED',
+                color: '#1A1A1A',
               }}
             >
               Your videos
@@ -314,10 +316,10 @@ export default async function Dashboard() {
                 {videos.map((video) => (
                   <a key={video.id} href={`https://www.youtube.com/watch?v=${video.id}`} target="_blank" rel="noopener noreferrer"
                     style={{
-                      border: '1px solid #40404E',
+                      border: '1px solid #E5E5EA',
                       borderRadius: '12px',
                       overflow: 'hidden',
-                      background: '#31313D',
+                      background: '#FFFFFF',
                       textDecoration: 'none',
                       color: 'inherit',
                       display: 'block',
@@ -347,7 +349,7 @@ export default async function Dashboard() {
                           fontWeight: 500,
                           margin: 0,
                           lineHeight: 1.4,
-                          color: '#E8E8ED',
+                          color: '#1A1A1A',
                           overflow: 'hidden',
                           textOverflow: 'ellipsis',
                           display: '-webkit-box',
@@ -364,11 +366,11 @@ export default async function Dashboard() {
             ) : (
               <div
                 style={{
-                  border: '1px dashed #3A3A48',
+                  border: '1px dashed #D1D1D8',
                   borderRadius: '12px',
                   padding: '3rem 2rem',
                   textAlign: 'center',
-                  color: '#9A9AA8',
+                  color: '#6B6B76',
                 }}
               >
                 <p style={{ margin: 0 }}>No videos found on this channel yet.</p>
@@ -378,11 +380,11 @@ export default async function Dashboard() {
         ) : (
           <div
             style={{
-              border: '1px solid #4A2020',
-              background: '#1A1214',
+              border: '1px solid #F0C4B4',
+              background: '#FDF2EE',
               borderRadius: '12px',
               padding: '1.5rem',
-              color: '#F0997B',
+              color: '#B54A2B',
             }}
           >
             {errorMsg}
