@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { auth } from '@clerk/nextjs/server'
 
@@ -8,10 +8,10 @@ export async function POST(request: NextRequest) {
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
-
-    const { priceId } = await request.json()
-
+    const { priceId, mode } = await request.json()
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
+
+    const checkoutMode: 'subscription' | 'payment' = mode === 'payment' ? 'payment' : 'subscription'
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -21,14 +21,13 @@ export async function POST(request: NextRequest) {
           quantity: 1,
         },
       ],
-      mode: 'subscription',
+      mode: checkoutMode,
       success_url: `${process.env.NEXT_PUBLIC_APP_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/`,
+      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/pricing`,
       metadata: {
         userId,
       },
     })
-
     return NextResponse.json({ url: session.url })
   } catch (error) {
     console.error('Checkout error:', error)
