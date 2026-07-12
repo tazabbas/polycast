@@ -17,7 +17,6 @@ const [synthesizing, setSynthesizing] = useState(false)
 const [error, setError] = useState('')
 const audioRef = useRef<HTMLAudioElement>(null)
 
-// Lip sync state
 const [lipSyncing, setLipSyncing] = useState(false)
 const [lipSyncStatus, setLipSyncStatus] = useState('')
 const [lipSyncVideoUrl, setLipSyncVideoUrl] = useState('')
@@ -103,7 +102,7 @@ setLipSyncing(false)
 }
 
 async function pollLipSyncStatus(id: string) {
-const maxAttempts = 60 // ~10 minutes at 10s intervals
+const maxAttempts = 60
 let attempts = 0
 
 const poll = async () => {
@@ -143,57 +142,64 @@ poll()
 }
 
 return (
-<main style={{ padding: '2rem', fontFamily: 'sans-serif', maxWidth: '680px' }}>
+<main style={{ minHeight: '100vh', background: '#FFFFFF', color: '#1A1A1A', fontFamily: "'DM Sans', sans-serif" }}>
 <DashboardHeader />
-<h2 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '0.5rem' }}>Transcribe & Translate</h2>
-<p style={{ fontSize: '0.9rem', color: '#666', marginBottom: '1.5rem' }}>Upload a video or audio file to transcribe it with AI, then translate and speak in your cloned voice.</p>
-<div style={{ background: '#f5f5f5', padding: '1.5rem', borderRadius: '12px', marginBottom: '1.5rem' }}>
-<input type="file" accept="audio/*,video/*" onChange={(e) => setFile(e.target.files?.[0] || null)} style={{ marginBottom: '1rem', display: 'block', fontSize: '0.9rem' }} />
-<button onClick={handleUpload} disabled={!file || loading} style={{ background: file && !loading ? '#1D9E75' : '#ccc', color: 'white', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '8px', fontSize: '0.95rem', cursor: file && !loading ? 'pointer' : 'not-allowed' }}>
+<div style={{ maxWidth: '680px', margin: '0 auto', padding: '2rem' }}>
+<h2 style={{ fontFamily: "'Syne', sans-serif", fontSize: '1.3rem', fontWeight: 700, marginBottom: '0.5rem' }}>Transcribe & Translate</h2>
+<p style={{ fontSize: '0.9rem', color: '#6B6B76', marginBottom: '1.5rem' }}>Upload a video or audio file to transcribe it with AI, then translate and speak in your cloned voice.</p>
+
+<div style={{ background: '#F7F7F8', border: '1px solid #E5E5EA', padding: '1.5rem', borderRadius: '12px', marginBottom: '1.5rem' }}>
+<input type="file" accept="audio/*,video/*" onChange={(e) => setFile(e.target.files?.[0] || null)} style={{ marginBottom: '1rem', display: 'block', fontSize: '0.9rem', color: '#1A1A1A' }} />
+<button onClick={handleUpload} disabled={!file || loading} style={{ background: file && !loading ? '#1D9E75' : '#D1D1D8', color: 'white', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '8px', fontSize: '0.95rem', fontWeight: 600, cursor: file && !loading ? 'pointer' : 'not-allowed' }}>
 {loading ? 'Transcribing...' : 'Transcribe'}
 </button>
 </div>
-{error && <p style={{ color: '#c00', marginBottom: '1rem' }}>{error}</p>}
+
+{error && <p style={{ color: '#B54A2B', marginBottom: '1rem', fontSize: '0.9rem' }}>{error}</p>}
+
 {transcript && (
 <>
-<div style={{ background: '#fff', border: '1px solid #eee', borderRadius: '12px', padding: '1.5rem', marginBottom: '1.5rem' }}>
-<p style={{ fontSize: '0.85rem', color: '#666', marginBottom: '0.5rem' }}>Transcript</p>
-<p style={{ fontSize: '0.95rem', lineHeight: 1.7, margin: 0 }}>{transcript}</p>
+<div style={{ background: '#FFFFFF', border: '1px solid #E5E5EA', borderRadius: '12px', padding: '1.5rem', marginBottom: '1.5rem' }}>
+<p style={{ fontSize: '0.85rem', color: '#6B6B76', marginBottom: '0.5rem' }}>Transcript</p>
+<p style={{ fontSize: '0.95rem', lineHeight: 1.7, margin: 0, color: '#1A1A1A' }}>{transcript}</p>
 </div>
-<div style={{ background: '#f5f5f5', padding: '1.5rem', borderRadius: '12px', marginBottom: '1.5rem' }}>
-<p style={{ fontSize: '0.9rem', fontWeight: 500, marginBottom: '0.75rem' }}>Translate into:</p>
-<select value={selectedLanguage} onChange={(e) => setSelectedLanguage(e.target.value)} style={{ padding: '0.5rem 1rem', borderRadius: '8px', border: '1px solid #ddd', fontSize: '0.9rem', marginBottom: '1rem', display: 'block', width: '100%', maxWidth: '300px' }}>
+
+<div style={{ background: '#F7F7F8', border: '1px solid #E5E5EA', padding: '1.5rem', borderRadius: '12px', marginBottom: '1.5rem' }}>
+<p style={{ fontSize: '0.9rem', fontWeight: 600, marginBottom: '0.75rem', color: '#1A1A1A' }}>Translate into:</p>
+<select value={selectedLanguage} onChange={(e) => setSelectedLanguage(e.target.value)} style={{ padding: '0.5rem 1rem', borderRadius: '8px', border: '1px solid #D1D1D8', fontSize: '0.9rem', marginBottom: '1rem', display: 'block', width: '100%', maxWidth: '300px', color: '#1A1A1A', background: '#FFFFFF' }}>
 {LANGUAGES.map((lang) => (<option key={lang.code} value={lang.code}>{lang.name}</option>))}
 </select>
-<button onClick={handleTranslate} disabled={translating} style={{ background: translating ? '#ccc' : '#533AB7', color: 'white', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '8px', fontSize: '0.95rem', cursor: translating ? 'not-allowed' : 'pointer' }}>
+<button onClick={handleTranslate} disabled={translating} style={{ background: translating ? '#D1D1D8' : '#533AB7', color: 'white', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '8px', fontSize: '0.95rem', fontWeight: 600, cursor: translating ? 'not-allowed' : 'pointer' }}>
 {translating ? 'Translating...' : 'Translate with DeepL'}
 </button>
 </div>
+
 {translatedText && (
-<div style={{ background: '#fff', border: '1px solid #eee', borderRadius: '12px', padding: '1.5rem', marginBottom: '1.5rem' }}>
-<p style={{ fontSize: '0.85rem', color: '#666', marginBottom: '0.5rem' }}>Translation — {LANGUAGES.find(l => l.code === selectedLanguage)?.name}</p>
-<p style={{ fontSize: '0.95rem', lineHeight: 1.7, marginBottom: '1.25rem' }}>{translatedText}</p>
-<button onClick={handleSynthesize} disabled={synthesizing} style={{ background: synthesizing ? '#ccc' : '#E8640A', color: 'white', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '8px', fontSize: '0.95rem', cursor: synthesizing ? 'not-allowed' : 'pointer' }}>
+<div style={{ background: '#FFFFFF', border: '1px solid #E5E5EA', borderRadius: '12px', padding: '1.5rem', marginBottom: '1.5rem' }}>
+<p style={{ fontSize: '0.85rem', color: '#6B6B76', marginBottom: '0.5rem' }}>Translation — {LANGUAGES.find(l => l.code === selectedLanguage)?.name}</p>
+<p style={{ fontSize: '0.95rem', lineHeight: 1.7, marginBottom: '1.25rem', color: '#1A1A1A' }}>{translatedText}</p>
+<button onClick={handleSynthesize} disabled={synthesizing} style={{ background: synthesizing ? '#D1D1D8' : '#E8640A', color: 'white', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '8px', fontSize: '0.95rem', fontWeight: 600, cursor: synthesizing ? 'not-allowed' : 'pointer' }}>
 {synthesizing ? 'Generating voice...' : 'Speak in my cloned voice'}
 </button>
+
 {audioUrl && (
 <div style={{ marginTop: '1.25rem' }}>
-<p style={{ fontSize: '0.85rem', color: '#666', marginBottom: '0.5rem' }}>Your cloned voice speaking the translation:</p>
+<p style={{ fontSize: '0.85rem', color: '#6B6B76', marginBottom: '0.5rem' }}>Your cloned voice speaking the translation:</p>
 <audio ref={audioRef} controls src={audioUrl} style={{ width: '100%' }} />
 
 {isVideoFile ? (
-<div style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid #eee' }}>
+<div style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid #E5E5EA' }}>
 {file && file.size > MAX_LIPSYNC_SIZE ? (
-<p style={{ fontSize: '0.85rem', color: '#c00' }}>Video is over 20MB — too large for lip sync right now.</p>
+<p style={{ fontSize: '0.85rem', color: '#B54A2B' }}>Video is over 20MB — too large for lip sync right now.</p>
 ) : (
 <>
-<button onClick={handleLipSync} disabled={lipSyncing} style={{ background: lipSyncing ? '#ccc' : '#1A1A1A', color: 'white', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '8px', fontSize: '0.95rem', cursor: lipSyncing ? 'not-allowed' : 'pointer' }}>
+<button onClick={handleLipSync} disabled={lipSyncing} style={{ background: lipSyncing ? '#D1D1D8' : '#1A1A1A', color: 'white', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '8px', fontSize: '0.95rem', fontWeight: 600, cursor: lipSyncing ? 'not-allowed' : 'pointer' }}>
 {lipSyncing ? (lipSyncStatus || 'Working...') : 'Lip sync my video'}
 </button>
-{lipSyncError && <p style={{ color: '#c00', marginTop: '0.75rem', fontSize: '0.85rem' }}>{lipSyncError}</p>}
+{lipSyncError && <p style={{ color: '#B54A2B', marginTop: '0.75rem', fontSize: '0.85rem' }}>{lipSyncError}</p>}
 {lipSyncVideoUrl && (
 <div style={{ marginTop: '1.25rem' }}>
-<p style={{ fontSize: '0.85rem', color: '#666', marginBottom: '0.5rem' }}>Your lip-synced video:</p>
+<p style={{ fontSize: '0.85rem', color: '#6B6B76', marginBottom: '0.5rem' }}>Your lip-synced video:</p>
 <video controls src={lipSyncVideoUrl} style={{ width: '100%', borderRadius: '8px' }} />
 </div>
 )}
@@ -201,7 +207,7 @@ return (
 )}
 </div>
 ) : (
-<p style={{ fontSize: '0.8rem', color: '#999', marginTop: '1rem' }}>Lip sync requires a video file (you uploaded audio only).</p>
+<p style={{ fontSize: '0.8rem', color: '#9A9AA4', marginTop: '1rem' }}>Lip sync requires a video file (you uploaded audio only).</p>
 )}
 </div>
 )}
@@ -209,6 +215,7 @@ return (
 )}
 </>
 )}
+</div>
 </main>
 )
 }
