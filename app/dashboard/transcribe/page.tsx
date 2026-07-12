@@ -2,6 +2,7 @@
 import { useState, useRef } from 'react'
 import DashboardHeader from '../header'
 const LANGUAGES = [{ code: 'EN-GB', name: 'English (UK)' },{ code: 'EN-US', name: 'English (US)' },{ code: 'ES', name: 'Spanish' },{ code: 'FR', name: 'French' },{ code: 'DE', name: 'German' },{ code: 'IT', name: 'Italian' },{ code: 'PT-BR', name: 'Portuguese (Brazil)' },{ code: 'ZH', name: 'Chinese (Simplified)' },{ code: 'JA', name: 'Japanese' },{ code: 'KO', name: 'Korean' },{ code: 'AR', name: 'Arabic' },{ code: 'RU', name: 'Russian' },{ code: 'HI', name: 'Hindi' },{ code: 'TR', name: 'Turkish' }]
+
 export default function TranscribePage() {
 const [file, setFile] = useState<File | null>(null)
 const [transcript, setTranscript] = useState('')
@@ -9,14 +10,26 @@ const [transcriptionId, setTranscriptionId] = useState('')
 const [selectedLanguage, setSelectedLanguage] = useState('ES')
 const [translatedText, setTranslatedText] = useState('')
 const [audioUrl, setAudioUrl] = useState('')
+const [audioBlob, setAudioBlob] = useState<Blob | null>(null)
 const [loading, setLoading] = useState(false)
 const [translating, setTranslating] = useState(false)
 const [synthesizing, setSynthesizing] = useState(false)
 const [error, setError] = useState('')
 const audioRef = useRef<HTMLAudioElement>(null)
+
+// Lip sync state
+const [lipSyncing, setLipSyncing] = useState(false)
+const [lipSyncStatus, setLipSyncStatus] = useState('')
+const [lipSyncVideoUrl, setLipSyncVideoUrl] = useState('')
+const [lipSyncError, setLipSyncError] = useState('')
+
+const isVideoFile = file?.type.startsWith('video/')
+const MAX_LIPSYNC_SIZE = 20 * 1024 * 1024
+
 async function handleUpload() {
 if (!file) return
-setLoading(true); setError(''); setTranscript(''); setTranslatedText(''); setAudioUrl('')
+setLoading(true); setError(''); setTranscript(''); setTranslatedText(''); setAudioUrl(''); setAudioBlob(null)
+setLipSyncVideoUrl(''); setLipSyncError(''); setLipSyncStatus('')
 const formData = new FormData()
 formData.append('file', file)
 try {
@@ -31,9 +44,11 @@ if (saveData.transcription?.id) setTranscriptionId(saveData.transcription.id)
 } catch { setError('Failed to connect to transcription service') }
 finally { setLoading(false) }
 }
+
 async function handleTranslate() {
 if (!transcript || !selectedLanguage) return
-setTranslating(true); setError(''); setTranslatedText(''); setAudioUrl('')
+setTranslating(true); setError(''); setTranslatedText(''); setAudioUrl(''); setAudioBlob(null)
+setLipSyncVideoUrl(''); setLipSyncError(''); setLipSyncStatus('')
 try {
 const res = await fetch('/api/translate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text: transcript, target_language: selectedLanguage, transcription_id: transcriptionId }) })
 const data = await res.json()
@@ -41,13 +56,16 @@ if (data.translated_text) { setTranslatedText(data.translated_text) } else { set
 } catch { setError('Failed to connect to translation service') }
 finally { setTranslating(false) }
 }
+
 async function handleSynthesize() {
 if (!translatedText) return
-setSynthesizing(true); setError(''); setAudioUrl('')
+setSynthesizing(true); setError(''); setAudioUrl(''); setAudioBlob(null)
+setLipSyncVideoUrl(''); setLipSyncError(''); setLipSyncStatus('')
 try {
 const res = await fetch('/api/synthesize', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text: translatedText }) })
 if (res.ok) {
 const blob = await res.blob()
+setAudioBlob(blob)
 const url = URL.createObjectURL(blob)
 setAudioUrl(url)
 setTimeout(() => { audioRef.current?.play() }, 100)
@@ -58,6 +76,72 @@ setError(data.error || 'Voice synthesis failed')
 } catch { setError('Failed to connect to voice synthesis service') }
 finally { setSynthesizing(false) }
 }
+
+async function handleLipSync() {
+if (!file || !audioBlob) return
+setLipSyncing(true); setLipSyncError(''); setLipSyncVideoUrl(''); setLipSyncStatus('Uploading...')
+try {
+const formData = new FormData()
+formData.append('video', file)
+formData.append('audio', audioBlob, 'dubbed-audio.mp3')
+
+const res = await fetch('/api/lipsync', { method: 'POST', body: formData })
+const data = await res.json()
+
+if (!res.ok || !data.id) {
+setLipSyncError(data.error || 'Failed to start lip sync')
+setLipSyncing(false)
+return
+}
+
+setLipSyncStatus('Processing...')
+pollLipSyncStatus(data.id)
+} catch {
+setLipSyncError('Failed to connect to lip sync service')
+setLipSyncing(false)
+}
+}
+
+async function pollLipSyncStatus(id: string) {
+const maxAttempts = 60 // ~10 minutes at 10s intervals
+let attempts = 0
+
+const poll = async () => {
+attempts++
+try {
+const res = await fetch(`/api/lipsync/status?id=${id}`)
+const data = await res.json()
+
+if (data.status === 'COMPLETED' && data.outputUrl) {
+setLipSyncVideoUrl(data.outputUrl)
+setLipSyncStatus('Complete')
+setLipSyncing(false)
+return
+}
+
+if (data.status === 'FAILED' || data.status === 'REJECTED') {
+setLipSyncError(data.error || 'Lip sync generation failed')
+setLipSyncing(false)
+return
+}
+
+if (attempts >= maxAttempts) {
+setLipSyncError('Lip sync is taking longer than expected. Check back later.')
+setLipSyncing(false)
+return
+}
+
+setLipSyncStatus(data.status === 'PENDING' ? 'Queued...' : 'Processing...')
+setTimeout(poll, 10000)
+} catch {
+setLipSyncError('Lost connection while checking lip sync status')
+setLipSyncing(false)
+}
+}
+
+poll()
+}
+
 return (
 <main style={{ padding: '2rem', fontFamily: 'sans-serif', maxWidth: '680px' }}>
 <DashboardHeader />
@@ -96,6 +180,29 @@ return (
 <div style={{ marginTop: '1.25rem' }}>
 <p style={{ fontSize: '0.85rem', color: '#666', marginBottom: '0.5rem' }}>Your cloned voice speaking the translation:</p>
 <audio ref={audioRef} controls src={audioUrl} style={{ width: '100%' }} />
+
+{isVideoFile ? (
+<div style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid #eee' }}>
+{file && file.size > MAX_LIPSYNC_SIZE ? (
+<p style={{ fontSize: '0.85rem', color: '#c00' }}>Video is over 20MB — too large for lip sync right now.</p>
+) : (
+<>
+<button onClick={handleLipSync} disabled={lipSyncing} style={{ background: lipSyncing ? '#ccc' : '#1A1A1A', color: 'white', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '8px', fontSize: '0.95rem', cursor: lipSyncing ? 'not-allowed' : 'pointer' }}>
+{lipSyncing ? (lipSyncStatus || 'Working...') : 'Lip sync my video'}
+</button>
+{lipSyncError && <p style={{ color: '#c00', marginTop: '0.75rem', fontSize: '0.85rem' }}>{lipSyncError}</p>}
+{lipSyncVideoUrl && (
+<div style={{ marginTop: '1.25rem' }}>
+<p style={{ fontSize: '0.85rem', color: '#666', marginBottom: '0.5rem' }}>Your lip-synced video:</p>
+<video controls src={lipSyncVideoUrl} style={{ width: '100%', borderRadius: '8px' }} />
+</div>
+)}
+</>
+)}
+</div>
+) : (
+<p style={{ fontSize: '0.8rem', color: '#999', marginTop: '1rem' }}>Lip sync requires a video file (you uploaded audio only).</p>
+)}
 </div>
 )}
 </div>
