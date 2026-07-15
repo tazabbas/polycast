@@ -1,5 +1,6 @@
 import { auth, clerkClient } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
+import { createClient } from '@supabase/supabase-js'
 import DashboardHeader from './header'
 import Link from 'next/link'
 
@@ -77,10 +78,28 @@ export default async function Dashboard() {
     errorMsg = 'No Google access token found — try signing out and in again.'
   }
 
-  // Free plan limit — usage tracking isn't wired up yet, so this starts at 0.
-  const minutesUsed = 0
-  const minutesLimit = 30
-  const usagePercent = Math.min(100, (minutesUsed / minutesLimit) * 100)
+  let plan = 'free'
+  let minutesBalance = 0
+  try {
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
+    const { data: credits } = await supabase
+      .from('user_credits')
+      .select('plan, minutes_balance')
+      .eq('user_id', userId)
+      .single()
+
+    if (credits) {
+      plan = credits.plan
+      minutesBalance = credits.minutes_balance
+    }
+  } catch {
+    // Defaults to free/0 if lookup fails
+  }
+
+  const planLabel = plan === 'creator' ? 'Creator' : plan === 'studio' ? 'Studio' : 'Free'
 
   return (
     <main
@@ -110,7 +129,6 @@ export default async function Dashboard() {
 
         {channelData ? (
           <>
-            {/* Channel + stats row */}
             <div
               style={{
                 display: 'grid',
@@ -119,7 +137,6 @@ export default async function Dashboard() {
                 marginBottom: '1rem',
               }}
             >
-              {/* Connected channel card */}
               <div
                 style={{
                   display: 'flex',
@@ -163,7 +180,6 @@ export default async function Dashboard() {
                 </div>
               </div>
 
-              {/* Stat: video count */}
               <div
                 style={{
                   background: '#F7F7F8',
@@ -189,7 +205,6 @@ export default async function Dashboard() {
                 </p>
               </div>
 
-              {/* Stat: plan + upgrade */}
               <div
                 style={{
                   background: '#F7F7F8',
@@ -211,7 +226,7 @@ export default async function Dashboard() {
                     color: '#1A1A1A',
                   }}
                 >
-                  Free
+                  {planLabel}
                 </p>
                 <Link
                   href="/pricing"
@@ -222,12 +237,11 @@ export default async function Dashboard() {
                     textDecoration: 'none',
                   }}
                 >
-                  Upgrade to Pro →
+                  {plan === 'free' ? 'Upgrade to Pro →' : 'Manage plan →'}
                 </Link>
               </div>
             </div>
 
-            {/* Usage bar */}
             <div
               style={{
                 background: '#F7F7F8',
@@ -246,33 +260,27 @@ export default async function Dashboard() {
                 }}
               >
                 <p style={{ fontSize: '0.85rem', fontWeight: 600, margin: 0, color: '#1A1A1A' }}>
-                  Usage this month
+                  Lip sync credits
                 </p>
                 <p style={{ fontSize: '0.8rem', margin: 0, color: '#6B6B76' }}>
-                  {minutesUsed} / {minutesLimit} mins
+                  {minutesBalance} mins remaining
                 </p>
               </div>
-              <div
-                style={{
-                  width: '100%',
-                  height: '8px',
-                  borderRadius: '999px',
-                  background: '#E5E5EA',
-                  overflow: 'hidden',
-                }}
-              >
-                <div
+              {minutesBalance === 0 && (
+                <Link
+                  href="/pricing"
                   style={{
-                    width: `${usagePercent}%`,
-                    height: '100%',
-                    borderRadius: '999px',
-                    background: 'linear-gradient(90deg, #1D9E75, #4FC79A)',
+                    fontSize: '0.8rem',
+                    fontWeight: 600,
+                    color: '#1D9E75',
+                    textDecoration: 'none',
                   }}
-                />
-              </div>
+                >
+                  Buy lip sync credits →
+                </Link>
+              )}
             </div>
 
-            {/* CTA */}
             <Link
               href="/dashboard/transcribe"
               style={{
