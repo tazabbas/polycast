@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
+import { createClient } from '@supabase/supabase-js'
 
 export async function GET(request: NextRequest) {
   try {
@@ -26,6 +27,39 @@ export async function GET(request: NextRequest) {
     if (!syncRes.ok) {
       console.error('Sync Labs status error:', data)
       return NextResponse.json({ error: data.error || 'Failed to check status' }, { status: syncRes.status })
+    }
+
+    if (data.status === 'COMPLETED') {
+      const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+      )
+
+      const { data: job } = await supabase
+        .from('lipsync_jobs')
+        .select('*')
+        .eq('id', id)
+        .single()
+
+      if (job && !job.deducted) {
+        const { data: credits } = await supabase
+          .from('user_credits')
+          .select('minutes_balance')
+          .eq('user_id', job.user_id)
+          .single()
+
+        const newBalance = Math.max(0, (credits?.minutes_balance || 0) - job.minutes_estimated)
+
+        await supabase
+          .from('user_credits')
+          .update({ minutes_balance: newBalance, updated_at: new Date().toISOString() })
+          .eq('user_id', job.user_id)
+
+        await supabase
+          .from('lipsync_jobs')
+          .update({ deducted: true })
+          .eq('id', id)
+      }
     }
 
     return NextResponse.json({
