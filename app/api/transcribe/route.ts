@@ -1,18 +1,24 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
 
 export async function POST(request: NextRequest) {
   try {
+    const { videoUrl } = await request.json()
+    if (!videoUrl) {
+      return NextResponse.json({ error: 'No video URL provided' }, { status: 400 })
+    }
+
+    const fileRes = await fetch(videoUrl)
+    if (!fileRes.ok) {
+      return NextResponse.json({ error: 'Could not fetch uploaded file' }, { status: 400 })
+    }
+    const arrayBuffer = await fileRes.arrayBuffer()
+    const contentType = fileRes.headers.get('content-type') || 'video/mp4'
+    const file = new File([arrayBuffer], 'upload', { type: contentType })
+
     const openai = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY,
     })
-
-    const formData = await request.formData()
-    const file = formData.get('file') as File
-
-    if (!file) {
-      return NextResponse.json({ error: 'No file provided' }, { status: 400 })
-    }
 
     const transcription = await openai.audio.transcriptions.create({
       file: file,
