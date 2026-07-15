@@ -89,14 +89,25 @@ setError(data.error || 'Voice synthesis failed')
 finally { setSynthesizing(false) }
 }
 
+function getAudioDuration(url: string): Promise<number> {
+return new Promise((resolve, reject) => {
+const audio = new Audio()
+audio.src = url
+audio.addEventListener('loadedmetadata', () => resolve(audio.duration))
+audio.addEventListener('error', () => reject(new Error('Could not read audio duration')))
+})
+}
+
 async function handleLipSync() {
 if (!videoUrl || !audioUrl) return
 setLipSyncing(true); setLipSyncError(''); setLipSyncVideoUrl(''); setLipSyncStatus('Starting...')
 try {
+const durationSeconds = await getAudioDuration(audioUrl)
+
 const res = await fetch('/api/lipsync', {
 method: 'POST',
 headers: { 'Content-Type': 'application/json' },
-body: JSON.stringify({ videoUrl, audioUrl }),
+body: JSON.stringify({ videoUrl, audioUrl, durationSeconds }),
 })
 const data = await res.json()
 
