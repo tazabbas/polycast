@@ -1,20 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { ElevenLabsClient } from '@elevenlabs/elevenlabs-js'
+import { put } from '@vercel/blob'
 
 export async function POST(request: NextRequest) {
   try {
     const { text: rawText } = await request.json()
-
     if (!rawText) {
       return NextResponse.json({ error: 'No text provided' }, { status: 400 })
     }
-
     const text = rawText.length > 800 ? rawText.substring(0, 800) : rawText
-
     const client = new ElevenLabsClient({
       apiKey: process.env.ELEVENLABS_API_KEY!,
     })
-
     const audioStream = await client.textToSpeech.convert(
       process.env.ELEVENLABS_VOICE_ID!,
       {
@@ -23,16 +20,13 @@ export async function POST(request: NextRequest) {
         outputFormat: 'mp3_44100_128',
       }
     )
-
     const reader = (audioStream as ReadableStream<Uint8Array>).getReader()
     const chunks: Uint8Array[] = []
-
     while (true) {
       const { done, value } = await reader.read()
       if (done) break
       if (value) chunks.push(value)
     }
-
     const totalLength = chunks.reduce((acc, chunk) => acc + chunk.length, 0)
     const audioBuffer = new Uint8Array(totalLength)
     let offset = 0
@@ -41,12 +35,12 @@ export async function POST(request: NextRequest) {
       offset += chunk.length
     }
 
-    return new NextResponse(audioBuffer, {
-      headers: {
-        'Content-Type': 'audio/mpeg',
-        'Content-Length': totalLength.toString(),
-      },
+    const blob = await put(`dubbed-audio-${Date.now()}.mp3`, audioBuffer, {
+      access: 'public',
+      contentType: 'audio/mpeg',
     })
+
+    return NextResponse.json({ url: blob.url })
   } catch (error) {
     console.error('Voice synthesis error:', error)
     return NextResponse.json({ error: 'Voice synthesis failed' }, { status: 500 })
