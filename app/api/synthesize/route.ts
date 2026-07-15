@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
       offset += chunk.length
     }
 
-    const blob = await put(`dubbed-audio-${Date.now()}.mp3`, audioBuffer, {
+    const blob = await put(`dubbed-audio-${Date.now()}.mp3`, Buffer.from(audioBuffer), {
       access: 'public',
       contentType: 'audio/mpeg',
     })
