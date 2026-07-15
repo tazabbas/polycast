@@ -14,7 +14,11 @@ export async function POST(request: NextRequest) {
     }
     const arrayBuffer = await fileRes.arrayBuffer()
     const contentType = fileRes.headers.get('content-type') || 'video/mp4'
-    const file = new File([arrayBuffer], 'upload', { type: contentType })
+
+    const pathname = new URL(videoUrl).pathname
+    const originalName = pathname.substring(pathname.lastIndexOf('/') + 1) || 'upload.mp4'
+
+    const file = new File([arrayBuffer], originalName, { type: contentType })
 
     const openai = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY,
