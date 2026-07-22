@@ -50,7 +50,7 @@ export default function VideosPage() {
                   {v.source_label && (
                     <p style={{ margin: '0 0 8px', fontSize: '0.78rem', color: '#9A9AA4' }}>{v.source_label}</p>
                   )}
-                  
+                  <a
                     href={v.video_url}
                     download={`polycast-${v.language}-${v.id}.mp4`}
                     style={{ fontSize: '0.8rem', color: '#1D9E75', fontWeight: 600, textDecoration: 'none' }}
