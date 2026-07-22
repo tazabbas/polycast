@@ -1,5 +1,6 @@
 'use client'
 import { UserButton } from '@clerk/nextjs'
+import Link from 'next/link'
 
 export default function DashboardHeader() {
   return (
@@ -12,6 +13,8 @@ export default function DashboardHeader() {
         borderBottom: '1px solid #E5E5EA',
         background: '#FFFFFF',
         marginBottom: '0',
+        flexWrap: 'wrap',
+        gap: '1rem',
       }}
     >
       <h1
@@ -25,7 +28,19 @@ export default function DashboardHeader() {
       >
         PolyCast
       </h1>
-      <UserButton />
+
+      <nav style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+        <Link href="/dashboard" style={{ fontSize: '0.9rem', fontWeight: 600, color: '#4A4A54', textDecoration: 'none' }}>
+          Dashboard
+        </Link>
+        <Link href="/dashboard/transcribe" style={{ fontSize: '0.9rem', fontWeight: 600, color: '#4A4A54', textDecoration: 'none' }}>
+          Dub a video
+        </Link>
+        <Link href="/dashboard/voices" style={{ fontSize: '0.9rem', fontWeight: 600, color: '#4A4A54', textDecoration: 'none' }}>
+          Voices
+        </Link>
+        <UserButton />
+      </nav>
     </div>
   )
 }
