@@ -1,5 +1,5 @@
 'use client'
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { upload } from '@vercel/blob/client'
 import { FFmpeg } from '@ffmpeg/ffmpeg'
 import { fetchFile, toBlobURL } from '@ffmpeg/util'
@@ -49,6 +49,7 @@ export default function TranscribePage() {
 const [mode, setMode] = useState<'upload' | 'youtube'>('upload')
 
 const [file, setFile] = useState<File | null>(null)
+const [localPreviewUrl, setLocalPreviewUrl] = useState('')
 const [youtubeUrl, setYoutubeUrl] = useState('')
 const [rightsConfirmed, setRightsConfirmed] = useState(false)
 
@@ -58,14 +59,20 @@ const [isVideoSource, setIsVideoSource] = useState(true)
 
 const [transcript, setTranscript] = useState('')
 const [transcriptionId, setTranscriptionId] = useState('')
-const [loading, setLoading] = useState(false)
-const [loadingLabel, setLoadingLabel] = useState('')
+const [processing, setProcessing] = useState(false)
+const [processingLabel, setProcessingLabel] = useState('')
 const [error, setError] = useState('')
 const audioRefs = useRef<Record<string, HTMLAudioElement | null>>({})
 
 const [selectedLanguages, setSelectedLanguages] = useState<string[]>([])
 const [results, setResults] = useState<Record<string, LangResult>>({})
 const [dubbing, setDubbing] = useState(false)
+
+useEffect(() => {
+return () => {
+if (localPreviewUrl) URL.revokeObjectURL(localPreviewUrl)
+}
+}, [localPreviewUrl])
 
 function toggleLanguage(code: string) {
 setSelectedLanguages((prev) =>
@@ -81,31 +88,43 @@ setSelectedLanguages([])
 setError('')
 }
 
-async function handleUploadFile() {
-if (!file) return
-setLoading(true); setError(''); resetAll()
+function handleFileSelect(selected: File | null) {
+resetAll()
+setFile(selected)
+if (localPreviewUrl) URL.revokeObjectURL(localPreviewUrl)
+if (selected) {
+const preview = URL.createObjectURL(selected)
+setLocalPreviewUrl(preview)
+setIsVideoSource(selected.type.startsWith('video/'))
+handleUploadFile(selected)
+} else {
+setLocalPreviewUrl('')
+}
+}
+
+async function handleUploadFile(selectedFile: File) {
+setProcessing(true); setError('')
 try {
-setLoadingLabel('Uploading...')
-const blob = await upload(file.name, file, {
+setProcessingLabel('Uploading...')
+const blob = await upload(selectedFile.name, selectedFile, {
 access: 'public',
 handleUploadUrl: '/api/blob-upload',
 })
 setVideoUrl(blob.url)
-setVideoLabel(file.name)
-setIsVideoSource(file.type.startsWith('video/'))
+setVideoLabel(selectedFile.name)
 
-await runTranscription(blob.url, file.name)
+await runTranscription(blob.url, selectedFile.name)
 } catch {
 setError('Failed to upload or transcribe the file')
-setLoading(false); setLoadingLabel('')
+setProcessing(false); setProcessingLabel('')
 }
 }
 
 async function handleFetchYoutube() {
 if (!youtubeUrl || !rightsConfirmed) return
-setLoading(true); setError(''); resetAll()
+setProcessing(true); setError(''); resetAll()
 try {
-setLoadingLabel('Fetching video...')
+setProcessingLabel('Fetching video...')
 const fetchRes = await fetch('/api/youtube-fetch', {
 method: 'POST',
 headers: { 'Content-Type': 'application/json' },
@@ -114,7 +133,7 @@ body: JSON.stringify({ youtubeUrl }),
 const fetchData = await fetchRes.json()
 if (!fetchRes.ok || !fetchData.videoUrl) {
 setError(fetchData.error || 'Could not fetch that video')
-setLoading(false); setLoadingLabel('')
+setProcessing(false); setProcessingLabel('')
 return
 }
 setVideoUrl(fetchData.videoUrl)
@@ -124,12 +143,12 @@ setIsVideoSource(true)
 await runTranscription(fetchData.videoUrl, fetchData.title || 'youtube-video')
 } catch {
 setError('Failed to fetch or transcribe that video')
-setLoading(false); setLoadingLabel('')
+setProcessing(false); setProcessingLabel('')
 }
 }
 
 async function runTranscription(url: string, label: string) {
-setLoadingLabel('Transcribing...')
+setProcessingLabel('Transcribing...')
 const res = await fetch('/api/transcribe', {
 method: 'POST',
 headers: { 'Content-Type': 'application/json' },
@@ -144,7 +163,7 @@ if (saveData.transcription?.id) setTranscriptionId(saveData.transcription.id)
 } else {
 setError(data.error || 'Something went wrong')
 }
-setLoading(false); setLoadingLabel('')
+setProcessing(false); setProcessingLabel('')
 }
 
 function updateResult(code: string, patch: Partial<LangResult>) {
@@ -297,26 +316,23 @@ background: active ? '#1D9E75' : '#FFFFFF',
 color: active ? '#FFFFFF' : '#4A4A54',
 })
 
+const previewUrl = mode === 'upload' ? localPreviewUrl : videoUrl
+
 return (
 <main style={{ minHeight: '100vh', background: '#FFFFFF', color: '#1A1A1A', fontFamily: "'DM Sans', sans-serif" }}>
 <DashboardHeader />
 <div style={{ maxWidth: '680px', margin: '0 auto', padding: '2rem' }}>
 <h2 style={{ fontFamily: "'Syne', sans-serif", fontSize: '1.3rem', fontWeight: 700, marginBottom: '0.5rem' }}>Dub a video</h2>
-<p style={{ fontSize: '0.9rem', color: '#6B6B76', marginBottom: '1.5rem' }}>Upload a file or paste a YouTube link to transcribe, translate, and speak in your cloned voice.</p>
+<p style={{ fontSize: '0.9rem', color: '#6B6B76', marginBottom: '1.5rem' }}>Upload a file or paste a YouTube link. We'll transcribe and prep it automatically.</p>
 
 <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.25rem' }}>
-<button onClick={() => { setMode('upload'); resetAll() }} style={tabStyle(mode === 'upload')}>Upload file</button>
-<button onClick={() => { setMode('youtube'); resetAll() }} style={tabStyle(mode === 'youtube')}>Paste YouTube URL</button>
+<button onClick={() => { setMode('upload'); resetAll(); setFile(null); setLocalPreviewUrl('') }} style={tabStyle(mode === 'upload')}>Upload file</button>
+<button onClick={() => { setMode('youtube'); resetAll(); setFile(null); setLocalPreviewUrl('') }} style={tabStyle(mode === 'youtube')}>Paste YouTube URL</button>
 </div>
 
 <div style={{ background: '#F7F7F8', border: '1px solid #E5E5EA', padding: '1.5rem', borderRadius: '12px', marginBottom: '1.5rem' }}>
 {mode === 'upload' ? (
-<>
-<input type="file" accept="audio/*,video/*" onChange={(e) => { setFile(e.target.files?.[0] || null); resetAll() }} style={{ marginBottom: '1rem', display: 'block', fontSize: '0.9rem', color: '#1A1A1A' }} />
-<button onClick={handleUploadFile} disabled={!file || loading} style={{ background: file && !loading ? '#1D9E75' : '#D1D1D8', color: 'white', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '8px', fontSize: '0.95rem', fontWeight: 600, cursor: file && !loading ? 'pointer' : 'not-allowed' }}>
-{loading ? loadingLabel || 'Working...' : 'Transcribe'}
-</button>
-</>
+<input type="file" accept="audio/*,video/*" onChange={(e) => handleFileSelect(e.target.files?.[0] || null)} style={{ display: 'block', fontSize: '0.9rem', color: '#1A1A1A' }} />
 ) : (
 <>
 <input type="text" placeholder="https://www.youtube.com/watch?v=..." value={youtubeUrl} onChange={(e) => setYoutubeUrl(e.target.value)} style={{ padding: '0.6rem 1rem', borderRadius: '8px', border: '1px solid #D1D1D8', fontSize: '0.9rem', marginBottom: '1rem', display: 'block', width: '100%', color: '#1A1A1A', background: '#FFFFFF' }} />
@@ -324,15 +340,25 @@ return (
 <input type="checkbox" checked={rightsConfirmed} onChange={(e) => setRightsConfirmed(e.target.checked)} style={{ marginTop: '3px' }} />
 I own this video or have the rights to dub and use it
 </label>
-<button onClick={handleFetchYoutube} disabled={!youtubeUrl || !rightsConfirmed || loading} style={{ background: youtubeUrl && rightsConfirmed && !loading ? '#1D9E75' : '#D1D1D8', color: 'white', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '8px', fontSize: '0.95rem', fontWeight: 600, cursor: youtubeUrl && rightsConfirmed && !loading ? 'pointer' : 'not-allowed' }}>
-{loading ? loadingLabel || 'Working...' : 'Fetch & Transcribe'}
+<button onClick={handleFetchYoutube} disabled={!youtubeUrl || !rightsConfirmed || processing} style={{ background: youtubeUrl && rightsConfirmed && !processing ? '#1D9E75' : '#D1D1D8', color: 'white', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '8px', fontSize: '0.95rem', fontWeight: 600, cursor: youtubeUrl && rightsConfirmed && !processing ? 'pointer' : 'not-allowed' }}>
+{processing ? processingLabel || 'Working...' : 'Fetch video'}
 </button>
 </>
 )}
 </div>
 
+{previewUrl && isVideoSource && (
+<div style={{ marginBottom: '1.25rem' }}>
+<video controls src={previewUrl} style={{ width: '100%', borderRadius: '12px', background: '#000' }} />
+</div>
+)}
+
 {videoLabel && !error && (
-<p style={{ fontSize: '0.8rem', color: '#6B6B76', marginTop: '-1rem', marginBottom: '1.25rem' }}>Source: {videoLabel}</p>
+<p style={{ fontSize: '0.8rem', color: '#6B6B76', marginBottom: '1.25rem' }}>Source: {videoLabel}</p>
+)}
+
+{processing && (
+<p style={{ fontSize: '0.85rem', color: '#6B6B76', marginBottom: '1.25rem' }}>{processingLabel || 'Working...'}</p>
 )}
 
 {error && <p style={{ color: '#B54A2B', marginBottom: '1rem', fontSize: '0.9rem' }}>{error}</p>}
