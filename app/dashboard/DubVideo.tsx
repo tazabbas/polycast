@@ -167,12 +167,34 @@ video.removeEventListener('loadedmetadata', handleLoadedMetadata)
 }
 }, [activeLang])
 
+useEffect(() => {
+if (transcript) {
+sessionStorage.setItem('polycast_unsaved_studio_work', 'true')
+} else {
+sessionStorage.removeItem('polycast_unsaved_studio_work')
+}
+return () => {
+sessionStorage.removeItem('polycast_unsaved_studio_work')
+}
+}, [transcript])
+
+useEffect(() => {
+function handleBeforeUnload(e: BeforeUnloadEvent) {
+if (transcript) {
+e.preventDefault()
+}
+}
+window.addEventListener('beforeunload', handleBeforeUnload)
+return () => window.removeEventListener('beforeunload', handleBeforeUnload)
+}, [transcript])
+
 function switchLanguage(code: string) {
 const video = mainVideoRef.current
 const oldAudio = audioTrackRefs.current[activeLang]
 const newAudio = audioTrackRefs.current[code]
 if (oldAudio) oldAudio.pause()
 setActiveLang(code)
+setSavedDub(false)
 if (newAudio && video) {
 newAudio.currentTime = video.currentTime
 if (!video.paused) newAudio.play().catch(() => {})
@@ -314,6 +336,9 @@ mainVideoRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
 
 const [savingVideo, setSavingVideo] = useState(false)
 const [savedVideo, setSavedVideo] = useState(false)
+const [savingDub, setSavingDub] = useState(false)
+const [savedDub, setSavedDub] = useState(false)
+const [saveDubError, setSaveDubError] = useState('')
 
 async function handleSaveVideo(code: string) {
 const r = results[code]
@@ -335,6 +360,38 @@ setSavedVideo(true)
 // silent fail, user can retry
 } finally {
 setSavingVideo(false)
+}
+}
+
+async function handleSaveDub(code: string) {
+const r = results[code]
+if (!videoUrl || !r?.audioUrl || !isVideoSource) return
+setSavingDub(true); setSaveDubError('')
+try {
+const ffmpeg = await getFFmpeg()
+await ffmpeg.writeFile('save_video_in.mp4', await fetchFile(videoUrl))
+await ffmpeg.writeFile(`save_audio_in_${code}.mp3`, await fetchFile(r.audioUrl))
+await ffmpeg.exec(['-i', 'save_video_in.mp4', '-i', `save_audio_in_${code}.mp3`, '-c:v', 'copy', '-map', '0:v:0', '-map', '1:a:0', '-shortest', `save_out_${code}.mp4`])
+const data = await ffmpeg.readFile(`save_out_${code}.mp4`)
+const mergedBlob = new Blob([data as unknown as BlobPart], { type: 'video/mp4' })
+const mergedFile = new File([mergedBlob], `dub-${code}.mp4`, { type: 'video/mp4' })
+const blob = await upload(`dub-${code}.mp4`, mergedFile, { access: 'public', handleUploadUrl: '/api/blob-upload' })
+
+await fetch('/api/saved-videos', {
+method: 'POST',
+headers: { 'Content-Type': 'application/json' },
+body: JSON.stringify({
+type: 'dub',
+language: LANGUAGES.find((l) => l.code === code)?.name || code,
+videoUrl: blob.url,
+sourceLabel: videoLabel,
+}),
+})
+setSavedDub(true)
+} catch {
+setSaveDubError('Could not save this dub. Try again.')
+} finally {
+setSavingDub(false)
 }
 }
 
@@ -554,6 +611,12 @@ This videos own audio stays off — sound comes from whichever language pill is 
 </select>
 </div>
 
+<div style={{ background: '#FDF2EE', border: '1px solid #F0C4B4', padding: '0.85rem 1rem', borderRadius: '10px', marginBottom: '1.5rem' }}>
+<p style={{ fontSize: '0.8rem', color: '#B54A2B', margin: 0 }}>
+Work here is not saved automatically. Use a Save to My Videos button before leaving this page, or you will need to start over.
+</p>
+</div>
+
 <div style={{ background: '#F7F7F8', border: '1px solid #E5E5EA', padding: '1.5rem', borderRadius: '12px', marginBottom: '1.5rem' }}>
 <p style={{ fontSize: '0.9rem', fontWeight: 600, marginBottom: '0.75rem', color: '#1A1A1A' }}>Select languages to dub into:</p>
 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1.25rem' }}>
@@ -581,6 +644,13 @@ Lip sync — {LANGUAGES.find((l) => l.code === activeLang)?.name}
 </p>
 {isVideoSource ? (
 <>
+<div style={{ marginBottom: '1.25rem', paddingBottom: '1.25rem', borderBottom: '1px solid #E5E5EA' }}>
+<p style={{ fontSize: '0.8rem', fontWeight: 600, marginBottom: '0.6rem', color: '#1A1A1A' }}>Free dub — save the video you are watching now</p>
+<button onClick={() => handleSaveDub(activeLang)} disabled={savingDub || savedDub} style={{ background: savedDub ? '#EAF7F1' : '#1D9E75', color: savedDub ? '#1D9E75' : 'white', border: savedDub ? '1px solid #1D9E75' : 'none', padding: '0.6rem 1.25rem', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 600, cursor: savingDub || savedDub ? 'not-allowed' : 'pointer' }}>
+{savedDub ? 'Saved to My Videos ✓' : savingDub ? 'Saving...' : 'Save to My Videos'}
+</button>
+{saveDubError && <p style={{ color: '#B54A2B', marginTop: '0.6rem', fontSize: '0.8rem' }}>{saveDubError}</p>}
+</div>
 {trimDuration > 0 && (
 <div style={{ marginBottom: '1.25rem', paddingBottom: '1.25rem', borderBottom: '1px solid #E5E5EA' }}>
 <p style={{ fontSize: '0.8rem', fontWeight: 600, marginBottom: '0.5rem', color: '#1A1A1A' }}>
