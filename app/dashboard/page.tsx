@@ -1,7 +1,6 @@
 import { auth, clerkClient } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import { createClient } from '@supabase/supabase-js'
-import DashboardHeader from './header'
 import Link from 'next/link'
 
 interface VideoItem {
@@ -104,14 +103,12 @@ export default async function Dashboard() {
   return (
     <main
       style={{
-        minHeight: '100vh',
         background: '#FFFFFF',
         color: '#1A1A1A',
         fontFamily: "'DM Sans', sans-serif",
         padding: '0 0 4rem',
       }}
     >
-      <DashboardHeader />
 
       <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '2rem 2rem 0' }}>
         <h1
