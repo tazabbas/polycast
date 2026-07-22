@@ -1,5 +1,5 @@
 'use client'
-import { useState, useRef, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { upload } from '@vercel/blob/client'
 import { FFmpeg } from '@ffmpeg/ffmpeg'
 import { fetchFile, toBlobURL } from '@ffmpeg/util'
@@ -62,7 +62,6 @@ const [transcriptionId, setTranscriptionId] = useState('')
 const [processing, setProcessing] = useState(false)
 const [processingLabel, setProcessingLabel] = useState('')
 const [error, setError] = useState('')
-const audioRefs = useRef<Record<string, HTMLAudioElement | null>>({})
 
 const [selectedLanguages, setSelectedLanguages] = useState<string[]>([])
 const [results, setResults] = useState<Record<string, LangResult>>({})
@@ -394,8 +393,6 @@ return (
 
 {r.audioUrl && (
 <div style={{ marginTop: '0.5rem' }}>
-<audio ref={(el) => { audioRefs.current[code] = el }} controls src={r.audioUrl} style={{ width: '100%' }} />
-
 {isVideoSource ? (
 <>
 <div style={{ marginTop: '1.25rem', paddingTop: '1.25rem', borderTop: '1px solid #E5E5EA' }}>
