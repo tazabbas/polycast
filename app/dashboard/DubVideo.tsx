@@ -555,7 +555,7 @@ I own this video or have the rights to dub and use it
 
 {previewUrl && isVideoSource && (
 <div style={{ position: 'relative', marginBottom: '1.25rem' }}>
-<video ref={mainVideoRef} disablePictureInPicture muted={readyLanguages.length > 0} src={previewUrl} onClick={togglePlay} style={{ width: '100%', borderRadius: '12px', background: '#000', cursor: 'pointer', display: 'block' }} />
+<video ref={mainVideoRef} disablePictureInPicture muted={readyLanguages.length > 0 && activeLang !== 'original'} src={previewUrl} onClick={togglePlay} style={{ width: '100%', borderRadius: '12px', background: '#000', cursor: 'pointer', display: 'block' }} />
 
 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginTop: '0.6rem' }}>
 <button onClick={togglePlay} style={{ background: '#1A1A1A', color: 'white', border: 'none', borderRadius: '50%', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0, fontSize: '0.8rem' }}>
@@ -568,6 +568,9 @@ I own this video or have the rights to dub and use it
 
 {readyLanguages.length > 0 && (
 <div style={{ position: 'absolute', top: '12px', right: '12px', display: 'flex', gap: '6px', flexWrap: 'wrap', maxWidth: 'calc(100% - 24px)', justifyContent: 'flex-end' }}>
+<button onClick={() => switchLanguage('original')} style={trackChipStyle(activeLang === 'original')}>
+Original
+</button>
 {readyLanguages.map((code) => (
 <button key={code} onClick={() => switchLanguage(code)} style={trackChipStyle(activeLang === code)}>
 {LANGUAGES.find((l) => l.code === code)?.name}
