@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { upload } from '@vercel/blob/client'
 import { FFmpeg } from '@ffmpeg/ffmpeg'
 import { fetchFile, toBlobURL } from '@ffmpeg/util'
@@ -66,12 +66,62 @@ const [error, setError] = useState('')
 const [selectedLanguages, setSelectedLanguages] = useState<string[]>([])
 const [results, setResults] = useState<Record<string, LangResult>>({})
 const [dubbing, setDubbing] = useState(false)
+const [activeLang, setActiveLang] = useState<string>('')
+
+const mainVideoRef = useRef<HTMLVideoElement>(null)
+const audioTrackRefs = useRef<Record<string, HTMLAudioElement | null>>({})
 
 useEffect(() => {
 return () => {
 if (localPreviewUrl) URL.revokeObjectURL(localPreviewUrl)
 }
 }, [localPreviewUrl])
+
+// Keep the active language's audio track in sync with the video
+useEffect(() => {
+const video = mainVideoRef.current
+if (!video) return
+
+function syncActiveAudio() {
+const activeAudio = audioTrackRefs.current[activeLang]
+if (!activeAudio) return
+if (Math.abs(activeAudio.currentTime - video!.currentTime) > 0.3) {
+activeAudio.currentTime = video!.currentTime
+}
+}
+function handlePlay() {
+audioTrackRefs.current[activeLang]?.play().catch(() => {})
+}
+function handlePause() {
+audioTrackRefs.current[activeLang]?.pause()
+}
+function handleSeeked() {
+syncActiveAudio()
+}
+
+video.addEventListener('timeupdate', syncActiveAudio)
+video.addEventListener('play', handlePlay)
+video.addEventListener('pause', handlePause)
+video.addEventListener('seeked', handleSeeked)
+return () => {
+video.removeEventListener('timeupdate', syncActiveAudio)
+video.removeEventListener('play', handlePlay)
+video.removeEventListener('pause', handlePause)
+video.removeEventListener('seeked', handleSeeked)
+}
+}, [activeLang])
+
+function switchLanguage(code: string) {
+const video = mainVideoRef.current
+const oldAudio = audioTrackRefs.current[activeLang]
+const newAudio = audioTrackRefs.current[code]
+if (oldAudio) oldAudio.pause()
+setActiveLang(code)
+if (newAudio && video) {
+newAudio.currentTime = video.currentTime
+if (!video.paused) newAudio.play().catch(() => {})
+}
+}
 
 function toggleLanguage(code: string) {
 setSelectedLanguages((prev) =>
@@ -84,6 +134,7 @@ setVideoUrl(''); setVideoLabel('')
 setTranscript('')
 setResults({})
 setSelectedLanguages([])
+setActiveLang('')
 setError('')
 }
 
@@ -186,6 +237,7 @@ const synthRes = await fetch('/api/synthesize', { method: 'POST', headers: { 'Co
 const synthData = await synthRes.json()
 if (synthRes.ok && synthData.url) {
 updateResult(code, { audioUrl: synthData.url, synthesizing: false })
+if (!activeLang) setActiveLang(code)
 } else {
 updateResult(code, { synthError: synthData.error || 'Voice synthesis failed', synthesizing: false })
 }
@@ -315,7 +367,19 @@ background: active ? '#1D9E75' : '#FFFFFF',
 color: active ? '#FFFFFF' : '#4A4A54',
 })
 
+const trackChipStyle = (active: boolean) => ({
+padding: '0.4rem 0.85rem',
+borderRadius: '999px',
+fontSize: '0.78rem',
+fontWeight: 700,
+cursor: 'pointer' as const,
+border: 'none',
+background: active ? '#1A1A1A' : 'rgba(255,255,255,0.85)',
+color: active ? '#FFFFFF' : '#1A1A1A',
+})
+
 const previewUrl = mode === 'upload' ? localPreviewUrl : videoUrl
+const readyLanguages = selectedLanguages.filter((code) => results[code]?.audioUrl)
 
 return (
 <main style={{ minHeight: '100vh', background: '#FFFFFF', color: '#1A1A1A', fontFamily: "'DM Sans', sans-serif" }}>
@@ -347,8 +411,22 @@ I own this video or have the rights to dub and use it
 </div>
 
 {previewUrl && isVideoSource && (
-<div style={{ marginBottom: '1.25rem' }}>
-<video controls src={previewUrl} style={{ width: '100%', borderRadius: '12px', background: '#000' }} />
+<div style={{ position: 'relative', marginBottom: '1.25rem' }}>
+<video ref={mainVideoRef} controls muted={readyLanguages.length > 0} src={previewUrl} style={{ width: '100%', borderRadius: '12px', background: '#000' }} />
+
+{readyLanguages.length > 0 && (
+<div style={{ position: 'absolute', top: '12px', right: '12px', display: 'flex', gap: '6px', flexWrap: 'wrap', maxWidth: 'calc(100% - 24px)', justifyContent: 'flex-end' }}>
+{readyLanguages.map((code) => (
+<button key={code} onClick={() => switchLanguage(code)} style={trackChipStyle(activeLang === code)}>
+{LANGUAGES.find((l) => l.code === code)?.name}
+</button>
+))}
+</div>
+)}
+
+{readyLanguages.map((code) => (
+<audio key={code} ref={(el) => { audioTrackRefs.current[code] = el }} src={results[code].audioUrl} preload="auto" />
+))}
 </div>
 )}
 
@@ -378,34 +456,39 @@ I own this video or have the rights to dub and use it
 </button>
 </div>
 
+{readyLanguages.length > 0 && (
+<p style={{ fontSize: '0.8rem', color: '#6B6B76', marginTop: '-0.75rem', marginBottom: '1.5rem' }}>
+Use the language buttons on the video above to switch instantly, mid-playback.
+</p>
+)}
+
 {selectedLanguages.map((code) => {
 const lang = LANGUAGES.find((l) => l.code === code)!
 const r = results[code] || emptyResult()
+if (!r.audioUrl) {
+return (
+<div key={code} style={{ marginBottom: '0.75rem' }}>
+{r.translating && <p style={{ fontSize: '0.85rem', color: '#6B6B76' }}>{lang.name}: translating...</p>}
+{r.synthesizing && <p style={{ fontSize: '0.85rem', color: '#6B6B76' }}>{lang.name}: generating voice...</p>}
+{r.translateError && <p style={{ fontSize: '0.85rem', color: '#B54A2B' }}>{lang.name}: {r.translateError}</p>}
+{r.synthError && <p style={{ fontSize: '0.85rem', color: '#B54A2B' }}>{lang.name}: {r.synthError}</p>}
+</div>
+)
+}
 return (
 <div key={code} style={{ background: '#FFFFFF', border: '1px solid #E5E5EA', borderRadius: '12px', padding: '1.5rem', marginBottom: '1.5rem' }}>
 <p style={{ fontSize: '0.9rem', fontWeight: 700, marginBottom: '0.75rem', color: '#1A1A1A', fontFamily: "'Syne', sans-serif" }}>{lang.name}</p>
 
-{r.translating && <p style={{ fontSize: '0.85rem', color: '#6B6B76' }}>Translating...</p>}
-{r.translateError && <p style={{ fontSize: '0.85rem', color: '#B54A2B' }}>{r.translateError}</p>}
-
-{r.synthesizing && <p style={{ fontSize: '0.85rem', color: '#6B6B76' }}>Generating voice...</p>}
-{r.synthError && <p style={{ fontSize: '0.85rem', color: '#B54A2B' }}>{r.synthError}</p>}
-
-{r.audioUrl && (
-<div style={{ marginTop: '0.5rem' }}>
 {isVideoSource ? (
 <>
-<div style={{ marginTop: '1.25rem', paddingTop: '1.25rem', borderTop: '1px solid #E5E5EA' }}>
-<p style={{ fontSize: '0.8rem', fontWeight: 600, marginBottom: '0.6rem', color: '#1A1A1A' }}>Free: dubbed video</p>
+<div>
+<p style={{ fontSize: '0.8rem', fontWeight: 600, marginBottom: '0.6rem', color: '#1A1A1A' }}>Download this dub as its own file</p>
 <button onClick={() => handleMergeVideo(code)} disabled={r.merging} style={{ background: r.merging ? '#D1D1D8' : '#1D9E75', color: 'white', border: 'none', padding: '0.65rem 1.25rem', borderRadius: '8px', fontSize: '0.9rem', fontWeight: 600, cursor: r.merging ? 'not-allowed' : 'pointer' }}>
 {r.merging ? (r.mergeStatus || 'Working...') : 'Create dubbed video'}
 </button>
 {r.mergeError && <p style={{ color: '#B54A2B', marginTop: '0.6rem', fontSize: '0.8rem' }}>{r.mergeError}</p>}
 {r.mergedVideoUrl && (
-<div style={{ marginTop: '1rem' }}>
-<video controls src={r.mergedVideoUrl} style={{ width: '100%', borderRadius: '8px' }} />
 <a href={r.mergedVideoUrl} download={`dubbed-${code}.mp4`} style={{ display: 'inline-block', marginTop: '0.6rem', fontSize: '0.8rem', color: '#1D9E75', fontWeight: 600, textDecoration: 'none' }}>Download video →</a>
-</div>
 )}
 </div>
 
@@ -423,9 +506,7 @@ return (
 </div>
 </>
 ) : (
-<p style={{ fontSize: '0.8rem', color: '#9A9AA4', marginTop: '0.75rem' }}>Video dubbing requires a video file.</p>
-)}
-</div>
+<p style={{ fontSize: '0.8rem', color: '#9A9AA4' }}>Video dubbing requires a video file.</p>
 )}
 </div>
 )
