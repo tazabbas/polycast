@@ -57,6 +57,7 @@ const [rightsConfirmed, setRightsConfirmed] = useState(false)
 const [videoUrl, setVideoUrl] = useState('')
 const [videoLabel, setVideoLabel] = useState('')
 const [isVideoSource, setIsVideoSource] = useState(true)
+const previewUrl = mode === 'upload' ? localPreviewUrl : videoUrl
 
 const [trimDuration, setTrimDuration] = useState(0)
 const [trimStart, setTrimStart] = useState(0)
@@ -158,6 +159,14 @@ video.addEventListener('play', handlePlay)
 video.addEventListener('pause', handlePauseVideo)
 video.addEventListener('seeked', handleSeeked)
 video.addEventListener('loadedmetadata', handleLoadedMetadata)
+
+// If metadata already loaded before this listener attached, capture it now
+if (video.readyState >= 1 && video.duration) {
+handleLoadedMetadata()
+}
+setIsPlaying(!video.paused)
+setCurrentTime(video.currentTime)
+
 return () => {
 video.removeEventListener('timeupdate', handleTimeUpdate)
 video.removeEventListener('play', handlePlay)
@@ -165,7 +174,7 @@ video.removeEventListener('pause', handlePauseVideo)
 video.removeEventListener('seeked', handleSeeked)
 video.removeEventListener('loadedmetadata', handleLoadedMetadata)
 }
-}, [activeLang])
+}, [activeLang, previewUrl])
 
 useEffect(() => {
 if (transcript) {
@@ -518,12 +527,11 @@ background: active ? '#1A1A1A' : 'rgba(255,255,255,0.85)',
 color: active ? '#FFFFFF' : '#1A1A1A',
 })
 
-const previewUrl = mode === 'upload' ? localPreviewUrl : videoUrl
 const readyLanguages = selectedLanguages.filter((code) => results[code]?.audioUrl)
 
 return (
 <main style={{ background: '#FFFFFF', color: '#1A1A1A', fontFamily: "'DM Sans', sans-serif" }}>
-<div style={{ maxWidth: '680px', margin: '0 auto', padding: '2rem' }}>
+<div style={{ maxWidth: '1100px', margin: '0 auto', padding: '2rem' }}>
 <h2 style={{ fontFamily: "'Syne', sans-serif", fontSize: '1.3rem', fontWeight: 700, marginBottom: '0.5rem' }}>Dub a video</h2>
 <p style={{ fontSize: '0.9rem', color: '#6B6B76', marginBottom: '1.5rem' }}>Upload a file or paste a YouTube link. We will transcribe and prep it automatically.</p>
 
@@ -532,7 +540,7 @@ return (
 <button onClick={() => { setMode('youtube'); resetAll(); setFile(null); setLocalPreviewUrl('') }} style={tabStyle(mode === 'youtube')}>Paste YouTube URL</button>
 </div>
 
-<div style={{ background: '#F7F7F8', border: '1px solid #E5E5EA', padding: '1.5rem', borderRadius: '12px', marginBottom: '1.5rem' }}>
+<div style={{ background: '#F7F7F8', border: '1px solid #E5E5EA', padding: '1.5rem', borderRadius: '12px', marginBottom: '1.5rem', maxWidth: previewUrl ? 'none' : '680px' }}>
 {mode === 'upload' ? (
 <label style={{ display: 'block', border: '2px dashed #D1D1D8', borderRadius: '10px', padding: '2rem', textAlign: 'center', cursor: 'pointer', background: '#FFFFFF' }}>
 <input type="file" accept="audio/*,video/*" onChange={(e) => handleFileSelect(e.target.files?.[0] || null)} style={{ display: 'none' }} />
@@ -552,6 +560,9 @@ I own this video or have the rights to dub and use it
 </>
 )}
 </div>
+
+<div style={{ display: 'flex', gap: '2rem', alignItems: 'flex-start', flexWrap: 'wrap' }}>
+<div style={{ flex: '1 1 480px', minWidth: '320px' }}>
 
 {previewUrl && isVideoSource && (
 <div style={{ position: 'relative', marginBottom: '1.25rem' }}>
@@ -600,7 +611,9 @@ This videos own audio stays off — sound comes from whichever language pill is 
 )}
 
 {error && <p style={{ color: '#B54A2B', marginBottom: '1rem', fontSize: '0.9rem' }}>{error}</p>}
+</div>
 
+<div style={{ flex: '1 1 380px', minWidth: '300px' }}>
 {transcript && (
 <>
 <div style={{ background: '#F7F7F8', border: '1px solid #E5E5EA', padding: '1.5rem', borderRadius: '12px', marginBottom: '1.5rem' }}>
@@ -696,6 +709,8 @@ style={{ marginTop: '0.75rem', background: savedVideo ? '#EAF7F1' : '#1D9E75', c
 )}
 </>
 )}
+</div>
+</div>
 </div>
 </main>
 )
