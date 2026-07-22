@@ -323,7 +323,7 @@ return (
 <DashboardHeader />
 <div style={{ maxWidth: '680px', margin: '0 auto', padding: '2rem' }}>
 <h2 style={{ fontFamily: "'Syne', sans-serif", fontSize: '1.3rem', fontWeight: 700, marginBottom: '0.5rem' }}>Dub a video</h2>
-<p style={{ fontSize: '0.9rem', color: '#6B6B76', marginBottom: '1.5rem' }}>Upload a file or paste a YouTube link. We will transcribe and prep it automatically.</p>
+<p style={{ fontSize: '0.9rem', color: '#6B6B76', marginBottom: '1.5rem' }}>Upload a file or paste a YouTube link. We'll transcribe and prep it automatically.</p>
 
 <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.25rem' }}>
 <button onClick={() => { setMode('upload'); resetAll(); setFile(null); setLocalPreviewUrl('') }} style={tabStyle(mode === 'upload')}>Upload file</button>
@@ -365,11 +365,6 @@ I own this video or have the rights to dub and use it
 
 {transcript && (
 <>
-<div style={{ background: '#FFFFFF', border: '1px solid #E5E5EA', borderRadius: '12px', padding: '1.5rem', marginBottom: '1.5rem' }}>
-<p style={{ fontSize: '0.85rem', color: '#6B6B76', marginBottom: '0.5rem' }}>Transcript</p>
-<p style={{ fontSize: '0.95rem', lineHeight: 1.7, margin: 0, color: '#1A1A1A' }}>{transcript}</p>
-</div>
-
 <div style={{ background: '#F7F7F8', border: '1px solid #E5E5EA', padding: '1.5rem', borderRadius: '12px', marginBottom: '1.5rem' }}>
 <p style={{ fontSize: '0.9rem', fontWeight: 600, marginBottom: '0.75rem', color: '#1A1A1A' }}>Select languages to dub into:</p>
 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1.25rem' }}>
@@ -393,7 +388,6 @@ return (
 
 {r.translating && <p style={{ fontSize: '0.85rem', color: '#6B6B76' }}>Translating...</p>}
 {r.translateError && <p style={{ fontSize: '0.85rem', color: '#B54A2B' }}>{r.translateError}</p>}
-{r.translatedText && <p style={{ fontSize: '0.9rem', lineHeight: 1.6, color: '#1A1A1A', marginBottom: '1rem' }}>{r.translatedText}</p>}
 
 {r.synthesizing && <p style={{ fontSize: '0.85rem', color: '#6B6B76' }}>Generating voice...</p>}
 {r.synthError && <p style={{ fontSize: '0.85rem', color: '#B54A2B' }}>{r.synthError}</p>}
