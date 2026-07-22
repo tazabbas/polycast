@@ -1,8 +1,24 @@
 'use client'
 import { useState, useRef } from 'react'
 import { upload } from '@vercel/blob/client'
+import { FFmpeg } from '@ffmpeg/ffmpeg'
+import { fetchFile, toBlobURL } from '@ffmpeg/util'
 import DashboardHeader from '../header'
 const LANGUAGES = [{ code: 'EN-GB', name: 'English (UK)' },{ code: 'EN-US', name: 'English (US)' },{ code: 'ES', name: 'Spanish' },{ code: 'FR', name: 'French' },{ code: 'DE', name: 'German' },{ code: 'IT', name: 'Italian' },{ code: 'PT-BR', name: 'Portuguese (Brazil)' },{ code: 'ZH', name: 'Chinese (Simplified)' },{ code: 'JA', name: 'Japanese' },{ code: 'KO', name: 'Korean' },{ code: 'AR', name: 'Arabic' },{ code: 'RU', name: 'Russian' },{ code: 'HI', name: 'Hindi' },{ code: 'TR', name: 'Turkish' }]
+
+let ffmpegSingleton: FFmpeg | null = null
+async function getFFmpeg(onLog?: (msg: string) => void): Promise<FFmpeg> {
+if (ffmpegSingleton) return ffmpegSingleton
+const ffmpeg = new FFmpeg()
+if (onLog) ffmpeg.on('log', ({ message }) => onLog(message))
+const baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd'
+await ffmpeg.load({
+coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
+wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
+})
+ffmpegSingleton = ffmpeg
+return ffmpeg
+}
 
 export default function TranscribePage() {
 const [mode, setMode] = useState<'upload' | 'youtube'>('upload')
@@ -27,6 +43,11 @@ const [synthesizing, setSynthesizing] = useState(false)
 const [error, setError] = useState('')
 const audioRef = useRef<HTMLAudioElement>(null)
 
+const [merging, setMerging] = useState(false)
+const [mergeStatus, setMergeStatus] = useState('')
+const [mergedVideoUrl, setMergedVideoUrl] = useState('')
+const [mergeError, setMergeError] = useState('')
+
 const [lipSyncing, setLipSyncing] = useState(false)
 const [lipSyncStatus, setLipSyncStatus] = useState('')
 const [lipSyncVideoUrl, setLipSyncVideoUrl] = useState('')
@@ -35,6 +56,7 @@ const [lipSyncError, setLipSyncError] = useState('')
 function resetAll() {
 setVideoUrl(''); setVideoLabel('')
 setTranscript(''); setTranslatedText(''); setAudioUrl('')
+setMergedVideoUrl(''); setMergeError(''); setMergeStatus('')
 setLipSyncVideoUrl(''); setLipSyncError(''); setLipSyncStatus('')
 setError('')
 }
@@ -108,6 +130,7 @@ setLoading(false); setLoadingLabel('')
 async function handleTranslate() {
 if (!transcript || !selectedLanguage) return
 setTranslating(true); setError(''); setTranslatedText(''); setAudioUrl('')
+setMergedVideoUrl(''); setMergeError(''); setMergeStatus('')
 setLipSyncVideoUrl(''); setLipSyncError(''); setLipSyncStatus('')
 try {
 const res = await fetch('/api/translate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text: transcript, target_language: selectedLanguage, transcription_id: transcriptionId }) })
@@ -120,6 +143,7 @@ finally { setTranslating(false) }
 async function handleSynthesize() {
 if (!translatedText) return
 setSynthesizing(true); setError(''); setAudioUrl('')
+setMergedVideoUrl(''); setMergeError(''); setMergeStatus('')
 setLipSyncVideoUrl(''); setLipSyncError(''); setLipSyncStatus('')
 try {
 const res = await fetch('/api/synthesize', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text: translatedText }) })
@@ -132,6 +156,41 @@ setError(data.error || 'Voice synthesis failed')
 }
 } catch { setError('Failed to connect to voice synthesis service') }
 finally { setSynthesizing(false) }
+}
+
+async function handleMergeVideo() {
+if (!videoUrl || !audioUrl || !isVideoSource) return
+setMerging(true); setMergeError(''); setMergedVideoUrl(''); setMergeStatus('Loading engine...')
+try {
+const ffmpeg = await getFFmpeg((msg) => {
+if (msg.toLowerCase().includes('frame=')) setMergeStatus('Merging...')
+})
+
+setMergeStatus('Preparing files...')
+await ffmpeg.writeFile('input_video.mp4', await fetchFile(videoUrl))
+await ffmpeg.writeFile('input_audio.mp3', await fetchFile(audioUrl))
+
+setMergeStatus('Merging...')
+await ffmpeg.exec([
+'-i', 'input_video.mp4',
+'-i', 'input_audio.mp3',
+'-c:v', 'copy',
+'-map', '0:v:0',
+'-map', '1:a:0',
+'-shortest',
+'output.mp4',
+])
+
+const data = await ffmpeg.readFile('output.mp4')
+const blob = new Blob([data as unknown as BlobPart], { type: 'video/mp4' })
+const url = URL.createObjectURL(blob)
+setMergedVideoUrl(url)
+setMergeStatus('Complete')
+} catch {
+setMergeError('Could not merge video and audio in your browser. Try a shorter clip.')
+} finally {
+setMerging(false)
+}
 }
 
 function getAudioDuration(url: string): Promise<number> {
@@ -292,7 +351,24 @@ I own this video or have the rights to dub and use it
 <audio ref={audioRef} controls src={audioUrl} style={{ width: '100%' }} />
 
 {isVideoSource ? (
+<>
 <div style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid #E5E5EA' }}>
+<p style={{ fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.75rem', color: '#1A1A1A' }}>Free: dubbed video (no lip sync)</p>
+<button onClick={handleMergeVideo} disabled={merging} style={{ background: merging ? '#D1D1D8' : '#1D9E75', color: 'white', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '8px', fontSize: '0.95rem', fontWeight: 600, cursor: merging ? 'not-allowed' : 'pointer' }}>
+{merging ? (mergeStatus || 'Working...') : 'Create dubbed video'}
+</button>
+{mergeError && <p style={{ color: '#B54A2B', marginTop: '0.75rem', fontSize: '0.85rem' }}>{mergeError}</p>}
+{mergedVideoUrl && (
+<div style={{ marginTop: '1.25rem' }}>
+<p style={{ fontSize: '0.85rem', color: '#6B6B76', marginBottom: '0.5rem' }}>Your dubbed video:</p>
+<video controls src={mergedVideoUrl} style={{ width: '100%', borderRadius: '8px' }} />
+<a href={mergedVideoUrl} download="dubbed-video.mp4" style={{ display: 'inline-block', marginTop: '0.75rem', fontSize: '0.85rem', color: '#1D9E75', fontWeight: 600, textDecoration: 'none' }}>Download video →</a>
+</div>
+)}
+</div>
+
+<div style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid #E5E5EA' }}>
+<p style={{ fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.75rem', color: '#1A1A1A' }}>Paid upgrade: lip sync (mouth matches new audio)</p>
 <button onClick={handleLipSync} disabled={lipSyncing} style={{ background: lipSyncing ? '#D1D1D8' : '#1A1A1A', color: 'white', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '8px', fontSize: '0.95rem', fontWeight: 600, cursor: lipSyncing ? 'not-allowed' : 'pointer' }}>
 {lipSyncing ? (lipSyncStatus || 'Working...') : 'Lip sync my video'}
 </button>
@@ -304,8 +380,9 @@ I own this video or have the rights to dub and use it
 </div>
 )}
 </div>
+</>
 ) : (
-<p style={{ fontSize: '0.8rem', color: '#9A9AA4', marginTop: '1rem' }}>Lip sync requires a video file (you uploaded audio only).</p>
+<p style={{ fontSize: '0.8rem', color: '#9A9AA4', marginTop: '1rem' }}>Video dubbing requires a video file (you uploaded audio only).</p>
 )}
 </div>
 )}
