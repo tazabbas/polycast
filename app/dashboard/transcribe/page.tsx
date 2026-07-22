@@ -1,23 +1,10 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
 import { upload } from '@vercel/blob/client'
-import { FFmpeg } from '@ffmpeg/ffmpeg'
-import { fetchFile, toBlobURL } from '@ffmpeg/util'
 import DashboardHeader from '../header'
 const LANGUAGES = [{ code: 'EN-GB', name: 'English (UK)' },{ code: 'EN-US', name: 'English (US)' },{ code: 'ES', name: 'Spanish' },{ code: 'FR', name: 'French' },{ code: 'DE', name: 'German' },{ code: 'IT', name: 'Italian' },{ code: 'PT-BR', name: 'Portuguese (Brazil)' },{ code: 'ZH', name: 'Chinese (Simplified)' },{ code: 'JA', name: 'Japanese' },{ code: 'KO', name: 'Korean' },{ code: 'AR', name: 'Arabic' },{ code: 'RU', name: 'Russian' },{ code: 'HI', name: 'Hindi' },{ code: 'TR', name: 'Turkish' }]
 
-let ffmpegSingleton: FFmpeg | null = null
-async function getFFmpeg(): Promise<FFmpeg> {
-if (ffmpegSingleton) return ffmpegSingleton
-const ffmpeg = new FFmpeg()
-const baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd'
-await ffmpeg.load({
-coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
-wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
-})
-ffmpegSingleton = ffmpeg
-return ffmpeg
-}
+
 
 interface LangResult {
 translatedText: string
@@ -255,36 +242,6 @@ mainVideoRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
 }
 }
 
-async function handleMergeVideo(code: string) {
-const r = results[code]
-if (!videoUrl || !r?.audioUrl || !isVideoSource) return
-updateResult(code, { merging: true, mergeError: '', mergedVideoUrl: '', mergeStatus: 'Loading engine...' })
-try {
-const ffmpeg = await getFFmpeg()
-updateResult(code, { mergeStatus: 'Preparing files...' })
-await ffmpeg.writeFile('input_video.mp4', await fetchFile(videoUrl))
-await ffmpeg.writeFile(`input_audio_${code}.mp3`, await fetchFile(r.audioUrl))
-
-updateResult(code, { mergeStatus: 'Merging...' })
-await ffmpeg.exec([
-'-i', 'input_video.mp4',
-'-i', `input_audio_${code}.mp3`,
-'-c:v', 'copy',
-'-map', '0:v:0',
-'-map', '1:a:0',
-'-shortest',
-`output_${code}.mp4`,
-])
-
-const data = await ffmpeg.readFile(`output_${code}.mp4`)
-const blob = new Blob([data as unknown as BlobPart], { type: 'video/mp4' })
-const url = URL.createObjectURL(blob)
-updateResult(code, { mergedVideoUrl: url, mergeStatus: 'Complete', merging: false })
-} catch {
-updateResult(code, { mergeError: 'Could not merge video and audio. Try a shorter clip.', merging: false })
-}
-}
-
 function getAudioDuration(url: string): Promise<number> {
 return new Promise((resolve, reject) => {
 const audio = new Audio()
@@ -469,55 +426,28 @@ Use the language buttons on the video above to switch instantly, mid-playback.
 </p>
 )}
 
-{selectedLanguages.map((code) => {
-const lang = LANGUAGES.find((l) => l.code === code)!
-const r = results[code] || emptyResult()
-if (!r.audioUrl) {
-return (
-<div key={code} style={{ marginBottom: '0.75rem' }}>
-{r.translating && <p style={{ fontSize: '0.85rem', color: '#6B6B76' }}>{lang.name}: translating...</p>}
-{r.synthesizing && <p style={{ fontSize: '0.85rem', color: '#6B6B76' }}>{lang.name}: generating voice...</p>}
-{r.translateError && <p style={{ fontSize: '0.85rem', color: '#B54A2B' }}>{lang.name}: {r.translateError}</p>}
-{r.synthError && <p style={{ fontSize: '0.85rem', color: '#B54A2B' }}>{lang.name}: {r.synthError}</p>}
-</div>
-)
-}
-return (
-<div key={code} style={{ background: '#FFFFFF', border: '1px solid #E5E5EA', borderRadius: '12px', padding: '1.5rem', marginBottom: '1.5rem' }}>
-<p style={{ fontSize: '0.9rem', fontWeight: 700, marginBottom: '0.75rem', color: '#1A1A1A', fontFamily: "'Syne', sans-serif" }}>{lang.name}</p>
-
+{readyLanguages.length > 0 && activeLang && results[activeLang] && (
+<div style={{ background: '#FFFFFF', border: '1px solid #E5E5EA', borderRadius: '12px', padding: '1.5rem', marginBottom: '1.5rem' }}>
+<p style={{ fontSize: '0.9rem', fontWeight: 700, marginBottom: '0.75rem', color: '#1A1A1A', fontFamily: "'Syne', sans-serif" }}>
+Lip sync — {LANGUAGES.find((l) => l.code === activeLang)?.name}
+</p>
 {isVideoSource ? (
 <>
-<div>
-<p style={{ fontSize: '0.8rem', fontWeight: 600, marginBottom: '0.6rem', color: '#1A1A1A' }}>Download this dub as its own file</p>
-<button onClick={() => handleMergeVideo(code)} disabled={r.merging} style={{ background: r.merging ? '#D1D1D8' : '#1D9E75', color: 'white', border: 'none', padding: '0.65rem 1.25rem', borderRadius: '8px', fontSize: '0.9rem', fontWeight: 600, cursor: r.merging ? 'not-allowed' : 'pointer' }}>
-{r.merging ? (r.mergeStatus || 'Working...') : 'Create dubbed video'}
+<button onClick={() => handleLipSync(activeLang)} disabled={results[activeLang].lipSyncing} style={{ background: results[activeLang].lipSyncing ? '#D1D1D8' : '#1A1A1A', color: 'white', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '8px', fontSize: '0.95rem', fontWeight: 600, cursor: results[activeLang].lipSyncing ? 'not-allowed' : 'pointer' }}>
+{results[activeLang].lipSyncing ? (results[activeLang].lipSyncStatus || 'Working...') : 'Lip sync my video'}
 </button>
-{r.mergeError && <p style={{ color: '#B54A2B', marginTop: '0.6rem', fontSize: '0.8rem' }}>{r.mergeError}</p>}
-{r.mergedVideoUrl && (
-<a href={r.mergedVideoUrl} download={`dubbed-${code}.mp4`} style={{ display: 'inline-block', marginTop: '0.6rem', fontSize: '0.8rem', color: '#1D9E75', fontWeight: 600, textDecoration: 'none' }}>Download video →</a>
-)}
-</div>
-
-<div style={{ marginTop: '1.25rem', paddingTop: '1.25rem', borderTop: '1px solid #E5E5EA' }}>
-<p style={{ fontSize: '0.8rem', fontWeight: 600, marginBottom: '0.6rem', color: '#1A1A1A' }}>Paid: lip sync</p>
-<button onClick={() => handleLipSync(code)} disabled={r.lipSyncing} style={{ background: r.lipSyncing ? '#D1D1D8' : '#1A1A1A', color: 'white', border: 'none', padding: '0.65rem 1.25rem', borderRadius: '8px', fontSize: '0.9rem', fontWeight: 600, cursor: r.lipSyncing ? 'not-allowed' : 'pointer' }}>
-{r.lipSyncing ? (r.lipSyncStatus || 'Working...') : 'Lip sync my video'}
-</button>
-{r.lipSyncError && <p style={{ color: '#B54A2B', marginTop: '0.6rem', fontSize: '0.8rem' }}>{r.lipSyncError}</p>}
-{r.lipSyncVideoUrl && (
-<div style={{ marginTop: '1rem' }}>
-<video controls src={r.lipSyncVideoUrl} style={{ width: '100%', borderRadius: '8px' }} />
+{results[activeLang].lipSyncError && <p style={{ color: '#B54A2B', marginTop: '0.75rem', fontSize: '0.85rem' }}>{results[activeLang].lipSyncError}</p>}
+{results[activeLang].lipSyncVideoUrl && (
+<div style={{ marginTop: '1.25rem' }}>
+<video controls src={results[activeLang].lipSyncVideoUrl} style={{ width: '100%', borderRadius: '8px' }} />
 </div>
 )}
-</div>
 </>
 ) : (
 <p style={{ fontSize: '0.8rem', color: '#9A9AA4' }}>Video dubbing requires a video file.</p>
 )}
 </div>
-)
-})}
+)}
 </>
 )}
 </div>
