@@ -323,7 +323,7 @@ return (
 <DashboardHeader />
 <div style={{ maxWidth: '680px', margin: '0 auto', padding: '2rem' }}>
 <h2 style={{ fontFamily: "'Syne', sans-serif", fontSize: '1.3rem', fontWeight: 700, marginBottom: '0.5rem' }}>Dub a video</h2>
-<p style={{ fontSize: '0.9rem', color: '#6B6B76', marginBottom: '1.5rem' }}>Upload a file or paste a YouTube link. We'll transcribe and prep it automatically.</p>
+<p style={{ fontSize: '0.9rem', color: '#6B6B76', marginBottom: '1.5rem' }}>Upload a file or paste a YouTube link. We will transcribe and prep it automatically.</p>
 
 <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.25rem' }}>
 <button onClick={() => { setMode('upload'); resetAll(); setFile(null); setLocalPreviewUrl('') }} style={tabStyle(mode === 'upload')}>Upload file</button>
