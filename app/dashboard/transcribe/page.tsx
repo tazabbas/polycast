@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, type ChangeEvent } from 'react'
 import { upload } from '@vercel/blob/client'
 import DashboardHeader from '../header'
 const LANGUAGES = [{ code: 'EN-GB', name: 'English (UK)' },{ code: 'EN-US', name: 'English (US)' },{ code: 'ES', name: 'Spanish' },{ code: 'FR', name: 'French' },{ code: 'DE', name: 'German' },{ code: 'IT', name: 'Italian' },{ code: 'PT-BR', name: 'Portuguese (Brazil)' },{ code: 'ZH', name: 'Chinese (Simplified)' },{ code: 'JA', name: 'Japanese' },{ code: 'KO', name: 'Korean' },{ code: 'AR', name: 'Arabic' },{ code: 'RU', name: 'Russian' },{ code: 'HI', name: 'Hindi' },{ code: 'TR', name: 'Turkish' }]
@@ -67,6 +67,35 @@ if (data.voices) setVoices(data.voices)
 const mainVideoRef = useRef<HTMLVideoElement>(null)
 const audioTrackRefs = useRef<Record<string, HTMLAudioElement | null>>({})
 
+const [isPlaying, setIsPlaying] = useState(false)
+const [currentTime, setCurrentTime] = useState(0)
+const [duration, setDuration] = useState(0)
+
+function togglePlay() {
+const video = mainVideoRef.current
+if (!video) return
+if (video.paused) {
+video.play()
+} else {
+video.pause()
+}
+}
+
+function handleSeek(e: ChangeEvent<HTMLInputElement>) {
+const video = mainVideoRef.current
+if (!video) return
+const newTime = Number(e.target.value)
+video.currentTime = newTime
+setCurrentTime(newTime)
+}
+
+function formatTime(seconds: number): string {
+if (!isFinite(seconds)) return '0:00'
+const m = Math.floor(seconds / 60)
+const s = Math.floor(seconds % 60)
+return `${m}:${s.toString().padStart(2, '0')}`
+}
+
 useEffect(() => {
 return () => {
 if (localPreviewUrl) URL.revokeObjectURL(localPreviewUrl)
@@ -87,23 +116,34 @@ activeAudio.currentTime = video!.currentTime
 }
 function handlePlay() {
 audioTrackRefs.current[activeLang]?.play().catch(() => {})
+setIsPlaying(true)
 }
-function handlePause() {
+function handlePauseVideo() {
 audioTrackRefs.current[activeLang]?.pause()
+setIsPlaying(false)
 }
 function handleSeeked() {
 syncActiveAudio()
 }
+function handleTimeUpdate() {
+syncActiveAudio()
+setCurrentTime(video!.currentTime)
+}
+function handleLoadedMetadata() {
+setDuration(video!.duration)
+}
 
-video.addEventListener('timeupdate', syncActiveAudio)
+video.addEventListener('timeupdate', handleTimeUpdate)
 video.addEventListener('play', handlePlay)
-video.addEventListener('pause', handlePause)
+video.addEventListener('pause', handlePauseVideo)
 video.addEventListener('seeked', handleSeeked)
+video.addEventListener('loadedmetadata', handleLoadedMetadata)
 return () => {
-video.removeEventListener('timeupdate', syncActiveAudio)
+video.removeEventListener('timeupdate', handleTimeUpdate)
 video.removeEventListener('play', handlePlay)
-video.removeEventListener('pause', handlePause)
+video.removeEventListener('pause', handlePauseVideo)
 video.removeEventListener('seeked', handleSeeked)
+video.removeEventListener('loadedmetadata', handleLoadedMetadata)
 }
 }, [activeLang])
 
@@ -385,7 +425,16 @@ I own this video or have the rights to dub and use it
 
 {previewUrl && isVideoSource && (
 <div style={{ position: 'relative', marginBottom: '1.25rem' }}>
-<video ref={mainVideoRef} controls disablePictureInPicture muted={readyLanguages.length > 0} onVolumeChange={(e) => { if (readyLanguages.length > 0) { e.currentTarget.muted = true } }} src={previewUrl} style={{ width: '100%', borderRadius: '12px', background: '#000' }} />
+<video ref={mainVideoRef} disablePictureInPicture muted={readyLanguages.length > 0} src={previewUrl} onClick={togglePlay} style={{ width: '100%', borderRadius: '12px', background: '#000', cursor: 'pointer', display: 'block' }} />
+
+<div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginTop: '0.6rem' }}>
+<button onClick={togglePlay} style={{ background: '#1A1A1A', color: 'white', border: 'none', borderRadius: '50%', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0, fontSize: '0.8rem' }}>
+{isPlaying ? '❚❚' : '▶'}
+</button>
+<span style={{ fontSize: '0.75rem', color: '#6B6B76', minWidth: '38px' }}>{formatTime(currentTime)}</span>
+<input type="range" min={0} max={duration || 0} step={0.1} value={currentTime} onChange={handleSeek} style={{ flex: 1 }} />
+<span style={{ fontSize: '0.75rem', color: '#6B6B76', minWidth: '38px' }}>{formatTime(duration)}</span>
+</div>
 
 {readyLanguages.length > 0 && (
 <div style={{ position: 'absolute', top: '12px', right: '12px', display: 'flex', gap: '6px', flexWrap: 'wrap', maxWidth: 'calc(100% - 24px)', justifyContent: 'flex-end' }}>
