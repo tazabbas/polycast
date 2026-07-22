@@ -1,7 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { upload } from '@vercel/blob/client'
-import DashboardHeader from '../header'
 
 interface Voice {
   id: string
@@ -66,8 +65,7 @@ export default function VoicesPage() {
   }
 
   return (
-    <main style={{ minHeight: '100vh', background: '#FFFFFF', color: '#1A1A1A', fontFamily: "'DM Sans', sans-serif" }}>
-      <DashboardHeader />
+    <main style={{ background: '#FFFFFF', color: '#1A1A1A', fontFamily: "'DM Sans', sans-serif" }}>
       <div style={{ maxWidth: '680px', margin: '0 auto', padding: '2rem' }}>
         <h2 style={{ fontFamily: "'Syne', sans-serif", fontSize: '1.3rem', fontWeight: 700, marginBottom: '0.5rem' }}>Your voices</h2>
         <p style={{ fontSize: '0.9rem', color: '#6B6B76', marginBottom: '1.5rem' }}>
