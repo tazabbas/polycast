@@ -1,6 +1,8 @@
 'use client'
 import { useState, useEffect, useRef, type ChangeEvent } from 'react'
 import { upload } from '@vercel/blob/client'
+import { FFmpeg } from '@ffmpeg/ffmpeg'
+import { fetchFile, toBlobURL } from '@ffmpeg/util'
 const LANGUAGES = [{ code: 'EN-GB', name: 'English (UK)' },{ code: 'EN-US', name: 'English (US)' },{ code: 'ES', name: 'Spanish' },{ code: 'FR', name: 'French' },{ code: 'DE', name: 'German' },{ code: 'IT', name: 'Italian' },{ code: 'PT-BR', name: 'Portuguese (Brazil)' },{ code: 'ZH', name: 'Chinese (Simplified)' },{ code: 'JA', name: 'Japanese' },{ code: 'KO', name: 'Korean' },{ code: 'AR', name: 'Arabic' },{ code: 'RU', name: 'Russian' },{ code: 'HI', name: 'Hindi' },{ code: 'TR', name: 'Turkish' }]
 
 
@@ -31,6 +33,19 @@ lipSyncing: false, lipSyncStatus: '', lipSyncVideoUrl: '', lipSyncError: '',
 }
 }
 
+let ffmpegSingleton: FFmpeg | null = null
+async function getFFmpeg(): Promise<FFmpeg> {
+if (ffmpegSingleton) return ffmpegSingleton
+const ffmpeg = new FFmpeg()
+const baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd'
+await ffmpeg.load({
+coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
+wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
+})
+ffmpegSingleton = ffmpeg
+return ffmpeg
+}
+
 export default function DubVideo() {
 const [mode, setMode] = useState<'upload' | 'youtube'>('upload')
 
@@ -42,6 +57,10 @@ const [rightsConfirmed, setRightsConfirmed] = useState(false)
 const [videoUrl, setVideoUrl] = useState('')
 const [videoLabel, setVideoLabel] = useState('')
 const [isVideoSource, setIsVideoSource] = useState(true)
+
+const [trimDuration, setTrimDuration] = useState(0)
+const [trimStart, setTrimStart] = useState(0)
+const [trimEnd, setTrimEnd] = useState(0)
 
 const [transcript, setTranscript] = useState('')
 const [transcriptionId, setTranscriptionId] = useState('')
@@ -130,6 +149,8 @@ setCurrentTime(video!.currentTime)
 }
 function handleLoadedMetadata() {
 setDuration(video!.duration)
+setTrimDuration((prev) => prev === 0 ? video!.duration : prev)
+setTrimEnd((prev) => prev === 0 ? video!.duration : prev)
 }
 
 video.addEventListener('timeupdate', handleTimeUpdate)
@@ -171,6 +192,7 @@ setResults({})
 setSelectedLanguages([])
 setActiveLang('')
 setError('')
+setTrimStart(0); setTrimEnd(0); setTrimDuration(0)
 }
 
 function handleFileSelect(selected: File | null) {
@@ -331,11 +353,37 @@ if (!videoUrl || !r?.audioUrl) return
 updateResult(code, { lipSyncing: true, lipSyncError: '', lipSyncVideoUrl: '', lipSyncStatus: 'Starting...' })
 setSavedVideo(false)
 try {
-const durationSeconds = await getAudioDuration(r.audioUrl)
+const needsTrim = trimStart > 0.15 || (trimDuration > 0 && trimEnd < trimDuration - 0.15)
+let finalVideoUrl = videoUrl
+let finalAudioUrl = r.audioUrl
+let durationSeconds = await getAudioDuration(r.audioUrl)
+
+if (needsTrim) {
+updateResult(code, { lipSyncStatus: 'Trimming clip...' })
+const ffmpeg = await getFFmpeg()
+
+await ffmpeg.writeFile('lip_video_in.mp4', await fetchFile(videoUrl))
+await ffmpeg.exec(['-i', 'lip_video_in.mp4', '-ss', String(trimStart), '-to', String(trimEnd), '-c', 'copy', 'lip_video_out.mp4'])
+const videoData = await ffmpeg.readFile('lip_video_out.mp4')
+const trimmedVideoFile = new File([videoData as unknown as BlobPart], `trim-${code}.mp4`, { type: 'video/mp4' })
+const videoBlob = await upload(`trim-${code}.mp4`, trimmedVideoFile, { access: 'public', handleUploadUrl: '/api/blob-upload' })
+finalVideoUrl = videoBlob.url
+
+await ffmpeg.writeFile('lip_audio_in.mp3', await fetchFile(r.audioUrl))
+await ffmpeg.exec(['-i', 'lip_audio_in.mp3', '-ss', String(trimStart), '-to', String(trimEnd), '-c', 'copy', 'lip_audio_out.mp3'])
+const audioData = await ffmpeg.readFile('lip_audio_out.mp3')
+const trimmedAudioFile = new File([audioData as unknown as BlobPart], `trim-audio-${code}.mp3`, { type: 'audio/mpeg' })
+const audioBlob = await upload(`trim-audio-${code}.mp3`, trimmedAudioFile, { access: 'public', handleUploadUrl: '/api/blob-upload' })
+finalAudioUrl = audioBlob.url
+
+durationSeconds = trimEnd - trimStart
+}
+
+updateResult(code, { lipSyncStatus: 'Starting...' })
 const res = await fetch('/api/lipsync', {
 method: 'POST',
 headers: { 'Content-Type': 'application/json' },
-body: JSON.stringify({ videoUrl, audioUrl: r.audioUrl, durationSeconds }),
+body: JSON.stringify({ videoUrl: finalVideoUrl, audioUrl: finalAudioUrl, durationSeconds }),
 })
 const data = await res.json()
 if (!res.ok || !data.id) {
@@ -345,7 +393,7 @@ return
 updateResult(code, { lipSyncStatus: 'Processing...' })
 pollLipSyncStatus(code, data.id)
 } catch {
-updateResult(code, { lipSyncError: 'Failed to connect to lip sync service', lipSyncing: false })
+updateResult(code, { lipSyncError: 'Failed to trim or start lip sync', lipSyncing: false })
 }
 }
 
@@ -533,6 +581,24 @@ Lip sync — {LANGUAGES.find((l) => l.code === activeLang)?.name}
 </p>
 {isVideoSource ? (
 <>
+{trimDuration > 0 && (
+<div style={{ marginBottom: '1.25rem', paddingBottom: '1.25rem', borderBottom: '1px solid #E5E5EA' }}>
+<p style={{ fontSize: '0.8rem', fontWeight: 600, marginBottom: '0.5rem', color: '#1A1A1A' }}>
+Clip length for lip sync: {(trimEnd - trimStart).toFixed(1)}s
+</p>
+<p style={{ fontSize: '0.75rem', color: '#9A9AA4', marginBottom: '0.75rem' }}>
+Pick the part of the video to lip sync — shorter clips cost less and process faster.
+</p>
+<div style={{ marginBottom: '0.5rem' }}>
+<label style={{ fontSize: '0.75rem', color: '#6B6B76' }}>Start: {trimStart.toFixed(1)}s</label>
+<input type="range" min={0} max={trimDuration} step={0.1} value={trimStart} onChange={(e) => { const v = Number(e.target.value); if (v < trimEnd) setTrimStart(v) }} style={{ width: '100%' }} />
+</div>
+<div>
+<label style={{ fontSize: '0.75rem', color: '#6B6B76' }}>End: {trimEnd.toFixed(1)}s</label>
+<input type="range" min={0} max={trimDuration} step={0.1} value={trimEnd} onChange={(e) => { const v = Number(e.target.value); if (v > trimStart) setTrimEnd(v) }} style={{ width: '100%' }} />
+</div>
+</div>
+)}
 <button onClick={() => handleLipSync(activeLang)} disabled={results[activeLang].lipSyncing} style={{ background: results[activeLang].lipSyncing ? '#D1D1D8' : '#1A1A1A', color: 'white', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '8px', fontSize: '0.95rem', fontWeight: 600, cursor: results[activeLang].lipSyncing ? 'not-allowed' : 'pointer' }}>
 {results[activeLang].lipSyncing ? (results[activeLang].lipSyncStatus || 'Working...') : 'Lip sync my video'}
 </button>
