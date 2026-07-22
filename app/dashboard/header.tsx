@@ -1,7 +1,8 @@
 'use client'
 import { UserButton } from '@clerk/nextjs'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
+import type { MouseEvent } from 'react'
 
 const NAV_ITEMS = [
   { href: '/', label: 'Home' },
@@ -13,6 +14,19 @@ const NAV_ITEMS = [
 
 export default function DashboardHeader() {
   const pathname = usePathname()
+  const router = useRouter()
+
+  function handleNavClick(e: MouseEvent, href: string) {
+    e.preventDefault()
+    if (typeof window !== 'undefined' && sessionStorage.getItem('polycast_unsaved_studio_work')) {
+      const proceed = window.confirm('You have unsaved work in Studio. Leave anyway? It will be lost.')
+      if (!proceed) {
+        return
+      }
+      sessionStorage.removeItem('polycast_unsaved_studio_work')
+    }
+    router.push(href)
+  }
 
   return (
     <div
@@ -47,6 +61,7 @@ export default function DashboardHeader() {
             <Link
               key={item.href}
               href={item.href}
+              onClick={(e) => handleNavClick(e, item.href)}
               style={{
                 padding: '0.65rem 0.75rem',
                 borderRadius: '8px',
