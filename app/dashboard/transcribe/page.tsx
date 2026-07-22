@@ -385,7 +385,7 @@ I own this video or have the rights to dub and use it
 
 {previewUrl && isVideoSource && (
 <div style={{ position: 'relative', marginBottom: '1.25rem' }}>
-<video ref={mainVideoRef} controls muted={readyLanguages.length > 0} src={previewUrl} style={{ width: '100%', borderRadius: '12px', background: '#000' }} />
+<video ref={mainVideoRef} controls disablePictureInPicture muted={readyLanguages.length > 0} onVolumeChange={(e) => { if (readyLanguages.length > 0) { e.currentTarget.muted = true } }} src={previewUrl} style={{ width: '100%', borderRadius: '12px', background: '#000' }} />
 
 {readyLanguages.length > 0 && (
 <div style={{ position: 'absolute', top: '12px', right: '12px', display: 'flex', gap: '6px', flexWrap: 'wrap', maxWidth: 'calc(100% - 24px)', justifyContent: 'flex-end' }}>
@@ -401,6 +401,12 @@ I own this video or have the rights to dub and use it
 <audio key={code} ref={(el) => { audioTrackRefs.current[code] = el }} src={results[code].audioUrl} preload="auto" />
 ))}
 </div>
+)}
+
+{readyLanguages.length > 0 && (
+<p style={{ fontSize: '0.78rem', color: '#9A9AA4', marginTop: '-1rem', marginBottom: '1.25rem' }}>
+This videos own audio stays off — sound comes from whichever language pill is selected above.
+</p>
 )}
 
 {videoLabel && !error && (
