@@ -250,6 +250,9 @@ updateResult(code, { translateError: 'Connection failed', translating: false })
 }
 
 setDubbing(false)
+if (mainVideoRef.current) {
+mainVideoRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
+}
 }
 
 async function handleMergeVideo(code: string) {
