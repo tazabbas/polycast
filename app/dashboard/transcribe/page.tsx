@@ -398,7 +398,11 @@ return (
 
 <div style={{ background: '#F7F7F8', border: '1px solid #E5E5EA', padding: '1.5rem', borderRadius: '12px', marginBottom: '1.5rem' }}>
 {mode === 'upload' ? (
-<input type="file" accept="audio/*,video/*" onChange={(e) => handleFileSelect(e.target.files?.[0] || null)} style={{ display: 'block', fontSize: '0.9rem', color: '#1A1A1A' }} />
+<label style={{ display: 'block', border: '2px dashed #D1D1D8', borderRadius: '10px', padding: '2rem', textAlign: 'center', cursor: 'pointer', background: '#FFFFFF' }}>
+<input type="file" accept="audio/*,video/*" onChange={(e) => handleFileSelect(e.target.files?.[0] || null)} style={{ display: 'none' }} />
+<p style={{ margin: 0, fontSize: '0.95rem', fontWeight: 600, color: '#1D9E75' }}>Click to choose a video or audio file</p>
+<p style={{ margin: '0.35rem 0 0', fontSize: '0.8rem', color: '#9A9AA4' }}>{file ? file.name : 'MP4, MOV, MP3, WAV supported'}</p>
+</label>
 ) : (
 <>
 <input type="text" placeholder="https://www.youtube.com/watch?v=..." value={youtubeUrl} onChange={(e) => setYoutubeUrl(e.target.value)} style={{ padding: '0.6rem 1rem', borderRadius: '8px', border: '1px solid #D1D1D8', fontSize: '0.9rem', marginBottom: '1rem', display: 'block', width: '100%', color: '#1A1A1A', background: '#FFFFFF' }} />
