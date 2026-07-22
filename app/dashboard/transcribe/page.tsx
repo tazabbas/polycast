@@ -1,7 +1,6 @@
 'use client'
 import { useState, useEffect, useRef, type ChangeEvent } from 'react'
 import { upload } from '@vercel/blob/client'
-import DashboardHeader from '../header'
 const LANGUAGES = [{ code: 'EN-GB', name: 'English (UK)' },{ code: 'EN-US', name: 'English (US)' },{ code: 'ES', name: 'Spanish' },{ code: 'FR', name: 'French' },{ code: 'DE', name: 'German' },{ code: 'IT', name: 'Italian' },{ code: 'PT-BR', name: 'Portuguese (Brazil)' },{ code: 'ZH', name: 'Chinese (Simplified)' },{ code: 'JA', name: 'Japanese' },{ code: 'KO', name: 'Korean' },{ code: 'AR', name: 'Arabic' },{ code: 'RU', name: 'Russian' },{ code: 'HI', name: 'Hindi' },{ code: 'TR', name: 'Turkish' }]
 
 
@@ -391,8 +390,7 @@ const previewUrl = mode === 'upload' ? localPreviewUrl : videoUrl
 const readyLanguages = selectedLanguages.filter((code) => results[code]?.audioUrl)
 
 return (
-<main style={{ minHeight: '100vh', background: '#FFFFFF', color: '#1A1A1A', fontFamily: "'DM Sans', sans-serif" }}>
-<DashboardHeader />
+<main style={{ background: '#FFFFFF', color: '#1A1A1A', fontFamily: "'DM Sans', sans-serif" }}>
 <div style={{ maxWidth: '680px', margin: '0 auto', padding: '2rem' }}>
 <h2 style={{ fontFamily: "'Syne', sans-serif", fontSize: '1.3rem', fontWeight: 700, marginBottom: '0.5rem' }}>Dub a video</h2>
 <p style={{ fontSize: '0.9rem', color: '#6B6B76', marginBottom: '1.5rem' }}>Upload a file or paste a YouTube link. We will transcribe and prep it automatically.</p>
