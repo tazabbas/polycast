@@ -55,6 +55,15 @@ const [results, setResults] = useState<Record<string, LangResult>>({})
 const [dubbing, setDubbing] = useState(false)
 const [activeLang, setActiveLang] = useState<string>('')
 
+const [voices, setVoices] = useState<{ id: string; name: string }[]>([])
+const [selectedVoiceId, setSelectedVoiceId] = useState('')
+
+useEffect(() => {
+fetch('/api/voices').then((r) => r.json()).then((data) => {
+if (data.voices) setVoices(data.voices)
+}).catch(() => {})
+}, [])
+
 const mainVideoRef = useRef<HTMLVideoElement>(null)
 const audioTrackRefs = useRef<Record<string, HTMLAudioElement | null>>({})
 
@@ -220,7 +229,7 @@ if (data.translated_text) {
 updateResult(code, { translatedText: data.translated_text, translating: false })
 
 updateResult(code, { synthesizing: true })
-const synthRes = await fetch('/api/synthesize', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text: data.translated_text }) })
+const synthRes = await fetch('/api/synthesize', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text: data.translated_text, voiceId: selectedVoiceId || undefined }) })
 const synthData = await synthRes.json()
 if (synthRes.ok && synthData.url) {
 updateResult(code, { audioUrl: synthData.url, synthesizing: false })
@@ -406,6 +415,17 @@ I own this video or have the rights to dub and use it
 
 {transcript && (
 <>
+<div style={{ background: '#F7F7F8', border: '1px solid #E5E5EA', padding: '1.5rem', borderRadius: '12px', marginBottom: '1.5rem' }}>
+<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+<p style={{ fontSize: '0.9rem', fontWeight: 600, margin: 0, color: '#1A1A1A' }}>Voice to use:</p>
+<a href="/dashboard/voices" style={{ fontSize: '0.8rem', color: '#1D9E75', fontWeight: 600, textDecoration: 'none' }}>Manage voices →</a>
+</div>
+<select value={selectedVoiceId} onChange={(e) => setSelectedVoiceId(e.target.value)} style={{ padding: '0.5rem 1rem', borderRadius: '8px', border: '1px solid #D1D1D8', fontSize: '0.9rem', display: 'block', width: '100%', maxWidth: '300px', color: '#1A1A1A', background: '#FFFFFF' }}>
+<option value="">Default voice</option>
+{voices.map((v) => (<option key={v.id} value={v.id}>{v.name}</option>))}
+</select>
+</div>
+
 <div style={{ background: '#F7F7F8', border: '1px solid #E5E5EA', padding: '1.5rem', borderRadius: '12px', marginBottom: '1.5rem' }}>
 <p style={{ fontSize: '0.9rem', fontWeight: 600, marginBottom: '0.75rem', color: '#1A1A1A' }}>Select languages to dub into:</p>
 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1.25rem' }}>
