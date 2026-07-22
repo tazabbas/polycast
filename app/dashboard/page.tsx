@@ -1,6 +1,7 @@
 import { auth, clerkClient } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import { createClient } from '@supabase/supabase-js'
+import DubVideo from './DubVideo'
 import Link from 'next/link'
 
 interface VideoItem {
@@ -278,25 +279,21 @@ export default async function Dashboard() {
               )}
             </div>
 
-            <Link
-              href="/dashboard/transcribe"
+            <h2
               style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                background: '#1D9E75',
-                color: 'white',
-                padding: '0.9rem 1.75rem',
-                borderRadius: '10px',
-                textDecoration: 'none',
-                fontSize: '0.95rem',
-                fontWeight: 600,
-                marginBottom: '2.5rem',
-                boxShadow: '0 4px 20px rgba(29, 158, 117, 0.2)',
+                fontFamily: "'Syne', sans-serif",
+                fontSize: '1.1rem',
+                fontWeight: 700,
+                marginBottom: '1.1rem',
+                color: '#1A1A1A',
               }}
             >
-              Transcribe a video →
-            </Link>
+              Dub a video
+            </h2>
+
+            <div style={{ marginBottom: '2.5rem', marginLeft: '-2rem', marginRight: '-2rem' }}>
+              <DubVideo />
+            </div>
 
             <h2
               style={{
