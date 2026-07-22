@@ -4,7 +4,7 @@ import { put } from '@vercel/blob'
 
 export async function POST(request: NextRequest) {
   try {
-    const { text: rawText } = await request.json()
+    const { text: rawText, voiceId } = await request.json()
     if (!rawText) {
       return NextResponse.json({ error: 'No text provided' }, { status: 400 })
     }
@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
       apiKey: process.env.ELEVENLABS_API_KEY!,
     })
     const audioStream = await client.textToSpeech.convert(
-      process.env.ELEVENLABS_VOICE_ID!,
+      voiceId || process.env.ELEVENLABS_VOICE_ID!,
       {
         text,
         modelId: 'eleven_multilingual_v2',
