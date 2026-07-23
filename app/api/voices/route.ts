@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     )
-    await supabase.from('voices').insert({ id: voiceId, user_id: userId, name })
+    await supabase.from('voices').insert({ id: voiceId, user_id: userId, name, audio_sample_url: audioUrl })
 
     return NextResponse.json({ id: voiceId, name })
   } catch (error) {
