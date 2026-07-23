@@ -8,12 +8,18 @@ interface SavedVideo {
   video_url: string
   source_label: string | null
   created_at: string
+  youtube_video_id?: string | null
+  youtube_url?: string | null
+  youtube_privacy_status?: string | null
 }
 
 export default function VideosPage() {
   const [videos, setVideos] = useState<SavedVideo[]>([])
   const [loading, setLoading] = useState(true)
   const [deletingId, setDeletingId] = useState('')
+  const [publishingId, setPublishingId] = useState('')
+  const [openPrivacyFor, setOpenPrivacyFor] = useState('')
+  const [publishError, setPublishError] = useState('')
 
   function loadVideos() {
     fetch('/api/saved-videos')
@@ -43,6 +49,41 @@ export default function VideosPage() {
     }
   }
 
+  async function handlePublish(video: SavedVideo, privacyStatus: string) {
+    setPublishingId(video.id)
+    setPublishError('')
+    setOpenPrivacyFor('')
+    try {
+      const title = video.source_label || `${video.language} ${video.type === 'lipsync' ? 'Lip Synced' : 'Dubbed'} Video`
+      const res = await fetch('/api/youtube/upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          videoId: video.id,
+          title,
+          description: '',
+          privacyStatus,
+        }),
+      })
+      const data = await res.json()
+      if (data.success) {
+        setVideos((prev) =>
+          prev.map((v) =>
+            v.id === video.id
+              ? { ...v, youtube_video_id: data.youtubeVideoId, youtube_url: data.youtubeUrl, youtube_privacy_status: privacyStatus }
+              : v
+          )
+        )
+      } else {
+        setPublishError(data.error || 'Upload failed')
+      }
+    } catch {
+      setPublishError('Failed to connect to YouTube')
+    } finally {
+      setPublishingId('')
+    }
+  }
+
   return (
     <main style={{ background: '#FFFFFF', color: '#1A1A1A', fontFamily: "'DM Sans', sans-serif" }}>
       <div style={{ maxWidth: '900px', margin: '0 auto', padding: '2rem' }}>
@@ -50,6 +91,12 @@ export default function VideosPage() {
         <p style={{ fontSize: '0.9rem', color: '#6B6B76', marginBottom: '1.5rem' }}>
           Every dubbed and lip-synced video you have saved, ready to download or share.
         </p>
+
+        {publishError && (
+          <div style={{ background: '#FDECEA', border: '1px solid #B54A2B', borderRadius: '8px', padding: '0.75rem 1rem', marginBottom: '1rem', color: '#B54A2B', fontSize: '0.85rem' }}>
+            {publishError}
+          </div>
+        )}
 
         {loading ? (
           <p style={{ fontSize: '0.85rem', color: '#6B6B76' }}>Loading...</p>
@@ -69,7 +116,7 @@ export default function VideosPage() {
                   {v.source_label && (
                     <p style={{ margin: '0 0 8px', fontSize: '0.78rem', color: '#9A9AA4' }}>{v.source_label}</p>
                   )}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: v.youtube_url || openPrivacyFor === v.id ? '0.6rem' : 0 }}>
                     <a
                       href={v.video_url}
                       download={`polycast-${v.language}-${v.id}.mp4`}
@@ -85,6 +132,44 @@ export default function VideosPage() {
                       {deletingId === v.id ? 'Deleting...' : 'Delete'}
                     </button>
                   </div>
+
+                  {v.youtube_url ? (
+                    <a
+                      href={v.youtube_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', color: '#FF0000', fontWeight: 600, textDecoration: 'none' }}
+                    >
+                      ▶ View on YouTube ({v.youtube_privacy_status})
+                    </a>
+                  ) : openPrivacyFor === v.id ? (
+                    <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
+                      {['private', 'unlisted', 'public'].map((status) => (
+                        <button
+                          key={status}
+                          onClick={() => handlePublish(v, status)}
+                          disabled={publishingId === v.id}
+                          style={{ fontSize: '0.75rem', padding: '0.35rem 0.7rem', borderRadius: '6px', border: '1px solid #D1D1D8', background: '#FFFFFF', cursor: publishingId === v.id ? 'not-allowed' : 'pointer', textTransform: 'capitalize' }}
+                        >
+                          {status}
+                        </button>
+                      ))}
+                      <button
+                        onClick={() => setOpenPrivacyFor('')}
+                        style={{ fontSize: '0.75rem', padding: '0.35rem 0.7rem', borderRadius: '6px', border: 'none', background: 'transparent', color: '#9A9AA4', cursor: 'pointer' }}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => setOpenPrivacyFor(v.id)}
+                      disabled={publishingId === v.id}
+                      style={{ width: '100%', fontSize: '0.8rem', fontWeight: 600, padding: '0.5rem', borderRadius: '8px', border: 'none', background: '#FF0000', color: 'white', cursor: publishingId === v.id ? 'not-allowed' : 'pointer' }}
+                    >
+                      {publishingId === v.id ? 'Publishing...' : 'Publish to YouTube'}
+                    </button>
+                  )}
                 </div>
               </div>
             ))}
