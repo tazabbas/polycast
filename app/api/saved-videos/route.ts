@@ -53,3 +53,32 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to save video' }, { status: 500 })
   }
 }
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const { userId } = await auth()
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+    const { searchParams } = new URL(request.url)
+    const id = searchParams.get('id')
+    if (!id) {
+      return NextResponse.json({ error: 'Missing video id' }, { status: 400 })
+    }
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
+    const { error } = await supabase
+      .from('saved_videos')
+      .delete()
+      .eq('id', id)
+      .eq('user_id', userId)
+
+    if (error) throw error
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error('Delete video error:', error)
+    return NextResponse.json({ error: 'Failed to delete video' }, { status: 500 })
+  }
+}
