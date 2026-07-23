@@ -163,7 +163,7 @@ export default function Home() {
             <span style={{ fontSize: '1.5rem', fontWeight: 700, color: '#FFFFFF' }}>TikTok</span>
             <span style={{ fontSize: '1.5rem', fontWeight: 700, color: '#F0709A' }}>Instagram</span>
           </div>
-          <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)' }}>For creator content and business ad campaigns alike</p>
+          <p style={{ fontSize: '0.8rem', color: '#5DCAA5', fontWeight: 500 }}>For creator content and business ad campaigns alike</p>
         </div>
 
         <style>{`
@@ -255,7 +255,7 @@ export default function Home() {
           <span style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', fontWeight: 800, color: '#FFFFFF' }}>TikTok</span>
           <span style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', fontWeight: 800, color: '#F0709A' }}>Instagram</span>
         </div>
-        <p style={{ fontSize: '0.95rem', color: 'rgba(255,255,255,0.5)' }}>For creator content and business ad campaigns alike</p>
+        <p style={{ fontSize: '0.95rem', color: '#5DCAA5', fontWeight: 500 }}>For creator content and business ad campaigns alike</p>
       </section>
 
       <footer style={{ borderTop: '1px solid #E5E5EA', padding: '2rem', textAlign: 'center', color: '#9A9AA4', fontSize: '0.85rem' }}>
