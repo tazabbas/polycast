@@ -17,6 +17,7 @@ export default function VoicesPage() {
   const [creating, setCreating] = useState(false)
   const [creatingLabel, setCreatingLabel] = useState('')
   const [error, setError] = useState('')
+  const [deletingId, setDeletingId] = useState('')
 
   useEffect(() => {
     loadVoices()
@@ -32,6 +33,19 @@ export default function VoicesPage() {
       // silently ignore, list stays empty
     }
     setLoadingList(false)
+  }
+
+  async function handleDeleteVoice(id: string) {
+    if (!window.confirm('Delete this voice? This cannot be undone.')) return
+    setDeletingId(id)
+    try {
+      await fetch(`/api/voices?id=${id}`, { method: 'DELETE' })
+      setVoices((prev) => prev.filter((v) => v.id !== id))
+    } catch {
+      // leave it in the list if delete failed, user can retry
+    } finally {
+      setDeletingId('')
+    }
   }
 
   async function handleCreateVoice() {
@@ -109,9 +123,18 @@ export default function VoicesPage() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
             {voices.map((v) => (
               <div key={v.id} style={{ background: '#F7F7F8', border: '1px solid #E5E5EA', borderRadius: '10px', padding: '1rem 1.25rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: v.audio_sample_url ? '0.6rem' : 0 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: v.audio_sample_url ? '0.6rem' : '0.4rem' }}>
                   <p style={{ margin: 0, fontSize: '0.9rem', fontWeight: 600, color: '#1A1A1A' }}>{v.name}</p>
-                  <p style={{ margin: 0, fontSize: '0.75rem', color: '#9A9AA4' }}>{new Date(v.created_at).toLocaleDateString()}</p>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <p style={{ margin: 0, fontSize: '0.75rem', color: '#9A9AA4' }}>{new Date(v.created_at).toLocaleDateString()}</p>
+                    <button
+                      onClick={() => handleDeleteVoice(v.id)}
+                      disabled={deletingId === v.id}
+                      style={{ background: 'transparent', border: 'none', color: '#B54A2B', fontSize: '0.78rem', fontWeight: 600, cursor: deletingId === v.id ? 'not-allowed' : 'pointer', padding: '0.15rem' }}
+                    >
+                      {deletingId === v.id ? 'Deleting...' : '🗑 Delete'}
+                    </button>
+                  </div>
                 </div>
                 {v.audio_sample_url ? (
                   <audio controls src={v.audio_sample_url} style={{ width: '100%', height: '32px' }} />
