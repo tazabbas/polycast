@@ -13,8 +13,14 @@ interface SavedVideo {
 export default function VideosPage() {
   const [videos, setVideos] = useState<SavedVideo[]>([])
   const [loading, setLoading] = useState(true)
+  const [deletingId, setDeletingId] = useState('')
 
   useEffect(() => {
+    loadVideos()
+  }, [])
+
+  function loadVideos() {
+    setLoading(true)
     fetch('/api/saved-videos')
       .then((r) => r.json())
       .then((data) => {
@@ -22,7 +28,20 @@ export default function VideosPage() {
       })
       .catch(() => {})
       .finally(() => setLoading(false))
-  }, [])
+  }
+
+  async function handleDelete(id: string) {
+    if (!window.confirm('Delete this video? This cannot be undone.')) return
+    setDeletingId(id)
+    try {
+      await fetch(`/api/saved-videos?id=${id}`, { method: 'DELETE' })
+      setVideos((prev) => prev.filter((v) => v.id !== id))
+    } catch {
+      // leave it in the list if delete failed, user can retry
+    } finally {
+      setDeletingId('')
+    }
+  }
 
   return (
     <main style={{ background: '#FFFFFF', color: '#1A1A1A', fontFamily: "'DM Sans', sans-serif" }}>
@@ -50,13 +69,22 @@ export default function VideosPage() {
                   {v.source_label && (
                     <p style={{ margin: '0 0 8px', fontSize: '0.78rem', color: '#9A9AA4' }}>{v.source_label}</p>
                   )}
-                  <a
-                    href={v.video_url}
-                    download={`polycast-${v.language}-${v.id}.mp4`}
-                    style={{ fontSize: '0.8rem', color: '#1D9E75', fontWeight: 600, textDecoration: 'none' }}
-                  >
-                    Download →
-                  </a>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    
+                      href={v.video_url}
+                      download={`polycast-${v.language}-${v.id}.mp4`}
+                      style={{ fontSize: '0.8rem', color: '#1D9E75', fontWeight: 600, textDecoration: 'none' }}
+                    >
+                      Download →
+                    </a>
+                    <button
+                      onClick={() => handleDelete(v.id)}
+                      disabled={deletingId === v.id}
+                      style={{ background: 'transparent', border: 'none', color: '#B54A2B', fontSize: '0.8rem', fontWeight: 600, cursor: deletingId === v.id ? 'not-allowed' : 'pointer', padding: '0.25rem' }}
+                    >
+                      {deletingId === v.id ? 'Deleting...' : '🗑 Delete'}
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
