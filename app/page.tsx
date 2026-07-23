@@ -40,6 +40,45 @@ function MatrixDivider() {
   )
 }
 
+function MatrixOverlay() {
+  const cols = Array.from({ length: 26 })
+  const chars = '01アイウエオカキクケコ日語translate'
+  return (
+    <div aria-hidden="true" style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none', zIndex: 0 }}>
+      <div style={{ position: 'absolute', inset: 0, display: 'flex', justifyContent: 'space-between', padding: '0 4px' }}>
+        {cols.map((_, i) => {
+          const char = chars[(i * 5) % chars.length]
+          const duration = 6 + (i % 6) * 1.5
+          const delay = (i % 10) * -1.1
+          return (
+            <span
+              key={i}
+              style={{
+                fontFamily: 'monospace',
+                fontSize: '13px',
+                color: '#1D9E75',
+                opacity: 0.1,
+                animation: `matrixFallSlow ${duration}s linear infinite`,
+                animationDelay: `${delay}s`,
+              }}
+            >
+              {char}
+            </span>
+          )
+        })}
+      </div>
+      <style>{`
+        @keyframes matrixFallSlow {
+          0% { transform: translateY(-40px); opacity: 0; }
+          10% { opacity: 0.12; }
+          90% { opacity: 0.12; }
+          100% { transform: translateY(600px); opacity: 0; }
+        }
+      `}</style>
+    </div>
+  )
+}
+
 export default function Home() {
   return (
     <main style={{ fontFamily: 'sans-serif', background: '#FFFFFF', minHeight: '100vh', color: '#1A1A1A', overflowX: 'hidden' }}>
@@ -159,65 +198,75 @@ export default function Home() {
 
       <MatrixDivider />
 
-      {/* Video demo section — light background */}
-      <section style={{ padding: '3.5rem 2rem 4rem', textAlign: 'center' }}>
-        <div style={{ maxWidth: '720px', margin: '0 auto', borderRadius: '20px', overflow: 'hidden', border: '1px solid #D6EEE3', background: '#0E1F19', aspectRatio: '16 / 9', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
-          {/* Once a demo video exists, replace this block with: <video controls src="/your-demo.mp4" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> */}
-          <div style={{ textAlign: 'center', color: 'rgba(255,255,255,0.85)' }}>
-            <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(29,158,117,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem', fontSize: '22px' }}>▶</div>
-            <p style={{ margin: 0, fontSize: '0.95rem', fontWeight: 500 }}>Demo video coming soon</p>
-            <p style={{ margin: '4px 0 0', fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)' }}>One voice, spoken in six languages, perfectly lip-synced</p>
+      {/* Video demo section — light background with subtle matrix overlay */}
+      <section style={{ position: 'relative', padding: '3.5rem 2rem 4rem', textAlign: 'center', overflow: 'hidden' }}>
+        <MatrixOverlay />
+        <div style={{ position: 'relative', zIndex: 1 }}>
+          <div style={{ maxWidth: '720px', margin: '0 auto', borderRadius: '20px', overflow: 'hidden', border: '1px solid #D6EEE3', background: '#0E1F19', aspectRatio: '16 / 9', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+            {/* Once a demo video exists, replace this block with: <video controls src="/your-demo.mp4" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> */}
+            <div style={{ textAlign: 'center', color: 'rgba(255,255,255,0.85)' }}>
+              <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(29,158,117,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem', fontSize: '22px' }}>▶</div>
+              <p style={{ margin: 0, fontSize: '0.95rem', fontWeight: 500 }}>Demo video coming soon</p>
+              <p style={{ margin: '4px 0 0', fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)' }}>One voice, spoken in six languages, perfectly lip-synced</p>
+            </div>
           </div>
+          <p style={{ fontSize: '0.85rem', color: '#8A8A94', marginTop: '1.5rem' }}>No credit card required · Free to start · Cancel anytime</p>
         </div>
-        <p style={{ fontSize: '0.85rem', color: '#8A8A94', marginTop: '1.5rem' }}>No credit card required · Free to start · Cancel anytime</p>
       </section>
 
       {/* Platform strip */}
-      <div style={{ background: '#F7F7F8', borderTop: '1px solid #E5E5EA', borderBottom: '1px solid #E5E5EA', padding: '1.5rem 2rem' }}>
-        <p style={{ textAlign: 'center', fontSize: '12px', color: '#8A8A94', marginBottom: '0.75rem' }}>Works with the platforms you already publish to</p>
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '2.5rem', flexWrap: 'wrap' }}>
-          {[
-            { label: 'YouTube', color: '#FF0000' },
-            { label: 'TikTok', color: '#1A1A1A' },
-            { label: 'Instagram', color: '#D4537E' },
-          ].map((p) => (
-            <span key={p.label} style={{ fontSize: '0.95rem', fontWeight: 600, color: p.color }}>{p.label}</span>
-          ))}
+      <div style={{ position: 'relative', background: '#F7F7F8', borderTop: '1px solid #E5E5EA', borderBottom: '1px solid #E5E5EA', padding: '1.5rem 2rem', overflow: 'hidden' }}>
+        <MatrixOverlay />
+        <div style={{ position: 'relative', zIndex: 1 }}>
+          <p style={{ textAlign: 'center', fontSize: '12px', color: '#8A8A94', marginBottom: '0.75rem' }}>Works with the platforms you already publish to</p>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '2.5rem', flexWrap: 'wrap' }}>
+            {[
+              { label: 'YouTube', color: '#FF0000' },
+              { label: 'TikTok', color: '#1A1A1A' },
+              { label: 'Instagram', color: '#D4537E' },
+            ].map((p) => (
+              <span key={p.label} style={{ fontSize: '0.95rem', fontWeight: 600, color: p.color }}>{p.label}</span>
+            ))}
+          </div>
         </div>
       </div>
 
       <MatrixDivider />
 
       {/* For Creators */}
-      <section style={{ padding: '4rem 2rem', maxWidth: '1000px', margin: '0 auto' }}>
-        <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
-          <div style={{ display: 'inline-block', background: '#EAF7F1', color: '#1D9E75', fontSize: '12px', fontWeight: 600, padding: '4px 14px', borderRadius: '20px', marginBottom: '0.75rem', textTransform: 'uppercase', letterSpacing: '1px' }}>For creators</div>
-          <h2 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '0.75rem' }}>From one video to a global audience</h2>
-          <p style={{ color: '#6B6B76' }}>Connect your channel, dub in your own voice, publish back automatically</p>
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1.5rem' }}>
-          {[
-            { icon: '🔗', title: 'Connect your account', desc: 'Sign in with YouTube, TikTok, or Instagram and select any video to translate.' },
-            { icon: '📝', title: 'AI transcribes it', desc: 'Whisper AI converts your speech to text in 99 languages with near-perfect accuracy.' },
-            { icon: '🌍', title: 'DeepL translates', desc: 'Your transcript is translated into up to 50 languages with natural phrasing.' },
-            { icon: '🎙', title: 'Your voice, dubbed', desc: 'ElevenLabs clones your voice and speaks the translation, lip-synced to match.' },
-            { icon: '📤', title: 'Auto-published', desc: 'The dubbed video is uploaded back to the platform it came from.' },
-          ].map((item, i) => (
-            <div key={i} style={{ background: '#F7F7F8', border: '1px solid #E5E5EA', borderRadius: '16px', padding: '1.5rem', textAlign: 'center' }}>
-              <div style={{ fontSize: '2rem', marginBottom: '0.75rem' }}>{item.icon}</div>
-              <div style={{ fontSize: '11px', color: '#1D9E75', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.5rem' }}>Step {i + 1}</div>
-              <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '0.5rem' }}>{item.title}</h3>
-              <p style={{ fontSize: '0.85rem', color: '#6B6B76', lineHeight: 1.6 }}>{item.desc}</p>
-            </div>
-          ))}
+      <section style={{ position: 'relative', padding: '4rem 2rem', overflow: 'hidden' }}>
+        <MatrixOverlay />
+        <div style={{ position: 'relative', zIndex: 1, maxWidth: '1000px', margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+            <div style={{ display: 'inline-block', background: '#EAF7F1', color: '#1D9E75', fontSize: '12px', fontWeight: 600, padding: '4px 14px', borderRadius: '20px', marginBottom: '0.75rem', textTransform: 'uppercase', letterSpacing: '1px' }}>For creators</div>
+            <h2 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '0.75rem' }}>From one video to a global audience</h2>
+            <p style={{ color: '#6B6B76' }}>Connect your channel, dub in your own voice, publish back automatically</p>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1.5rem' }}>
+            {[
+              { icon: '🔗', title: 'Connect your account', desc: 'Sign in with YouTube, TikTok, or Instagram and select any video to translate.' },
+              { icon: '📝', title: 'AI transcribes it', desc: 'Whisper AI converts your speech to text in 99 languages with near-perfect accuracy.' },
+              { icon: '🌍', title: 'DeepL translates', desc: 'Your transcript is translated into up to 50 languages with natural phrasing.' },
+              { icon: '🎙', title: 'Your voice, dubbed', desc: 'ElevenLabs clones your voice and speaks the translation, lip-synced to match.' },
+              { icon: '📤', title: 'Auto-published', desc: 'The dubbed video is uploaded back to the platform it came from.' },
+            ].map((item, i) => (
+              <div key={i} style={{ background: '#F7F7F8', border: '1px solid #E5E5EA', borderRadius: '16px', padding: '1.5rem', textAlign: 'center' }}>
+                <div style={{ fontSize: '2rem', marginBottom: '0.75rem' }}>{item.icon}</div>
+                <div style={{ fontSize: '11px', color: '#1D9E75', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.5rem' }}>Step {i + 1}</div>
+                <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '0.5rem' }}>{item.title}</h3>
+                <p style={{ fontSize: '0.85rem', color: '#6B6B76', lineHeight: 1.6 }}>{item.desc}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
       <MatrixDivider />
 
       {/* For Businesses */}
-      <section id="business" style={{ padding: '4rem 2rem', background: '#F7F7F8' }}>
-        <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
+      <section id="business" style={{ position: 'relative', padding: '4rem 2rem', background: '#F7F7F8', overflow: 'hidden' }}>
+        <MatrixOverlay />
+        <div style={{ position: 'relative', zIndex: 1, maxWidth: '1000px', margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
             <div style={{ display: 'inline-block', background: '#FFFFFF', color: '#1D9E75', fontSize: '12px', fontWeight: 600, padding: '4px 14px', borderRadius: '20px', marginBottom: '0.75rem', textTransform: 'uppercase', letterSpacing: '1px' }}>For businesses</div>
             <h2 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '0.75rem' }}>Dub your ad campaigns into every market</h2>
@@ -247,14 +296,17 @@ export default function Home() {
       <MatrixDivider />
 
       {/* Pricing teaser */}
-      <section style={{ padding: '4rem 2rem', textAlign: 'center' }}>
-        <h2 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '0.75rem' }}>Simple pricing for creators and businesses</h2>
-        <p style={{ color: '#6B6B76', marginBottom: '2rem' }}>Start free. Scale as you grow.</p>
-        <Link href="/pricing">
-          <button style={{ background: '#1D9E75', color: 'white', border: 'none', padding: '1rem 2.5rem', borderRadius: '50px', fontSize: '1.05rem', cursor: 'pointer', fontWeight: 600 }}>
-            View pricing
-          </button>
-        </Link>
+      <section style={{ position: 'relative', padding: '4rem 2rem', textAlign: 'center', overflow: 'hidden' }}>
+        <MatrixOverlay />
+        <div style={{ position: 'relative', zIndex: 1 }}>
+          <h2 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '0.75rem' }}>Simple pricing for creators and businesses</h2>
+          <p style={{ color: '#6B6B76', marginBottom: '2rem' }}>Start free. Scale as you grow.</p>
+          <Link href="/pricing">
+            <button style={{ background: '#1D9E75', color: 'white', border: 'none', padding: '1rem 2.5rem', borderRadius: '50px', fontSize: '1.05rem', cursor: 'pointer', fontWeight: 600 }}>
+              View pricing
+            </button>
+          </Link>
+        </div>
       </section>
 
       <footer style={{ borderTop: '1px solid #E5E5EA', padding: '2rem', textAlign: 'center', color: '#9A9AA4', fontSize: '0.85rem' }}>
