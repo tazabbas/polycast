@@ -9,6 +9,7 @@ const NAV_ITEMS = [
   { href: '/dashboard/studio', label: 'Studio' },
   { href: '/dashboard/videos', label: 'My Videos' },
   { href: '/dashboard/voices', label: 'Voices' },
+  { href: '/dashboard/bin', label: 'Bin' },
 ]
 
 export default function DashboardHeader() {
