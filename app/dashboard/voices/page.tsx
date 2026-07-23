@@ -6,6 +6,7 @@ interface Voice {
   id: string
   name: string
   created_at: string
+  audio_sample_url: string | null
 }
 
 export default function VoicesPage() {
@@ -107,9 +108,16 @@ export default function VoicesPage() {
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
             {voices.map((v) => (
-              <div key={v.id} style={{ background: '#F7F7F8', border: '1px solid #E5E5EA', borderRadius: '10px', padding: '1rem 1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <p style={{ margin: 0, fontSize: '0.9rem', fontWeight: 600, color: '#1A1A1A' }}>{v.name}</p>
-                <p style={{ margin: 0, fontSize: '0.75rem', color: '#9A9AA4' }}>{new Date(v.created_at).toLocaleDateString()}</p>
+              <div key={v.id} style={{ background: '#F7F7F8', border: '1px solid #E5E5EA', borderRadius: '10px', padding: '1rem 1.25rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: v.audio_sample_url ? '0.6rem' : 0 }}>
+                  <p style={{ margin: 0, fontSize: '0.9rem', fontWeight: 600, color: '#1A1A1A' }}>{v.name}</p>
+                  <p style={{ margin: 0, fontSize: '0.75rem', color: '#9A9AA4' }}>{new Date(v.created_at).toLocaleDateString()}</p>
+                </div>
+                {v.audio_sample_url ? (
+                  <audio controls src={v.audio_sample_url} style={{ width: '100%', height: '32px' }} />
+                ) : (
+                  <p style={{ margin: 0, fontSize: '0.78rem', color: '#9A9AA4' }}>No sample saved for this voice.</p>
+                )}
               </div>
             ))}
           </div>
