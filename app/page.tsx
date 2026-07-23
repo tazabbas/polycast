@@ -162,6 +162,7 @@ export default function Home() {
             <span style={{ fontSize: '1.5rem', fontWeight: 700, color: '#FF3B3B' }}>YouTube</span>
             <span style={{ fontSize: '1.5rem', fontWeight: 700, color: '#FFFFFF' }}>TikTok</span>
             <span style={{ fontSize: '1.5rem', fontWeight: 700, color: '#F0709A' }}>Instagram</span>
+            <span style={{ fontSize: '1.5rem', fontWeight: 700, color: '#5DCAA5' }}>Business Ads</span>
           </div>
           <p style={{ fontSize: '0.8rem', color: '#5DCAA5', fontWeight: 500 }}>For creator content and business ad campaigns alike</p>
         </div>
@@ -250,12 +251,12 @@ export default function Home() {
       {/* Platform names, repeated much bigger near the bottom */}
       <section style={{ padding: '3.5rem 2rem', textAlign: 'center', background: '#08110D' }}>
         <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.45)', marginBottom: '1.25rem', textTransform: 'uppercase', letterSpacing: '2px' }}>Works with the platforms you already publish to</p>
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '4rem', flexWrap: 'wrap', marginBottom: '1.25rem' }}>
-          <span style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', fontWeight: 800, color: '#FF3B3B' }}>YouTube</span>
-          <span style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', fontWeight: 800, color: '#FFFFFF' }}>TikTok</span>
-          <span style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', fontWeight: 800, color: '#F0709A' }}>Instagram</span>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '3rem', flexWrap: 'wrap' }}>
+          <span style={{ fontSize: 'clamp(1.8rem, 4.5vw, 3.2rem)', fontWeight: 800, color: '#FF3B3B' }}>YouTube</span>
+          <span style={{ fontSize: 'clamp(1.8rem, 4.5vw, 3.2rem)', fontWeight: 800, color: '#FFFFFF' }}>TikTok</span>
+          <span style={{ fontSize: 'clamp(1.8rem, 4.5vw, 3.2rem)', fontWeight: 800, color: '#F0709A' }}>Instagram</span>
+          <span style={{ fontSize: 'clamp(1.8rem, 4.5vw, 3.2rem)', fontWeight: 800, color: '#5DCAA5' }}>Business Ads</span>
         </div>
-        <p style={{ fontSize: '0.95rem', color: '#5DCAA5', fontWeight: 500 }}>For creator content and business ad campaigns alike</p>
       </section>
 
       <footer style={{ borderTop: '1px solid #E5E5EA', padding: '2rem', textAlign: 'center', color: '#9A9AA4', fontSize: '0.85rem' }}>
