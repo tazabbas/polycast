@@ -3,22 +3,28 @@ import { auth } from '@clerk/nextjs/server'
 import { createClient } from '@supabase/supabase-js'
 import { ElevenLabsClient } from '@elevenlabs/elevenlabs-js'
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const { userId } = await auth()
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+    const { searchParams } = new URL(request.url)
+    const trash = searchParams.get('trash') === 'true'
+
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     )
-    const { data, error } = await supabase
+    let query = supabase
       .from('voices')
       .select('*')
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
 
+    query = trash ? query.not('deleted_at', 'is', null) : query.is('deleted_at', null)
+
+    const { data, error } = await query
     if (error) throw error
     return NextResponse.json({ voices: data })
   } catch (error) {
@@ -76,7 +82,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function DELETE(request: NextRequest) {
+export async function PATCH(request: NextRequest) {
   try {
     const { userId } = await auth()
     if (!userId) {
@@ -87,27 +93,66 @@ export async function DELETE(request: NextRequest) {
     if (!id) {
       return NextResponse.json({ error: 'Missing voice id' }, { status: 400 })
     }
-
-    const client = new ElevenLabsClient({
-      apiKey: process.env.ELEVENLABS_API_KEY!,
-    })
-    try {
-      await client.voices.delete(id)
-    } catch {
-      // If it's already gone on ElevenLabs' side, still proceed to clean up our own record
-    }
-
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     )
     const { error } = await supabase
       .from('voices')
-      .delete()
+      .update({ deleted_at: null })
       .eq('id', id)
       .eq('user_id', userId)
 
     if (error) throw error
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error('Restore voice error:', error)
+    return NextResponse.json({ error: 'Failed to restore voice' }, { status: 500 })
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const { userId } = await auth()
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+    const { searchParams } = new URL(request.url)
+    const id = searchParams.get('id')
+    const permanent = searchParams.get('permanent') === 'true'
+    if (!id) {
+      return NextResponse.json({ error: 'Missing voice id' }, { status: 400 })
+    }
+
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
+
+    if (permanent) {
+      const client = new ElevenLabsClient({
+        apiKey: process.env.ELEVENLABS_API_KEY!,
+      })
+      try {
+        await client.voices.delete(id)
+      } catch {
+        // If it's already gone on ElevenLabs' side, still proceed to clean up our own record
+      }
+      const { error } = await supabase
+        .from('voices')
+        .delete()
+        .eq('id', id)
+        .eq('user_id', userId)
+      if (error) throw error
+    } else {
+      const { error } = await supabase
+        .from('voices')
+        .update({ deleted_at: new Date().toISOString() })
+        .eq('id', id)
+        .eq('user_id', userId)
+      if (error) throw error
+    }
+
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Delete voice error:', error)
