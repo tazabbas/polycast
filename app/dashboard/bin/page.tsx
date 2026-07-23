@@ -21,10 +21,6 @@ export default function BinPage() {
   const [loading, setLoading] = useState(true)
   const [busyId, setBusyId] = useState('')
 
-  useEffect(() => {
-    loadTrash()
-  }, [])
-
   async function loadTrash() {
     try {
       const [videosRes, voicesRes] = await Promise.all([
@@ -40,6 +36,11 @@ export default function BinPage() {
     }
     setLoading(false)
   }
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    loadTrash()
+  }, [])
 
   async function restoreVideo(id: string) {
     setBusyId(id)
