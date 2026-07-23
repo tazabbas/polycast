@@ -1,6 +1,45 @@
 import { Show, SignInButton, SignUpButton, UserButton } from '@clerk/nextjs'
 import Link from 'next/link'
 
+function MatrixDivider() {
+  const cols = Array.from({ length: 40 })
+  const chars = '01アイウエオカキクケコ日語translate'
+  return (
+    <div aria-hidden="true" style={{ position: 'relative', height: '46px', overflow: 'hidden', background: '#08110D' }}>
+      <div style={{ position: 'absolute', inset: 0, display: 'flex', justifyContent: 'space-between', padding: '0 4px' }}>
+        {cols.map((_, i) => {
+          const char = chars[(i * 7) % chars.length]
+          const duration = 1.4 + (i % 5) * 0.35
+          const delay = (i % 9) * -0.4
+          return (
+            <span
+              key={i}
+              style={{
+                fontFamily: 'monospace',
+                fontSize: '13px',
+                color: '#5DCAA5',
+                opacity: 0.7,
+                animation: `matrixFall ${duration}s linear infinite`,
+                animationDelay: `${delay}s`,
+              }}
+            >
+              {char}
+            </span>
+          )
+        })}
+      </div>
+      <style>{`
+        @keyframes matrixFall {
+          0% { transform: translateY(-46px); opacity: 0; }
+          15% { opacity: 0.8; }
+          85% { opacity: 0.8; }
+          100% { transform: translateY(46px); opacity: 0; }
+        }
+      `}</style>
+    </div>
+  )
+}
+
 export default function Home() {
   return (
     <main style={{ fontFamily: 'sans-serif', background: '#FFFFFF', minHeight: '100vh', color: '#1A1A1A', overflowX: 'hidden' }}>
@@ -118,6 +157,8 @@ export default function Home() {
         `}</style>
       </section>
 
+      <MatrixDivider />
+
       {/* Video demo section — light background */}
       <section style={{ padding: '3.5rem 2rem 4rem', textAlign: 'center' }}>
         <div style={{ maxWidth: '720px', margin: '0 auto', borderRadius: '20px', overflow: 'hidden', border: '1px solid #D6EEE3', background: '#0E1F19', aspectRatio: '16 / 9', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
@@ -145,6 +186,8 @@ export default function Home() {
         </div>
       </div>
 
+      <MatrixDivider />
+
       {/* For Creators */}
       <section style={{ padding: '4rem 2rem', maxWidth: '1000px', margin: '0 auto' }}>
         <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
@@ -170,8 +213,10 @@ export default function Home() {
         </div>
       </section>
 
+      <MatrixDivider />
+
       {/* For Businesses */}
-      <section id="business" style={{ padding: '4rem 2rem', background: '#F7F7F8', borderTop: '1px solid #E5E5EA', borderBottom: '1px solid #E5E5EA' }}>
+      <section id="business" style={{ padding: '4rem 2rem', background: '#F7F7F8' }}>
         <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
             <div style={{ display: 'inline-block', background: '#FFFFFF', color: '#1D9E75', fontSize: '12px', fontWeight: 600, padding: '4px 14px', borderRadius: '20px', marginBottom: '0.75rem', textTransform: 'uppercase', letterSpacing: '1px' }}>For businesses</div>
@@ -198,6 +243,8 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      <MatrixDivider />
 
       {/* Pricing teaser */}
       <section style={{ padding: '4rem 2rem', textAlign: 'center' }}>
