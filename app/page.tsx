@@ -55,9 +55,10 @@ function MatrixOverlay() {
               key={i}
               style={{
                 fontFamily: 'monospace',
-                fontSize: '13px',
-                color: '#1D9E75',
-                opacity: 0.1,
+                fontSize: '14px',
+                fontWeight: 700,
+                color: '#0F6E56',
+                opacity: 0.4,
                 animation: `matrixFallSlow ${duration}s linear infinite`,
                 animationDelay: `${delay}s`,
               }}
@@ -70,8 +71,8 @@ function MatrixOverlay() {
       <style>{`
         @keyframes matrixFallSlow {
           0% { transform: translateY(-40px); opacity: 0; }
-          10% { opacity: 0.12; }
-          90% { opacity: 0.12; }
+          10% { opacity: 0.45; }
+          90% { opacity: 0.45; }
           100% { transform: translateY(600px); opacity: 0; }
         }
       `}</style>
