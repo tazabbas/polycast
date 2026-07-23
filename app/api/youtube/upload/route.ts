@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth, clerkClient } from '@clerk/nextjs/server';
 import { google } from 'googleapis';
 import { createClient } from '@supabase/supabase-js';
+import { Readable } from 'stream';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -16,13 +17,11 @@ export async function POST(req: NextRequest) {
     }
 
     const { videoId, title, description, privacyStatus } = await req.json();
-    // privacyStatus should be 'private' | 'unlisted' | 'public'
 
     if (!videoId || !title || !privacyStatus) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    // 1. Get the user's Google OAuth access token via Clerk
     const client = await clerkClient();
     const tokenResponse = await client.users.getUserOauthAccessToken(userId, 'google');
     const accessToken = tokenResponse.data[0]?.token;
@@ -31,7 +30,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'No Google account connected' }, { status: 400 });
     }
 
-    // 2. Look up the saved video row to get its file URL
     const { data: videoRow, error: fetchError } = await supabase
       .from('saved_videos')
       .select('*')
@@ -43,14 +41,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Video not found' }, { status: 404 });
     }
 
-    // 3. Download the video file from its stored URL
     const videoFileRes = await fetch(videoRow.video_url);
     if (!videoFileRes.ok) {
       return NextResponse.json({ error: 'Could not fetch video file' }, { status: 500 });
     }
     const videoBuffer = Buffer.from(await videoFileRes.arrayBuffer());
 
-    // 4. Upload to YouTube
     const oauth2Client = new google.auth.OAuth2();
     oauth2Client.setCredentials({ access_token: accessToken });
 
@@ -64,7 +60,7 @@ export async function POST(req: NextRequest) {
           description: description || '',
         },
         status: {
-          privacyStatus, // 'private' | 'unlisted' | 'public'
+          privacyStatus,
         },
       },
       media: {
@@ -75,7 +71,6 @@ export async function POST(req: NextRequest) {
     const youtubeVideoId = uploadResponse.data.id;
     const youtubeUrl = `https://www.youtube.com/watch?v=${youtubeVideoId}`;
 
-    // 5. Save the YouTube link back to Supabase
     const { error: updateError } = await supabase
       .from('saved_videos')
       .update({
@@ -90,18 +85,14 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({ success: true, youtubeUrl, youtubeVideoId });
-  } catch (err: any) {
+  } catch (err) {
     console.error('YouTube upload error:', err);
-    return NextResponse.json(
-      { error: err.message || 'Upload failed' },
-      { status: 500 }
-    );
+    const message = err instanceof Error ? err.message : 'Upload failed';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 
-// Helper: convert a Buffer into a readable stream (required by the YouTube API client)
 function bufferToStream(buffer: Buffer) {
-  const { Readable } = require('stream');
   const stream = new Readable();
   stream.push(buffer);
   stream.push(null);
