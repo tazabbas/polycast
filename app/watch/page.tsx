@@ -1,5 +1,6 @@
-﻿'use client'
+'use client'
 import { useState, useRef } from 'react'
+import Link from 'next/link'
 const LANGUAGES = [{ code: 'EN-GB', name: 'English (UK)' },{ code: 'EN-US', name: 'English (US)' },{ code: 'ES', name: 'Spanish' },{ code: 'FR', name: 'French' },{ code: 'DE', name: 'German' },{ code: 'IT', name: 'Italian' },{ code: 'PT-BR', name: 'Portuguese (Brazil)' },{ code: 'ZH', name: 'Chinese (Simplified)' },{ code: 'JA', name: 'Japanese' },{ code: 'KO', name: 'Korean' },{ code: 'AR', name: 'Arabic' },{ code: 'RU', name: 'Russian' },{ code: 'HI', name: 'Hindi' },{ code: 'TR', name: 'Turkish' }]
 function getYouTubeId(url: string): string | null {
   const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/)
@@ -38,17 +39,22 @@ export default function WatchPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: translateData.translated_text })
       })
-      if (synthesizeRes.ok) {
-        const blob = await synthesizeRes.blob()
-        const audio = URL.createObjectURL(blob)
-        setAudioUrl(audio)
+      const synthesizeData = await synthesizeRes.json()
+      if (synthesizeRes.ok && synthesizeData.url) {
+        setAudioUrl(synthesizeData.url)
         setStatus('Ready')
         setTimeout(() => { audioRef.current?.play() }, 500)
       } else { setError('Voice synthesis failed'); setStatus('') }
     } catch { setError('Something went wrong'); setStatus('') }
   }
   return (
-    <main style={{ padding: '2rem', fontFamily: 'sans-serif', maxWidth: '800px', margin: '0 auto' }}>
+    <main style={{ fontFamily: 'sans-serif' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.25rem 2rem', borderBottom: '1px solid #E5E5EA' }}>
+        <Link href="/" style={{ fontSize: '1.1rem', fontWeight: 700, color: '#1D9E75', textDecoration: 'none' }}>PolyCast</Link>
+        <Link href="/" style={{ fontSize: '0.9rem', fontWeight: 600, color: '#4A4A54', textDecoration: 'none' }}>← Back to home</Link>
+      </div>
+
+      <div style={{ padding: '2rem', maxWidth: '800px', margin: '0 auto' }}>
       <h1 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.5rem' }}>Watch in any language</h1>
       <p style={{ fontSize: '0.9rem', color: '#666', marginBottom: '1.5rem' }}>Paste a YouTube URL and choose your language to hear the video dubbed in that language.</p>
       <div style={{ background: '#f5f5f5', padding: '1.5rem', borderRadius: '12px', marginBottom: '1.5rem' }}>
@@ -73,6 +79,7 @@ export default function WatchPage() {
           <audio ref={audioRef} controls src={audioUrl} style={{ width: '100%' }} />
         </div>
       )}
+      </div>
     </main>
   )
 }
