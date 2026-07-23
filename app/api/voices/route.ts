@@ -75,3 +75,42 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to create voice clone' }, { status: 500 })
   }
 }
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const { userId } = await auth()
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+    const { searchParams } = new URL(request.url)
+    const id = searchParams.get('id')
+    if (!id) {
+      return NextResponse.json({ error: 'Missing voice id' }, { status: 400 })
+    }
+
+    const client = new ElevenLabsClient({
+      apiKey: process.env.ELEVENLABS_API_KEY!,
+    })
+    try {
+      await client.voices.delete(id)
+    } catch {
+      // If it's already gone on ElevenLabs' side, still proceed to clean up our own record
+    }
+
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
+    const { error } = await supabase
+      .from('voices')
+      .delete()
+      .eq('id', id)
+      .eq('user_id', userId)
+
+    if (error) throw error
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error('Delete voice error:', error)
+    return NextResponse.json({ error: 'Failed to delete voice' }, { status: 500 })
+  }
+}
