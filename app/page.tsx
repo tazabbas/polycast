@@ -41,6 +41,19 @@ function MatrixOverlay() {
   )
 }
 
+function DemoVideoBox({ label }: { label: string }) {
+  return (
+    <div style={{ borderRadius: '16px', overflow: 'hidden', border: '1px solid #D6EEE3', background: '#0E1F19', aspectRatio: '16 / 9', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', marginBottom: '1.5rem' }}>
+      {/* Once a demo video exists, replace this block with: <video controls src="/your-demo.mp4" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> */}
+      <div style={{ textAlign: 'center', color: 'rgba(255,255,255,0.85)' }}>
+        <div style={{ width: '46px', height: '46px', borderRadius: '50%', background: 'rgba(29,158,117,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 0.6rem', fontSize: '16px' }}>▶</div>
+        <p style={{ margin: 0, fontSize: '0.8rem', fontWeight: 500 }}>Demo coming soon</p>
+        <p style={{ margin: '4px 0 0', fontSize: '0.7rem', color: 'rgba(255,255,255,0.5)' }}>{label}</p>
+      </div>
+    </div>
+  )
+}
+
 export default function Home() {
   return (
     <main style={{ fontFamily: 'sans-serif', background: '#FFFFFF', minHeight: '100vh', color: '#1A1A1A', overflowX: 'hidden' }}>
@@ -122,12 +135,12 @@ export default function Home() {
             <span style={{ display: 'block', color: '#FFFFFF' }}>Every platform.</span>
             <span style={{ display: 'block', color: '#5DCAA5' }}>Every language.</span>
           </h1>
-          <p style={{ fontSize: '1.2rem', color: 'rgba(255,255,255,0.65)', maxWidth: '640px', margin: '0 auto 2.5rem', lineHeight: 1.7 }}>
+          <p style={{ fontSize: '1.2rem', color: 'rgba(255,255,255,0.65)', maxWidth: '640px', margin: '0 auto 2rem', lineHeight: 1.7 }}>
             PolyCast uses AI to transcribe, translate, dub, and lip-sync your videos in your own cloned voice —
             then publishes them back to YouTube, TikTok, or Instagram automatically.
           </p>
 
-          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '1rem', flexWrap: 'wrap', marginBottom: '2.5rem' }}>
             <Show when="signed-out">
               <SignUpButton mode="modal">
                 <button style={{ display: 'flex', alignItems: 'center', gap: '10px', background: '#1D9E75', color: 'white', border: 'none', padding: '1rem 2rem', borderRadius: '50px', fontSize: '1.05rem', cursor: 'pointer', fontWeight: 600, boxShadow: '0 0 40px rgba(29,158,117,0.35)' }}>
@@ -148,6 +161,13 @@ export default function Home() {
               </button>
             </Link>
           </div>
+
+          <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.45)', marginBottom: '0.75rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Works with the platforms you already publish to</p>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '3rem', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: '1.5rem', fontWeight: 700, color: '#FF3B3B' }}>YouTube</span>
+            <span style={{ fontSize: '1.5rem', fontWeight: 700, color: '#FFFFFF' }}>TikTok</span>
+            <span style={{ fontSize: '1.5rem', fontWeight: 700, color: '#F0709A' }}>Instagram</span>
+          </div>
         </div>
 
         <style>{`
@@ -158,15 +178,16 @@ export default function Home() {
         `}</style>
       </section>
 
-      {/* SECTION 2 — Business (left) | Demo video (center) | Creators (right) */}
+      {/* SECTION 2 — Business (left, own demo) | Creators (right, own demo) */}
       <section style={{ position: 'relative', padding: '3.5rem 2rem', overflow: 'hidden' }}>
         <MatrixOverlay />
-        <div style={{ position: 'relative', zIndex: 1, maxWidth: '1300px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem', alignItems: 'center' }}>
+        <div style={{ position: 'relative', zIndex: 1, maxWidth: '1200px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '3rem' }}>
 
           {/* Business — left */}
           <div>
+            <DemoVideoBox label="A dubbed ad, spoken in six languages" />
             <div style={{ display: 'inline-block', background: '#EAF7F1', color: '#1D9E75', fontSize: '11px', fontWeight: 600, padding: '4px 12px', borderRadius: '20px', marginBottom: '0.6rem', textTransform: 'uppercase', letterSpacing: '1px' }}>For businesses</div>
-            <h2 style={{ fontSize: '1.3rem', fontWeight: 700, marginBottom: '0.4rem' }}>Dub your ad campaigns into every market</h2>
+            <h2 style={{ fontSize: '1.4rem', fontWeight: 700, marginBottom: '0.4rem' }}>Dub your ad campaigns into every market</h2>
             <p style={{ color: '#6B6B76', fontSize: '0.85rem', marginBottom: '1.25rem' }}>No re-shoots, no voice actors per language.</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.25rem' }}>
               {[
@@ -188,23 +209,11 @@ export default function Home() {
             </a>
           </div>
 
-          {/* Demo video — center */}
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ borderRadius: '20px', overflow: 'hidden', border: '1px solid #D6EEE3', background: '#0E1F19', aspectRatio: '16 / 9', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
-              {/* Once a demo video exists, replace this block with: <video controls src="/your-demo.mp4" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> */}
-              <div style={{ textAlign: 'center', color: 'rgba(255,255,255,0.85)' }}>
-                <div style={{ width: '52px', height: '52px', borderRadius: '50%', background: 'rgba(29,158,117,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 0.75rem', fontSize: '18px' }}>▶</div>
-                <p style={{ margin: 0, fontSize: '0.85rem', fontWeight: 500 }}>Demo video coming soon</p>
-                <p style={{ margin: '4px 0 0', fontSize: '0.72rem', color: 'rgba(255,255,255,0.5)' }}>One voice, six languages, lip-synced</p>
-              </div>
-            </div>
-            <p style={{ fontSize: '0.78rem', color: '#8A8A94', marginTop: '1rem' }}>No credit card required · Free to start</p>
-          </div>
-
           {/* Creators — right */}
           <div>
+            <DemoVideoBox label="A dubbed short, lip-synced perfectly" />
             <div style={{ display: 'inline-block', background: '#EAF7F1', color: '#1D9E75', fontSize: '11px', fontWeight: 600, padding: '4px 12px', borderRadius: '20px', marginBottom: '0.6rem', textTransform: 'uppercase', letterSpacing: '1px' }}>For creators</div>
-            <h2 style={{ fontSize: '1.3rem', fontWeight: 700, marginBottom: '0.4rem' }}>From one video to a global audience</h2>
+            <h2 style={{ fontSize: '1.4rem', fontWeight: 700, marginBottom: '0.4rem' }}>From one video to a global audience</h2>
             <p style={{ color: '#6B6B76', fontSize: '0.85rem', marginBottom: '1.25rem' }}>Connect, dub, publish back automatically.</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
               {[
@@ -227,23 +236,6 @@ export default function Home() {
 
         </div>
       </section>
-
-      {/* Platform strip */}
-      <div style={{ position: 'relative', background: '#F7F7F8', borderTop: '1px solid #E5E5EA', borderBottom: '1px solid #E5E5EA', padding: '1.5rem 2rem', overflow: 'hidden' }}>
-        <MatrixOverlay />
-        <div style={{ position: 'relative', zIndex: 1 }}>
-          <p style={{ textAlign: 'center', fontSize: '12px', color: '#8A8A94', marginBottom: '0.75rem' }}>Works with the platforms you already publish to</p>
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '2.5rem', flexWrap: 'wrap' }}>
-            {[
-              { label: 'YouTube', color: '#FF0000' },
-              { label: 'TikTok', color: '#1A1A1A' },
-              { label: 'Instagram', color: '#D4537E' },
-            ].map((p) => (
-              <span key={p.label} style={{ fontSize: '0.95rem', fontWeight: 600, color: p.color }}>{p.label}</span>
-            ))}
-          </div>
-        </div>
-      </div>
 
       {/* SECTION 3 — Pricing */}
       <section style={{ position: 'relative', padding: '4rem 2rem', textAlign: 'center', overflow: 'hidden' }}>
