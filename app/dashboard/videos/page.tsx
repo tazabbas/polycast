@@ -15,12 +15,7 @@ export default function VideosPage() {
   const [loading, setLoading] = useState(true)
   const [deletingId, setDeletingId] = useState('')
 
-  useEffect(() => {
-    loadVideos()
-  }, [])
-
   function loadVideos() {
-    setLoading(true)
     fetch('/api/saved-videos')
       .then((r) => r.json())
       .then((data) => {
@@ -29,6 +24,11 @@ export default function VideosPage() {
       .catch(() => {})
       .finally(() => setLoading(false))
   }
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    loadVideos()
+  }, [])
 
   async function handleDelete(id: string) {
     if (!window.confirm('Delete this video? This cannot be undone.')) return
@@ -70,7 +70,7 @@ export default function VideosPage() {
                     <p style={{ margin: '0 0 8px', fontSize: '0.78rem', color: '#9A9AA4' }}>{v.source_label}</p>
                   )}
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    
+                    <a
                       href={v.video_url}
                       download={`polycast-${v.language}-${v.id}.mp4`}
                       style={{ fontSize: '0.8rem', color: '#1D9E75', fontWeight: 600, textDecoration: 'none' }}
@@ -82,7 +82,7 @@ export default function VideosPage() {
                       disabled={deletingId === v.id}
                       style={{ background: 'transparent', border: 'none', color: '#B54A2B', fontSize: '0.8rem', fontWeight: 600, cursor: deletingId === v.id ? 'not-allowed' : 'pointer', padding: '0.25rem' }}
                     >
-                      {deletingId === v.id ? 'Deleting...' : '🗑 Delete'}
+                      {deletingId === v.id ? 'Deleting...' : 'Delete'}
                     </button>
                   </div>
                 </div>

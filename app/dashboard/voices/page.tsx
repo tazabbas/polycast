@@ -19,12 +19,7 @@ export default function VoicesPage() {
   const [error, setError] = useState('')
   const [deletingId, setDeletingId] = useState('')
 
-  useEffect(() => {
-    loadVoices()
-  }, [])
-
   async function loadVoices() {
-    setLoadingList(true)
     try {
       const res = await fetch('/api/voices')
       const data = await res.json()
@@ -34,6 +29,11 @@ export default function VoicesPage() {
     }
     setLoadingList(false)
   }
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    loadVoices()
+  }, [])
 
   async function handleDeleteVoice(id: string) {
     if (!window.confirm('Delete this voice? This cannot be undone.')) return
@@ -132,7 +132,7 @@ export default function VoicesPage() {
                       disabled={deletingId === v.id}
                       style={{ background: 'transparent', border: 'none', color: '#B54A2B', fontSize: '0.78rem', fontWeight: 600, cursor: deletingId === v.id ? 'not-allowed' : 'pointer', padding: '0.15rem' }}
                     >
-                      {deletingId === v.id ? 'Deleting...' : '🗑 Delete'}
+                      {deletingId === v.id ? 'Deleting...' : 'Delete'}
                     </button>
                   </div>
                 </div>
