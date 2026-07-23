@@ -53,7 +53,7 @@ export default function PrivacyPolicy() {
       <h2 style={{ fontSize: '1.2rem', fontWeight: 700, marginTop: '2rem', marginBottom: '0.75rem' }}>6. Contact us</h2>
       <p style={{ marginBottom: '1rem' }}>
         If you have questions about this privacy policy or how your data is handled, contact us at{' '}
-        <a href="mailto:hello@polycast.ai" style={{ color: '#1D9E75' }}>hello@polycast.ai</a>.
+        <a href="mailto:tazabbas88@gmail.com" style={{ color: '#1D9E75' }}>tazabbas88@gmail.com</a>.
       </p>
     </main>
   )
