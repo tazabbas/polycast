@@ -115,7 +115,7 @@ export default function Home() {
         </div>
       </nav>
 
-      {/* SECTION 1 — Hero + video demo */}
+      {/* SECTION 1 — Hero */}
       <section style={{ position: 'relative', overflow: 'hidden', background: '#08110D', padding: '4.5rem 2rem 3.5rem' }}>
         <div aria-hidden="true" style={{ position: 'absolute', inset: 0, zIndex: 0 }}>
           <svg width="100%" height="100%" viewBox="0 0 1000 500" preserveAspectRatio="none" style={{ position: 'absolute', inset: 0, opacity: 0.9 }}>
@@ -199,19 +199,65 @@ export default function Home() {
 
       <MatrixDivider />
 
-      {/* Video demo — still part of section 1 visually, light background */}
-      <section style={{ position: 'relative', padding: '3.5rem 2rem 4rem', textAlign: 'center', overflow: 'hidden' }}>
+      {/* SECTION 2 — Business (left) | Demo video (center) | Creators (right) */}
+      <section style={{ position: 'relative', padding: '3.5rem 2rem', overflow: 'hidden' }}>
         <MatrixOverlay />
-        <div style={{ position: 'relative', zIndex: 1 }}>
-          <div style={{ maxWidth: '720px', margin: '0 auto', borderRadius: '20px', overflow: 'hidden', border: '1px solid #D6EEE3', background: '#0E1F19', aspectRatio: '16 / 9', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
-            {/* Once a demo video exists, replace this block with: <video controls src="/your-demo.mp4" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> */}
-            <div style={{ textAlign: 'center', color: 'rgba(255,255,255,0.85)' }}>
-              <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(29,158,117,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem', fontSize: '22px' }}>▶</div>
-              <p style={{ margin: 0, fontSize: '0.95rem', fontWeight: 500 }}>Demo video coming soon</p>
-              <p style={{ margin: '4px 0 0', fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)' }}>One voice, spoken in six languages, perfectly lip-synced</p>
+        <div style={{ position: 'relative', zIndex: 1, maxWidth: '1300px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem', alignItems: 'center' }}>
+
+          {/* Business — left */}
+          <div>
+            <div style={{ display: 'inline-block', background: '#EAF7F1', color: '#1D9E75', fontSize: '11px', fontWeight: 600, padding: '4px 12px', borderRadius: '20px', marginBottom: '0.6rem', textTransform: 'uppercase', letterSpacing: '1px' }}>For businesses</div>
+            <h2 style={{ fontSize: '1.3rem', fontWeight: 700, marginBottom: '0.4rem' }}>Dub your ad campaigns into every market</h2>
+            <p style={{ color: '#6B6B76', fontSize: '0.85rem', marginBottom: '1.25rem' }}>No re-shoots, no voice actors per language.</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', marginBottom: '1.25rem' }}>
+              {[
+                { icon: '⚡', title: 'Fast turnaround' },
+                { icon: '🎯', title: 'Consistent brand voice' },
+                { icon: '📦', title: 'Bulk pricing' },
+              ].map((f, i) => (
+                <div key={i} style={{ display: 'flex', gap: '0.6rem', alignItems: 'center', background: '#F7F7F8', border: '1px solid #E5E5EA', borderRadius: '10px', padding: '0.6rem 0.8rem' }}>
+                  <span style={{ fontSize: '1.1rem' }}>{f.icon}</span>
+                  <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>{f.title}</span>
+                </div>
+              ))}
+            </div>
+            <a href="mailto:tazabbas88@gmail.com" style={{ display: 'inline-block', background: '#1D9E75', color: 'white', padding: '0.6rem 1.4rem', borderRadius: '50px', textDecoration: 'none', fontWeight: 600, fontSize: '0.85rem' }}>
+              Talk to us
+            </a>
+          </div>
+
+          {/* Demo video — center */}
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ borderRadius: '20px', overflow: 'hidden', border: '1px solid #D6EEE3', background: '#0E1F19', aspectRatio: '16 / 9', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+              {/* Once a demo video exists, replace this block with: <video controls src="/your-demo.mp4" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> */}
+              <div style={{ textAlign: 'center', color: 'rgba(255,255,255,0.85)' }}>
+                <div style={{ width: '52px', height: '52px', borderRadius: '50%', background: 'rgba(29,158,117,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 0.75rem', fontSize: '18px' }}>▶</div>
+                <p style={{ margin: 0, fontSize: '0.85rem', fontWeight: 500 }}>Demo video coming soon</p>
+                <p style={{ margin: '4px 0 0', fontSize: '0.72rem', color: 'rgba(255,255,255,0.5)' }}>One voice, six languages, lip-synced</p>
+              </div>
+            </div>
+            <p style={{ fontSize: '0.78rem', color: '#8A8A94', marginTop: '1rem' }}>No credit card required · Free to start</p>
+          </div>
+
+          {/* Creators — right */}
+          <div>
+            <div style={{ display: 'inline-block', background: '#EAF7F1', color: '#1D9E75', fontSize: '11px', fontWeight: 600, padding: '4px 12px', borderRadius: '20px', marginBottom: '0.6rem', textTransform: 'uppercase', letterSpacing: '1px' }}>For creators</div>
+            <h2 style={{ fontSize: '1.3rem', fontWeight: 700, marginBottom: '0.4rem' }}>From one video to a global audience</h2>
+            <p style={{ color: '#6B6B76', fontSize: '0.85rem', marginBottom: '1.25rem' }}>Connect, dub, publish back automatically.</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+              {[
+                { icon: '🔗', title: 'Connect your account' },
+                { icon: '🎙', title: 'Your voice, dubbed' },
+                { icon: '📤', title: 'Auto-published' },
+              ].map((item, i) => (
+                <div key={i} style={{ display: 'flex', gap: '0.6rem', alignItems: 'center', background: '#F7F7F8', border: '1px solid #E5E5EA', borderRadius: '10px', padding: '0.6rem 0.8rem' }}>
+                  <span style={{ fontSize: '1.1rem' }}>{item.icon}</span>
+                  <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>{item.title}</span>
+                </div>
+              ))}
             </div>
           </div>
-          <p style={{ fontSize: '0.85rem', color: '#8A8A94', marginTop: '1.5rem' }}>No credit card required · Free to start · Cancel anytime</p>
+
         </div>
       </section>
 
@@ -231,69 +277,6 @@ export default function Home() {
           </div>
         </div>
       </div>
-
-      <MatrixDivider />
-
-      {/* SECTION 2 — Creators (left) and Businesses (right), side by side */}
-      <section style={{ position: 'relative', padding: '4rem 2rem', overflow: 'hidden' }}>
-        <MatrixOverlay />
-        <div style={{ position: 'relative', zIndex: 1, maxWidth: '1100px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '2.5rem' }}>
-
-          {/* For Creators — left */}
-          <div>
-            <div style={{ marginBottom: '2rem' }}>
-              <div style={{ display: 'inline-block', background: '#EAF7F1', color: '#1D9E75', fontSize: '12px', fontWeight: 600, padding: '4px 14px', borderRadius: '20px', marginBottom: '0.75rem', textTransform: 'uppercase', letterSpacing: '1px' }}>For creators</div>
-              <h2 style={{ fontSize: '1.6rem', fontWeight: 700, marginBottom: '0.5rem' }}>From one video to a global audience</h2>
-              <p style={{ color: '#6B6B76', fontSize: '0.9rem' }}>Connect your channel, dub in your own voice, publish back automatically</p>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.9rem' }}>
-              {[
-                { icon: '🔗', title: 'Connect your account', desc: 'Sign in with YouTube, TikTok, or Instagram and select any video.' },
-                { icon: '📝', title: 'AI transcribes it', desc: 'Whisper AI converts your speech to text in 99 languages.' },
-                { icon: '🌍', title: 'DeepL translates', desc: 'Translated into up to 50 languages with natural phrasing.' },
-                { icon: '🎙', title: 'Your voice, dubbed', desc: 'ElevenLabs clones your voice, lip-synced to match.' },
-                { icon: '📤', title: 'Auto-published', desc: 'Uploaded back to the platform it came from.' },
-              ].map((item, i) => (
-                <div key={i} style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start', background: '#F7F7F8', border: '1px solid #E5E5EA', borderRadius: '12px', padding: '0.85rem 1rem' }}>
-                  <span style={{ fontSize: '1.3rem' }}>{item.icon}</span>
-                  <div>
-                    <h3 style={{ fontSize: '0.9rem', fontWeight: 600, margin: '0 0 2px' }}>{item.title}</h3>
-                    <p style={{ fontSize: '0.8rem', color: '#6B6B76', margin: 0, lineHeight: 1.5 }}>{item.desc}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* For Businesses — right */}
-          <div>
-            <div style={{ marginBottom: '2rem' }}>
-              <div style={{ display: 'inline-block', background: '#F7F7F8', color: '#1D9E75', fontSize: '12px', fontWeight: 600, padding: '4px 14px', borderRadius: '20px', marginBottom: '0.75rem', textTransform: 'uppercase', letterSpacing: '1px' }}>For businesses</div>
-              <h2 style={{ fontSize: '1.6rem', fontWeight: 700, marginBottom: '0.5rem' }}>Dub your ad campaigns into every market</h2>
-              <p style={{ color: '#6B6B76', fontSize: '0.9rem' }}>No re-shoots, no voice actors per language — one campaign, every market.</p>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.9rem', marginBottom: '1.5rem' }}>
-              {[
-                { icon: '⚡', title: 'Fast turnaround', desc: 'Dubbed campaign assets back in hours, not weeks.' },
-                { icon: '🎯', title: 'Consistent brand voice', desc: 'The same voice and delivery across every market.' },
-                { icon: '📦', title: 'Bulk pricing', desc: 'Volume-based plans built for campaigns.' },
-              ].map((f, i) => (
-                <div key={i} style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start', background: '#FFFFFF', border: '1px solid #E5E5EA', borderRadius: '12px', padding: '0.85rem 1rem' }}>
-                  <span style={{ fontSize: '1.3rem' }}>{f.icon}</span>
-                  <div>
-                    <h3 style={{ fontSize: '0.9rem', fontWeight: 600, margin: '0 0 2px' }}>{f.title}</h3>
-                    <p style={{ fontSize: '0.8rem', color: '#6B6B76', margin: 0, lineHeight: 1.5 }}>{f.desc}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <a href="mailto:tazabbas88@gmail.com" style={{ display: 'inline-block', background: '#1D9E75', color: 'white', padding: '0.75rem 1.75rem', borderRadius: '50px', textDecoration: 'none', fontWeight: 600, fontSize: '0.9rem' }}>
-              Talk to us about your campaign
-            </a>
-          </div>
-
-        </div>
-      </section>
 
       <MatrixDivider />
 
