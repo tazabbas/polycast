@@ -149,17 +149,12 @@ export default function Home() {
               </SignUpButton>
             </Show>
             <Show when="signed-in">
-              <Link href="/dashboard">
+              <Link href="/pricing">
                 <button style={{ display: 'flex', alignItems: 'center', gap: '10px', background: '#1D9E75', color: 'white', border: 'none', padding: '1rem 2rem', borderRadius: '50px', fontSize: '1.05rem', cursor: 'pointer', fontWeight: 600, boxShadow: '0 0 40px rgba(29,158,117,0.35)' }}>
-                  Go to dashboard
+                  Subscribe
                 </button>
               </Link>
             </Show>
-            <Link href="/pricing#business">
-              <button style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'transparent', color: 'rgba(255,255,255,0.85)', border: '1px solid rgba(255,255,255,0.3)', padding: '1rem 2rem', borderRadius: '50px', fontSize: '1.05rem', cursor: 'pointer' }}>
-                I run a business
-              </button>
-            </Link>
           </div>
 
           <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.45)', marginBottom: '0.75rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Works with the platforms you already publish to</p>
@@ -248,6 +243,16 @@ export default function Home() {
               View pricing
             </button>
           </Link>
+        </div>
+      </section>
+
+      {/* Platform names, repeated much bigger near the bottom */}
+      <section style={{ padding: '3.5rem 2rem', textAlign: 'center', background: '#08110D' }}>
+        <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.45)', marginBottom: '1.25rem', textTransform: 'uppercase', letterSpacing: '2px' }}>Works with the platforms you already publish to</p>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '4rem', flexWrap: 'wrap' }}>
+          <span style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', fontWeight: 800, color: '#FF3B3B' }}>YouTube</span>
+          <span style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', fontWeight: 800, color: '#FFFFFF' }}>TikTok</span>
+          <span style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', fontWeight: 800, color: '#F0709A' }}>Instagram</span>
         </div>
       </section>
 
