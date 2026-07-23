@@ -535,32 +535,6 @@ return (
 <h2 style={{ fontFamily: "'Syne', sans-serif", fontSize: '1.3rem', fontWeight: 700, marginBottom: '0.5rem' }}>Dub a video</h2>
 <p style={{ fontSize: '0.9rem', color: '#6B6B76', marginBottom: '1.5rem' }}>Upload a file or paste a YouTube link. We will transcribe and prep it automatically.</p>
 
-<div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.25rem' }}>
-<button onClick={() => { setMode('upload'); resetAll(); setFile(null); setLocalPreviewUrl('') }} style={tabStyle(mode === 'upload')}>Upload file</button>
-<button onClick={() => { setMode('youtube'); resetAll(); setFile(null); setLocalPreviewUrl('') }} style={tabStyle(mode === 'youtube')}>Paste YouTube URL</button>
-</div>
-
-<div style={{ background: '#F7F7F8', border: '1px solid #E5E5EA', padding: '1.5rem', borderRadius: '12px', marginBottom: '1.5rem', maxWidth: previewUrl ? 'none' : '680px' }}>
-{mode === 'upload' ? (
-<label style={{ display: 'block', border: '2px dashed #D1D1D8', borderRadius: '10px', padding: '2rem', textAlign: 'center', cursor: 'pointer', background: '#FFFFFF' }}>
-<input type="file" accept="audio/*,video/*" onChange={(e) => handleFileSelect(e.target.files?.[0] || null)} style={{ display: 'none' }} />
-<p style={{ margin: 0, fontSize: '0.95rem', fontWeight: 600, color: '#1D9E75' }}>Click to choose a video or audio file</p>
-<p style={{ margin: '0.35rem 0 0', fontSize: '0.8rem', color: '#9A9AA4' }}>{file ? file.name : 'MP4, MOV, MP3, WAV supported'}</p>
-</label>
-) : (
-<>
-<input type="text" placeholder="https://www.youtube.com/watch?v=..." value={youtubeUrl} onChange={(e) => setYoutubeUrl(e.target.value)} style={{ padding: '0.6rem 1rem', borderRadius: '8px', border: '1px solid #D1D1D8', fontSize: '0.9rem', marginBottom: '1rem', display: 'block', width: '100%', color: '#1A1A1A', background: '#FFFFFF' }} />
-<label style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', fontSize: '0.8rem', color: '#6B6B76', marginBottom: '1rem', cursor: 'pointer' }}>
-<input type="checkbox" checked={rightsConfirmed} onChange={(e) => setRightsConfirmed(e.target.checked)} style={{ marginTop: '3px' }} />
-I own this video or have the rights to dub and use it
-</label>
-<button onClick={handleFetchYoutube} disabled={!youtubeUrl || !rightsConfirmed || processing} style={{ background: youtubeUrl && rightsConfirmed && !processing ? '#1D9E75' : '#D1D1D8', color: 'white', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '8px', fontSize: '0.95rem', fontWeight: 600, cursor: youtubeUrl && rightsConfirmed && !processing ? 'pointer' : 'not-allowed' }}>
-{processing ? processingLabel || 'Working...' : 'Fetch video'}
-</button>
-</>
-)}
-</div>
-
 <div style={{ display: 'flex', gap: '2rem', alignItems: 'flex-start', flexWrap: 'wrap' }}>
 <div style={{ flex: '1 1 480px', minWidth: '320px' }}>
 
@@ -614,6 +588,33 @@ This videos own audio stays off — sound comes from whichever language pill is 
 </div>
 
 <div style={{ flex: '1 1 380px', minWidth: '300px' }}>
+
+<div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.85rem' }}>
+<button onClick={() => { setMode('upload'); resetAll(); setFile(null); setLocalPreviewUrl('') }} style={{ ...tabStyle(mode === 'upload'), padding: '0.4rem 0.85rem', fontSize: '0.8rem' }}>Upload file</button>
+<button onClick={() => { setMode('youtube'); resetAll(); setFile(null); setLocalPreviewUrl('') }} style={{ ...tabStyle(mode === 'youtube'), padding: '0.4rem 0.85rem', fontSize: '0.8rem' }}>Paste YouTube URL</button>
+</div>
+
+<div style={{ background: '#F7F7F8', border: '1px solid #E5E5EA', padding: '0.85rem', borderRadius: '10px', marginBottom: '1.5rem' }}>
+{mode === 'upload' ? (
+<label style={{ display: 'block', border: '2px dashed #D1D1D8', borderRadius: '8px', padding: '0.85rem', textAlign: 'center', cursor: 'pointer', background: '#FFFFFF' }}>
+<input type="file" accept="audio/*,video/*" onChange={(e) => handleFileSelect(e.target.files?.[0] || null)} style={{ display: 'none' }} />
+<p style={{ margin: 0, fontSize: '0.82rem', fontWeight: 600, color: '#1D9E75' }}>Click to choose a file</p>
+<p style={{ margin: '0.25rem 0 0', fontSize: '0.72rem', color: '#9A9AA4' }}>{file ? file.name : 'MP4, MOV, MP3, WAV'}</p>
+</label>
+) : (
+<>
+<input type="text" placeholder="https://www.youtube.com/watch?v=..." value={youtubeUrl} onChange={(e) => setYoutubeUrl(e.target.value)} style={{ padding: '0.45rem 0.75rem', borderRadius: '8px', border: '1px solid #D1D1D8', fontSize: '0.82rem', marginBottom: '0.75rem', display: 'block', width: '100%', color: '#1A1A1A', background: '#FFFFFF' }} />
+<label style={{ display: 'flex', alignItems: 'flex-start', gap: '6px', fontSize: '0.72rem', color: '#6B6B76', marginBottom: '0.75rem', cursor: 'pointer' }}>
+<input type="checkbox" checked={rightsConfirmed} onChange={(e) => setRightsConfirmed(e.target.checked)} style={{ marginTop: '2px' }} />
+I own this video or have the rights to dub and use it
+</label>
+<button onClick={handleFetchYoutube} disabled={!youtubeUrl || !rightsConfirmed || processing} style={{ background: youtubeUrl && rightsConfirmed && !processing ? '#1D9E75' : '#D1D1D8', color: 'white', border: 'none', padding: '0.5rem 1rem', borderRadius: '8px', fontSize: '0.82rem', fontWeight: 600, cursor: youtubeUrl && rightsConfirmed && !processing ? 'pointer' : 'not-allowed' }}>
+{processing ? processingLabel || 'Working...' : 'Fetch video'}
+</button>
+</>
+)}
+</div>
+
 {transcript && (
 <>
 <div style={{ background: '#F7F7F8', border: '1px solid #E5E5EA', padding: '1.5rem', borderRadius: '12px', marginBottom: '1.5rem' }}>
