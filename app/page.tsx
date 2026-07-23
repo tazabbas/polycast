@@ -158,11 +158,12 @@ export default function Home() {
           </div>
 
           <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.45)', marginBottom: '0.75rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Works with the platforms you already publish to</p>
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '3rem', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '3rem', flexWrap: 'wrap', marginBottom: '0.6rem' }}>
             <span style={{ fontSize: '1.5rem', fontWeight: 700, color: '#FF3B3B' }}>YouTube</span>
             <span style={{ fontSize: '1.5rem', fontWeight: 700, color: '#FFFFFF' }}>TikTok</span>
             <span style={{ fontSize: '1.5rem', fontWeight: 700, color: '#F0709A' }}>Instagram</span>
           </div>
+          <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)' }}>For creator content and business ad campaigns alike</p>
         </div>
 
         <style>{`
@@ -249,11 +250,12 @@ export default function Home() {
       {/* Platform names, repeated much bigger near the bottom */}
       <section style={{ padding: '3.5rem 2rem', textAlign: 'center', background: '#08110D' }}>
         <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.45)', marginBottom: '1.25rem', textTransform: 'uppercase', letterSpacing: '2px' }}>Works with the platforms you already publish to</p>
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '4rem', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '4rem', flexWrap: 'wrap', marginBottom: '1.25rem' }}>
           <span style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', fontWeight: 800, color: '#FF3B3B' }}>YouTube</span>
           <span style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', fontWeight: 800, color: '#FFFFFF' }}>TikTok</span>
           <span style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', fontWeight: 800, color: '#F0709A' }}>Instagram</span>
         </div>
+        <p style={{ fontSize: '0.95rem', color: 'rgba(255,255,255,0.5)' }}>For creator content and business ad campaigns alike</p>
       </section>
 
       <footer style={{ borderTop: '1px solid #E5E5EA', padding: '2rem', textAlign: 'center', color: '#9A9AA4', fontSize: '0.85rem' }}>
