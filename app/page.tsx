@@ -1,45 +1,6 @@
 import { Show, SignInButton, SignUpButton, UserButton } from '@clerk/nextjs'
 import Link from 'next/link'
 
-function MatrixDivider() {
-  const cols = Array.from({ length: 40 })
-  const chars = '01アイウエオカキクケコ日語translate'
-  return (
-    <div aria-hidden="true" style={{ position: 'relative', height: '46px', overflow: 'hidden', background: '#08110D' }}>
-      <div style={{ position: 'absolute', inset: 0, display: 'flex', justifyContent: 'space-between', padding: '0 4px' }}>
-        {cols.map((_, i) => {
-          const char = chars[(i * 7) % chars.length]
-          const duration = 1.4 + (i % 5) * 0.35
-          const delay = (i % 9) * -0.4
-          return (
-            <span
-              key={i}
-              style={{
-                fontFamily: 'monospace',
-                fontSize: '13px',
-                color: '#5DCAA5',
-                opacity: 0.7,
-                animation: `matrixFall ${duration}s linear infinite`,
-                animationDelay: `${delay}s`,
-              }}
-            >
-              {char}
-            </span>
-          )
-        })}
-      </div>
-      <style>{`
-        @keyframes matrixFall {
-          0% { transform: translateY(-46px); opacity: 0; }
-          15% { opacity: 0.8; }
-          85% { opacity: 0.8; }
-          100% { transform: translateY(46px); opacity: 0; }
-        }
-      `}</style>
-    </div>
-  )
-}
-
 function MatrixOverlay() {
   const cols = Array.from({ length: 26 })
   const chars = '01アイウエオカキクケコ日語translate'
@@ -197,8 +158,6 @@ export default function Home() {
         `}</style>
       </section>
 
-      <MatrixDivider />
-
       {/* SECTION 2 — Business (left) | Demo video (center) | Creators (right) */}
       <section style={{ position: 'relative', padding: '3.5rem 2rem', overflow: 'hidden' }}>
         <MatrixOverlay />
@@ -209,15 +168,18 @@ export default function Home() {
             <div style={{ display: 'inline-block', background: '#EAF7F1', color: '#1D9E75', fontSize: '11px', fontWeight: 600, padding: '4px 12px', borderRadius: '20px', marginBottom: '0.6rem', textTransform: 'uppercase', letterSpacing: '1px' }}>For businesses</div>
             <h2 style={{ fontSize: '1.3rem', fontWeight: 700, marginBottom: '0.4rem' }}>Dub your ad campaigns into every market</h2>
             <p style={{ color: '#6B6B76', fontSize: '0.85rem', marginBottom: '1.25rem' }}>No re-shoots, no voice actors per language.</p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', marginBottom: '1.25rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.25rem' }}>
               {[
-                { icon: '⚡', title: 'Fast turnaround' },
-                { icon: '🎯', title: 'Consistent brand voice' },
-                { icon: '📦', title: 'Bulk pricing' },
+                { icon: '⚡', title: 'Fast turnaround', desc: 'Dubbed campaign assets back in hours, not weeks.' },
+                { icon: '🎯', title: 'Consistent brand voice', desc: 'The same voice and delivery across every language and market.' },
+                { icon: '📦', title: 'Bulk pricing', desc: 'Volume-based plans built for campaigns, not single videos.' },
               ].map((f, i) => (
-                <div key={i} style={{ display: 'flex', gap: '0.6rem', alignItems: 'center', background: '#F7F7F8', border: '1px solid #E5E5EA', borderRadius: '10px', padding: '0.6rem 0.8rem' }}>
-                  <span style={{ fontSize: '1.1rem' }}>{f.icon}</span>
-                  <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>{f.title}</span>
+                <div key={i} style={{ display: 'flex', gap: '0.7rem', alignItems: 'flex-start', background: '#F7F7F8', border: '1px solid #E5E5EA', borderRadius: '10px', padding: '0.75rem 0.9rem' }}>
+                  <span style={{ fontSize: '1.2rem' }}>{f.icon}</span>
+                  <div>
+                    <p style={{ fontSize: '0.85rem', fontWeight: 600, margin: '0 0 2px' }}>{f.title}</p>
+                    <p style={{ fontSize: '0.78rem', color: '#6B6B76', margin: 0, lineHeight: 1.5 }}>{f.desc}</p>
+                  </div>
                 </div>
               ))}
             </div>
@@ -244,15 +206,20 @@ export default function Home() {
             <div style={{ display: 'inline-block', background: '#EAF7F1', color: '#1D9E75', fontSize: '11px', fontWeight: 600, padding: '4px 12px', borderRadius: '20px', marginBottom: '0.6rem', textTransform: 'uppercase', letterSpacing: '1px' }}>For creators</div>
             <h2 style={{ fontSize: '1.3rem', fontWeight: 700, marginBottom: '0.4rem' }}>From one video to a global audience</h2>
             <p style={{ color: '#6B6B76', fontSize: '0.85rem', marginBottom: '1.25rem' }}>Connect, dub, publish back automatically.</p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
               {[
-                { icon: '🔗', title: 'Connect your account' },
-                { icon: '🎙', title: 'Your voice, dubbed' },
-                { icon: '📤', title: 'Auto-published' },
+                { icon: '🔗', title: 'Connect your account', desc: 'Sign in with YouTube, TikTok, or Instagram and select any video.' },
+                { icon: '📝', title: 'AI transcribes it', desc: 'Whisper AI converts your speech to text in 99 languages.' },
+                { icon: '🌍', title: 'DeepL translates', desc: 'Translated into up to 50 languages with natural phrasing.' },
+                { icon: '🎙', title: 'Your voice, dubbed', desc: 'ElevenLabs clones your voice, lip-synced to match.' },
+                { icon: '📤', title: 'Auto-published', desc: 'The dubbed video is uploaded back to the platform it came from.' },
               ].map((item, i) => (
-                <div key={i} style={{ display: 'flex', gap: '0.6rem', alignItems: 'center', background: '#F7F7F8', border: '1px solid #E5E5EA', borderRadius: '10px', padding: '0.6rem 0.8rem' }}>
-                  <span style={{ fontSize: '1.1rem' }}>{item.icon}</span>
-                  <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>{item.title}</span>
+                <div key={i} style={{ display: 'flex', gap: '0.7rem', alignItems: 'flex-start', background: '#F7F7F8', border: '1px solid #E5E5EA', borderRadius: '10px', padding: '0.75rem 0.9rem' }}>
+                  <span style={{ fontSize: '1.2rem' }}>{item.icon}</span>
+                  <div>
+                    <p style={{ fontSize: '0.85rem', fontWeight: 600, margin: '0 0 2px' }}>{item.title}</p>
+                    <p style={{ fontSize: '0.78rem', color: '#6B6B76', margin: 0, lineHeight: 1.5 }}>{item.desc}</p>
+                  </div>
                 </div>
               ))}
             </div>
@@ -277,8 +244,6 @@ export default function Home() {
           </div>
         </div>
       </div>
-
-      <MatrixDivider />
 
       {/* SECTION 3 — Pricing */}
       <section style={{ position: 'relative', padding: '4rem 2rem', textAlign: 'center', overflow: 'hidden' }}>
