@@ -1,9 +1,23 @@
 'use client'
 import { useState, useEffect, useRef, type ChangeEvent } from 'react'
+import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { upload } from '@vercel/blob/client'
-const LANGUAGES = [{ code: 'EN-GB', name: 'English (UK)' },{ code: 'EN-US', name: 'English (US)' },{ code: 'ES', name: 'Spanish' },{ code: 'FR', name: 'French' },{ code: 'DE', name: 'German' },{ code: 'IT', name: 'Italian' },{ code: 'PT-BR', name: 'Portuguese (Brazil)' },{ code: 'ZH', name: 'Chinese (Simplified)' },{ code: 'JA', name: 'Japanese' },{ code: 'KO', name: 'Korean' },{ code: 'AR', name: 'Arabic' },{ code: 'RU', name: 'Russian' },{ code: 'HI', name: 'Hindi' },{ code: 'TR', name: 'Turkish' }]
+import { FFmpeg } from '@ffmpeg/ffmpeg'
+import { fetchFile, toBlobURL } from '@ffmpeg/util'
+const LANGUAGES = [{ code: 'EN-GB', name: 'English (UK)' },{ code: 'EN-US', name: 'English (US)' },{ code: 'ES', name: 'Spanish' },{ code: 'ES-419', name: 'Spanish (Latin America)' },{ code: 'FR', name: 'French' },{ code: 'DE', name: 'German' },{ code: 'IT', name: 'Italian' },{ code: 'PT-BR', name: 'Portuguese (Brazil)' },{ code: 'PT-PT', name: 'Portuguese (Portugal)' },{ code: 'ZH', name: 'Chinese (Simplified)' },{ code: 'JA', name: 'Japanese' },{ code: 'KO', name: 'Korean' },{ code: 'AR', name: 'Arabic' },{ code: 'RU', name: 'Russian' },{ code: 'HI', name: 'Hindi' },{ code: 'TR', name: 'Turkish' },{ code: 'NL', name: 'Dutch' },{ code: 'PL', name: 'Polish' },{ code: 'SV', name: 'Swedish' },{ code: 'DA', name: 'Danish' },{ code: 'FI', name: 'Finnish' },{ code: 'NB', name: 'Norwegian' },{ code: 'EL', name: 'Greek' },{ code: 'CS', name: 'Czech' },{ code: 'SK', name: 'Slovak' },{ code: 'RO', name: 'Romanian' },{ code: 'HU', name: 'Hungarian' },{ code: 'BG', name: 'Bulgarian' },{ code: 'UK', name: 'Ukrainian' },{ code: 'ID', name: 'Indonesian' },{ code: 'VI', name: 'Vietnamese' },{ code: 'TH', name: 'Thai' },{ code: 'HE', name: 'Hebrew' },{ code: 'ET', name: 'Estonian' },{ code: 'LV', name: 'Latvian' },{ code: 'LT', name: 'Lithuanian' },{ code: 'SL', name: 'Slovenian' }]
 
+const PLAN_LANGUAGES: Record<string, string[]> = {
+  starter: ['ES', 'PT-BR', 'FR'],
+  creator: ['ES', 'PT-BR', 'FR', 'DE', 'HI', 'AR', 'JA', 'KO', 'ZH', 'IT', 'RU', 'TR', 'ID', 'NL', 'EN-GB'],
+}
 
+function isLanguageAllowed(plan: string | null, code: string): boolean {
+  if (plan === 'pro') return true
+  if (plan === 'creator') return PLAN_LANGUAGES.creator.includes(code)
+  if (plan === 'starter') return PLAN_LANGUAGES.starter.includes(code)
+  return false
+}
 
 interface LangResult {
 translatedText: string
@@ -31,8 +45,31 @@ lipSyncing: false, lipSyncStatus: '', lipSyncVideoUrl: '', lipSyncError: '',
 }
 }
 
+let ffmpegSingleton: FFmpeg | null = null
+async function getFFmpeg(): Promise<FFmpeg> {
+if (ffmpegSingleton) return ffmpegSingleton
+const ffmpeg = new FFmpeg()
+const baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd'
+await ffmpeg.load({
+coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
+wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
+})
+ffmpegSingleton = ffmpeg
+return ffmpeg
+}
+
 export default function DubVideo() {
+const router = useRouter()
 const [mode, setMode] = useState<'upload' | 'youtube'>('upload')
+
+const [plan, setPlan] = useState<string | null>(null)
+const [planLoading, setPlanLoading] = useState(true)
+
+useEffect(() => {
+fetch('/api/user-plan').then((r) => r.json()).then((data) => {
+setPlan(data.plan || null)
+}).catch(() => setPlan(null)).finally(() => setPlanLoading(false))
+}, [])
 
 const [file, setFile] = useState<File | null>(null)
 const [localPreviewUrl, setLocalPreviewUrl] = useState('')
@@ -42,6 +79,11 @@ const [rightsConfirmed, setRightsConfirmed] = useState(false)
 const [videoUrl, setVideoUrl] = useState('')
 const [videoLabel, setVideoLabel] = useState('')
 const [isVideoSource, setIsVideoSource] = useState(true)
+const previewUrl = mode === 'upload' ? localPreviewUrl : videoUrl
+
+const [trimDuration, setTrimDuration] = useState(0)
+const [trimStart, setTrimStart] = useState(0)
+const [trimEnd, setTrimEnd] = useState(0)
 
 const [transcript, setTranscript] = useState('')
 const [transcriptionId, setTranscriptionId] = useState('')
@@ -130,6 +172,8 @@ setCurrentTime(video!.currentTime)
 }
 function handleLoadedMetadata() {
 setDuration(video!.duration)
+setTrimDuration((prev) => prev === 0 ? video!.duration : prev)
+setTrimEnd((prev) => prev === 0 ? video!.duration : prev)
 }
 
 video.addEventListener('timeupdate', handleTimeUpdate)
@@ -137,6 +181,14 @@ video.addEventListener('play', handlePlay)
 video.addEventListener('pause', handlePauseVideo)
 video.addEventListener('seeked', handleSeeked)
 video.addEventListener('loadedmetadata', handleLoadedMetadata)
+
+// If metadata already loaded before this listener attached, capture it now
+if (video.readyState >= 1 && video.duration) {
+handleLoadedMetadata()
+}
+setIsPlaying(!video.paused)
+setCurrentTime(video.currentTime)
+
 return () => {
 video.removeEventListener('timeupdate', handleTimeUpdate)
 video.removeEventListener('play', handlePlay)
@@ -144,7 +196,28 @@ video.removeEventListener('pause', handlePauseVideo)
 video.removeEventListener('seeked', handleSeeked)
 video.removeEventListener('loadedmetadata', handleLoadedMetadata)
 }
-}, [activeLang])
+}, [activeLang, previewUrl])
+
+useEffect(() => {
+if (transcript) {
+sessionStorage.setItem('polycast_unsaved_studio_work', 'true')
+} else {
+sessionStorage.removeItem('polycast_unsaved_studio_work')
+}
+return () => {
+sessionStorage.removeItem('polycast_unsaved_studio_work')
+}
+}, [transcript])
+
+useEffect(() => {
+function handleBeforeUnload(e: BeforeUnloadEvent) {
+if (transcript) {
+e.preventDefault()
+}
+}
+window.addEventListener('beforeunload', handleBeforeUnload)
+return () => window.removeEventListener('beforeunload', handleBeforeUnload)
+}, [transcript])
 
 function switchLanguage(code: string) {
 const video = mainVideoRef.current
@@ -152,6 +225,7 @@ const oldAudio = audioTrackRefs.current[activeLang]
 const newAudio = audioTrackRefs.current[code]
 if (oldAudio) oldAudio.pause()
 setActiveLang(code)
+setSavedDub(false)
 if (newAudio && video) {
 newAudio.currentTime = video.currentTime
 if (!video.paused) newAudio.play().catch(() => {})
@@ -171,6 +245,7 @@ setResults({})
 setSelectedLanguages([])
 setActiveLang('')
 setError('')
+setTrimStart(0); setTrimEnd(0); setTrimDuration(0)
 }
 
 function handleFileSelect(selected: File | null) {
@@ -245,10 +320,43 @@ setTranscript(data.transcript)
 const saveRes = await fetch('/api/transcriptions', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ file_name: label, transcript: data.transcript }) })
 const saveData = await saveRes.json()
 if (saveData.transcription?.id) setTranscriptionId(saveData.transcription.id)
+
+await autoCloneSpeakerVoice(url, label)
 } else {
 setError(data.error || 'Something went wrong')
 }
 setProcessing(false); setProcessingLabel('')
+}
+
+async function autoCloneSpeakerVoice(url: string, label: string) {
+try {
+setProcessingLabel('Cloning the speakers voice...')
+let sampleUrl = url
+
+if (isVideoSource) {
+const ffmpeg = await getFFmpeg()
+await ffmpeg.writeFile('clone_source.mp4', await fetchFile(url))
+await ffmpeg.exec(['-i', 'clone_source.mp4', '-vn', '-acodec', 'libmp3lame', 'clone_sample.mp3'])
+const audioData = await ffmpeg.readFile('clone_sample.mp3')
+const audioBlob = new Blob([audioData as unknown as BlobPart], { type: 'audio/mpeg' })
+const audioFile = new File([audioBlob], 'speaker-sample.mp3', { type: 'audio/mpeg' })
+const uploaded = await upload('speaker-sample.mp3', audioFile, { access: 'public', handleUploadUrl: '/api/blob-upload' })
+sampleUrl = uploaded.url
+}
+
+const res = await fetch('/api/voices', {
+method: 'POST',
+headers: { 'Content-Type': 'application/json' },
+body: JSON.stringify({ audioUrl: sampleUrl, name: `${label} — speaker` }),
+})
+const data = await res.json()
+if (res.ok && data.id) {
+setSelectedVoiceId(data.id)
+setVoices((prev) => [{ id: data.id, name: data.name }, ...prev])
+}
+} catch {
+// If cloning fails, dubbing still proceeds with the default voice
+}
 }
 
 function updateResult(code: string, patch: Partial<LangResult>) {
@@ -271,7 +379,18 @@ updateResult(code, { synthesizing: true })
 const synthRes = await fetch('/api/synthesize', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text: data.translated_text, voiceId: selectedVoiceId || undefined }) })
 const synthData = await synthRes.json()
 if (synthRes.ok && synthData.url) {
+try {
+const ffmpeg = await getFFmpeg()
+await ffmpeg.writeFile(`raw_audio_${code}.mp3`, await fetchFile(synthData.url))
+await ffmpeg.exec(['-i', `raw_audio_${code}.mp3`, '-af', 'loudnorm=I=-14:TP=-1:LRA=11', `boosted_audio_${code}.mp3`])
+const boostedData = await ffmpeg.readFile(`boosted_audio_${code}.mp3`)
+const boostedBlob = new Blob([boostedData as unknown as BlobPart], { type: 'audio/mpeg' })
+const boostedFile = new File([boostedBlob], `boosted-${code}.mp3`, { type: 'audio/mpeg' })
+const boostedUpload = await upload(`boosted-${code}.mp3`, boostedFile, { access: 'public', handleUploadUrl: '/api/blob-upload' })
+updateResult(code, { audioUrl: boostedUpload.url, synthesizing: false })
+} catch {
 updateResult(code, { audioUrl: synthData.url, synthesizing: false })
+}
 if (!activeLang) setActiveLang(code)
 } else {
 updateResult(code, { synthError: synthData.error || 'Voice synthesis failed', synthesizing: false })
@@ -290,6 +409,67 @@ mainVideoRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
 }
 }
 
+const [savingVideo, setSavingVideo] = useState(false)
+const [savedVideo, setSavedVideo] = useState(false)
+const [savingDub, setSavingDub] = useState(false)
+const [savedDub, setSavedDub] = useState(false)
+const [saveDubError, setSaveDubError] = useState('')
+
+async function handleSaveVideo(code: string) {
+const r = results[code]
+if (!r?.lipSyncVideoUrl) return
+setSavingVideo(true)
+try {
+await fetch('/api/saved-videos', {
+method: 'POST',
+headers: { 'Content-Type': 'application/json' },
+body: JSON.stringify({
+type: 'lipsync',
+language: LANGUAGES.find((l) => l.code === code)?.name || code,
+videoUrl: r.lipSyncVideoUrl,
+sourceLabel: videoLabel,
+}),
+})
+setSavedVideo(true)
+} catch {
+// silent fail, user can retry
+} finally {
+setSavingVideo(false)
+}
+}
+
+async function handleSaveDub(code: string) {
+const r = results[code]
+if (!videoUrl || !r?.audioUrl || !isVideoSource) return
+setSavingDub(true); setSaveDubError('')
+try {
+const ffmpeg = await getFFmpeg()
+await ffmpeg.writeFile('save_video_in.mp4', await fetchFile(videoUrl))
+await ffmpeg.writeFile(`save_audio_in_${code}.mp3`, await fetchFile(r.audioUrl))
+await ffmpeg.exec(['-i', 'save_video_in.mp4', '-i', `save_audio_in_${code}.mp3`, '-c:v', 'copy', '-map', '0:v:0', '-map', '1:a:0', '-shortest', `save_out_${code}.mp4`])
+const data = await ffmpeg.readFile(`save_out_${code}.mp4`)
+const mergedBlob = new Blob([data as unknown as BlobPart], { type: 'video/mp4' })
+const mergedFile = new File([mergedBlob], `dub-${code}.mp4`, { type: 'video/mp4' })
+const blob = await upload(`dub-${code}.mp4`, mergedFile, { access: 'public', handleUploadUrl: '/api/blob-upload' })
+
+await fetch('/api/saved-videos', {
+method: 'POST',
+headers: { 'Content-Type': 'application/json' },
+body: JSON.stringify({
+type: 'dub',
+language: LANGUAGES.find((l) => l.code === code)?.name || code,
+videoUrl: blob.url,
+sourceLabel: videoLabel,
+}),
+})
+setSavedDub(true)
+} catch {
+setSaveDubError('Could not save this dub. Try again.')
+} finally {
+setSavingDub(false)
+}
+}
+
 function getAudioDuration(url: string): Promise<number> {
 return new Promise((resolve, reject) => {
 const audio = new Audio()
@@ -303,12 +483,39 @@ async function handleLipSync(code: string) {
 const r = results[code]
 if (!videoUrl || !r?.audioUrl) return
 updateResult(code, { lipSyncing: true, lipSyncError: '', lipSyncVideoUrl: '', lipSyncStatus: 'Starting...' })
+setSavedVideo(false)
 try {
-const durationSeconds = await getAudioDuration(r.audioUrl)
+const needsTrim = trimStart > 0.15 || (trimDuration > 0 && trimEnd < trimDuration - 0.15)
+let finalVideoUrl = videoUrl
+let finalAudioUrl = r.audioUrl
+let durationSeconds = await getAudioDuration(r.audioUrl)
+
+if (needsTrim) {
+updateResult(code, { lipSyncStatus: 'Trimming clip...' })
+const ffmpeg = await getFFmpeg()
+
+await ffmpeg.writeFile('lip_video_in.mp4', await fetchFile(videoUrl))
+await ffmpeg.exec(['-i', 'lip_video_in.mp4', '-ss', String(trimStart), '-to', String(trimEnd), '-c', 'copy', 'lip_video_out.mp4'])
+const videoData = await ffmpeg.readFile('lip_video_out.mp4')
+const trimmedVideoFile = new File([videoData as unknown as BlobPart], `trim-${code}.mp4`, { type: 'video/mp4' })
+const videoBlob = await upload(`trim-${code}.mp4`, trimmedVideoFile, { access: 'public', handleUploadUrl: '/api/blob-upload' })
+finalVideoUrl = videoBlob.url
+
+await ffmpeg.writeFile('lip_audio_in.mp3', await fetchFile(r.audioUrl))
+await ffmpeg.exec(['-i', 'lip_audio_in.mp3', '-ss', String(trimStart), '-to', String(trimEnd), '-c', 'copy', 'lip_audio_out.mp3'])
+const audioData = await ffmpeg.readFile('lip_audio_out.mp3')
+const trimmedAudioFile = new File([audioData as unknown as BlobPart], `trim-audio-${code}.mp3`, { type: 'audio/mpeg' })
+const audioBlob = await upload(`trim-audio-${code}.mp3`, trimmedAudioFile, { access: 'public', handleUploadUrl: '/api/blob-upload' })
+finalAudioUrl = audioBlob.url
+
+durationSeconds = trimEnd - trimStart
+}
+
+updateResult(code, { lipSyncStatus: 'Starting...' })
 const res = await fetch('/api/lipsync', {
 method: 'POST',
 headers: { 'Content-Type': 'application/json' },
-body: JSON.stringify({ videoUrl, audioUrl: r.audioUrl, durationSeconds }),
+body: JSON.stringify({ videoUrl: finalVideoUrl, audioUrl: finalAudioUrl, durationSeconds }),
 })
 const data = await res.json()
 if (!res.ok || !data.id) {
@@ -318,7 +525,7 @@ return
 updateResult(code, { lipSyncStatus: 'Processing...' })
 pollLipSyncStatus(code, data.id)
 } catch {
-updateResult(code, { lipSyncError: 'Failed to connect to lip sync service', lipSyncing: false })
+updateResult(code, { lipSyncError: 'Failed to trim or start lip sync', lipSyncing: false })
 }
 }
 
@@ -375,6 +582,17 @@ background: active ? '#1D9E75' : '#FFFFFF',
 color: active ? '#FFFFFF' : '#4A4A54',
 })
 
+const lockedChipStyle = {
+padding: '0.5rem 1rem',
+borderRadius: '999px',
+fontSize: '0.85rem',
+fontWeight: 600,
+cursor: 'pointer' as const,
+border: '1px dashed #D1D1D8',
+background: '#F7F7F8',
+color: '#B0B0B8',
+}
+
 const trackChipStyle = (active: boolean) => ({
 padding: '0.4rem 0.85rem',
 borderRadius: '999px',
@@ -386,44 +604,20 @@ background: active ? '#1A1A1A' : 'rgba(255,255,255,0.85)',
 color: active ? '#FFFFFF' : '#1A1A1A',
 })
 
-const previewUrl = mode === 'upload' ? localPreviewUrl : videoUrl
 const readyLanguages = selectedLanguages.filter((code) => results[code]?.audioUrl)
 
 return (
 <main style={{ background: '#FFFFFF', color: '#1A1A1A', fontFamily: "'DM Sans', sans-serif" }}>
-<div style={{ maxWidth: '680px', margin: '0 auto', padding: '2rem' }}>
+<div style={{ maxWidth: '1100px', margin: '0 auto', padding: '2rem' }}>
 <h2 style={{ fontFamily: "'Syne', sans-serif", fontSize: '1.3rem', fontWeight: 700, marginBottom: '0.5rem' }}>Dub a video</h2>
 <p style={{ fontSize: '0.9rem', color: '#6B6B76', marginBottom: '1.5rem' }}>Upload a file or paste a YouTube link. We will transcribe and prep it automatically.</p>
 
-<div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.25rem' }}>
-<button onClick={() => { setMode('upload'); resetAll(); setFile(null); setLocalPreviewUrl('') }} style={tabStyle(mode === 'upload')}>Upload file</button>
-<button onClick={() => { setMode('youtube'); resetAll(); setFile(null); setLocalPreviewUrl('') }} style={tabStyle(mode === 'youtube')}>Paste YouTube URL</button>
-</div>
-
-<div style={{ background: '#F7F7F8', border: '1px solid #E5E5EA', padding: '1.5rem', borderRadius: '12px', marginBottom: '1.5rem' }}>
-{mode === 'upload' ? (
-<label style={{ display: 'block', border: '2px dashed #D1D1D8', borderRadius: '10px', padding: '2rem', textAlign: 'center', cursor: 'pointer', background: '#FFFFFF' }}>
-<input type="file" accept="audio/*,video/*" onChange={(e) => handleFileSelect(e.target.files?.[0] || null)} style={{ display: 'none' }} />
-<p style={{ margin: 0, fontSize: '0.95rem', fontWeight: 600, color: '#1D9E75' }}>Click to choose a video or audio file</p>
-<p style={{ margin: '0.35rem 0 0', fontSize: '0.8rem', color: '#9A9AA4' }}>{file ? file.name : 'MP4, MOV, MP3, WAV supported'}</p>
-</label>
-) : (
-<>
-<input type="text" placeholder="https://www.youtube.com/watch?v=..." value={youtubeUrl} onChange={(e) => setYoutubeUrl(e.target.value)} style={{ padding: '0.6rem 1rem', borderRadius: '8px', border: '1px solid #D1D1D8', fontSize: '0.9rem', marginBottom: '1rem', display: 'block', width: '100%', color: '#1A1A1A', background: '#FFFFFF' }} />
-<label style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', fontSize: '0.8rem', color: '#6B6B76', marginBottom: '1rem', cursor: 'pointer' }}>
-<input type="checkbox" checked={rightsConfirmed} onChange={(e) => setRightsConfirmed(e.target.checked)} style={{ marginTop: '3px' }} />
-I own this video or have the rights to dub and use it
-</label>
-<button onClick={handleFetchYoutube} disabled={!youtubeUrl || !rightsConfirmed || processing} style={{ background: youtubeUrl && rightsConfirmed && !processing ? '#1D9E75' : '#D1D1D8', color: 'white', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '8px', fontSize: '0.95rem', fontWeight: 600, cursor: youtubeUrl && rightsConfirmed && !processing ? 'pointer' : 'not-allowed' }}>
-{processing ? processingLabel || 'Working...' : 'Fetch video'}
-</button>
-</>
-)}
-</div>
+<div style={{ display: 'flex', gap: '2rem', alignItems: 'flex-start', flexWrap: 'wrap' }}>
+<div style={{ flex: '1 1 480px', minWidth: '320px' }}>
 
 {previewUrl && isVideoSource && (
 <div style={{ position: 'relative', marginBottom: '1.25rem' }}>
-<video ref={mainVideoRef} disablePictureInPicture muted={readyLanguages.length > 0} src={previewUrl} onClick={togglePlay} style={{ width: '100%', borderRadius: '12px', background: '#000', cursor: 'pointer', display: 'block' }} />
+<video ref={mainVideoRef} disablePictureInPicture muted={readyLanguages.length > 0 && activeLang !== 'original'} src={previewUrl} onClick={togglePlay} style={{ width: '100%', borderRadius: '12px', background: '#000', cursor: 'pointer', display: 'block' }} />
 
 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginTop: '0.6rem' }}>
 <button onClick={togglePlay} style={{ background: '#1A1A1A', color: 'white', border: 'none', borderRadius: '50%', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0, fontSize: '0.8rem' }}>
@@ -436,6 +630,9 @@ I own this video or have the rights to dub and use it
 
 {readyLanguages.length > 0 && (
 <div style={{ position: 'absolute', top: '12px', right: '12px', display: 'flex', gap: '6px', flexWrap: 'wrap', maxWidth: 'calc(100% - 24px)', justifyContent: 'flex-end' }}>
+<button onClick={() => switchLanguage('original')} style={trackChipStyle(activeLang === 'original')}>
+Original
+</button>
 {readyLanguages.map((code) => (
 <button key={code} onClick={() => switchLanguage(code)} style={trackChipStyle(activeLang === code)}>
 {LANGUAGES.find((l) => l.code === code)?.name}
@@ -465,6 +662,35 @@ This videos own audio stays off — sound comes from whichever language pill is 
 )}
 
 {error && <p style={{ color: '#B54A2B', marginBottom: '1rem', fontSize: '0.9rem' }}>{error}</p>}
+</div>
+
+<div style={{ flex: '1 1 380px', minWidth: '300px' }}>
+
+<div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.85rem' }}>
+<button onClick={() => { setMode('upload'); resetAll(); setFile(null); setLocalPreviewUrl('') }} style={{ ...tabStyle(mode === 'upload'), padding: '0.4rem 0.85rem', fontSize: '0.8rem' }}>Upload file</button>
+<button onClick={() => { setMode('youtube'); resetAll(); setFile(null); setLocalPreviewUrl('') }} style={{ ...tabStyle(mode === 'youtube'), padding: '0.4rem 0.85rem', fontSize: '0.8rem' }}>Paste YouTube URL</button>
+</div>
+
+<div style={{ background: '#F7F7F8', border: '1px solid #E5E5EA', padding: '0.85rem', borderRadius: '10px', marginBottom: '1.5rem' }}>
+{mode === 'upload' ? (
+<label style={{ display: 'block', border: '2px dashed #D1D1D8', borderRadius: '8px', padding: '0.85rem', textAlign: 'center', cursor: 'pointer', background: '#FFFFFF' }}>
+<input type="file" accept="audio/*,video/*" onChange={(e) => handleFileSelect(e.target.files?.[0] || null)} style={{ display: 'none' }} />
+<p style={{ margin: 0, fontSize: '0.82rem', fontWeight: 600, color: '#1D9E75' }}>Click to choose a file</p>
+<p style={{ margin: '0.25rem 0 0', fontSize: '0.72rem', color: '#9A9AA4' }}>{file ? file.name : 'MP4, MOV, MP3, WAV'}</p>
+</label>
+) : (
+<>
+<input type="text" placeholder="https://www.youtube.com/watch?v=..." value={youtubeUrl} onChange={(e) => setYoutubeUrl(e.target.value)} style={{ padding: '0.45rem 0.75rem', borderRadius: '8px', border: '1px solid #D1D1D8', fontSize: '0.82rem', marginBottom: '0.75rem', display: 'block', width: '100%', color: '#1A1A1A', background: '#FFFFFF' }} />
+<label style={{ display: 'flex', alignItems: 'flex-start', gap: '6px', fontSize: '0.72rem', color: '#6B6B76', marginBottom: '0.75rem', cursor: 'pointer' }}>
+<input type="checkbox" checked={rightsConfirmed} onChange={(e) => setRightsConfirmed(e.target.checked)} style={{ marginTop: '2px' }} />
+I own this video or have the rights to dub and use it
+</label>
+<button onClick={handleFetchYoutube} disabled={!youtubeUrl || !rightsConfirmed || processing} style={{ background: youtubeUrl && rightsConfirmed && !processing ? '#1D9E75' : '#D1D1D8', color: 'white', border: 'none', padding: '0.5rem 1rem', borderRadius: '8px', fontSize: '0.82rem', fontWeight: 600, cursor: youtubeUrl && rightsConfirmed && !processing ? 'pointer' : 'not-allowed' }}>
+{processing ? processingLabel || 'Working...' : 'Fetch video'}
+</button>
+</>
+)}
+</div>
 
 {transcript && (
 <>
@@ -479,18 +705,46 @@ This videos own audio stays off — sound comes from whichever language pill is 
 </select>
 </div>
 
+<div style={{ background: '#FDF2EE', border: '1px solid #F0C4B4', padding: '0.85rem 1rem', borderRadius: '10px', marginBottom: '1.5rem' }}>
+<p style={{ fontSize: '0.8rem', color: '#B54A2B', margin: 0 }}>
+Work here is not saved automatically. Use a Save to My Videos button before leaving this page, or you will need to start over.
+</p>
+</div>
+
 <div style={{ background: '#F7F7F8', border: '1px solid #E5E5EA', padding: '1.5rem', borderRadius: '12px', marginBottom: '1.5rem' }}>
 <p style={{ fontSize: '0.9rem', fontWeight: 600, marginBottom: '0.75rem', color: '#1A1A1A' }}>Select languages to dub into:</p>
+
+{!planLoading && plan === null ? (
+<div style={{ textAlign: 'center', padding: '1.5rem 0.5rem' }}>
+<p style={{ fontSize: '0.85rem', color: '#6B6B76', marginBottom: '1rem' }}>
+Dubbing requires an active subscription.
+</p>
+<Link href="/pricing" style={{ display: 'inline-block', background: '#1D9E75', color: 'white', padding: '0.65rem 1.5rem', borderRadius: '8px', textDecoration: 'none', fontSize: '0.85rem', fontWeight: 600 }}>
+Subscribe to unlock
+</Link>
+</div>
+) : (
+<>
 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1.25rem' }}>
-{LANGUAGES.map((lang) => (
-<button key={lang.code} onClick={() => toggleLanguage(lang.code)} style={chipStyle(selectedLanguages.includes(lang.code))}>
-{lang.name}
+{LANGUAGES.map((lang) => {
+const allowed = isLanguageAllowed(plan, lang.code)
+return (
+<button
+key={lang.code}
+onClick={() => allowed ? toggleLanguage(lang.code) : router.push('/pricing')}
+style={allowed ? chipStyle(selectedLanguages.includes(lang.code)) : lockedChipStyle}
+title={allowed ? undefined : 'Upgrade your plan to unlock this language'}
+>
+{!allowed && '🔒 '}{lang.name}
 </button>
-))}
+)
+})}
 </div>
 <button onClick={handleDubAll} disabled={selectedLanguages.length === 0 || dubbing} style={{ background: selectedLanguages.length > 0 && !dubbing ? '#533AB7' : '#D1D1D8', color: 'white', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '8px', fontSize: '0.95rem', fontWeight: 600, cursor: selectedLanguages.length > 0 && !dubbing ? 'pointer' : 'not-allowed' }}>
 {dubbing ? 'Dubbing...' : `Translate & dub (${selectedLanguages.length || 0})`}
 </button>
+</>
+)}
 </div>
 
 {readyLanguages.length > 0 && (
@@ -506,6 +760,31 @@ Lip sync — {LANGUAGES.find((l) => l.code === activeLang)?.name}
 </p>
 {isVideoSource ? (
 <>
+<div style={{ marginBottom: '1.25rem', paddingBottom: '1.25rem', borderBottom: '1px solid #E5E5EA' }}>
+<p style={{ fontSize: '0.8rem', fontWeight: 600, marginBottom: '0.6rem', color: '#1A1A1A' }}>Free dub — save the video you are watching now</p>
+<button onClick={() => handleSaveDub(activeLang)} disabled={savingDub || savedDub} style={{ background: savedDub ? '#EAF7F1' : '#1D9E75', color: savedDub ? '#1D9E75' : 'white', border: savedDub ? '1px solid #1D9E75' : 'none', padding: '0.6rem 1.25rem', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 600, cursor: savingDub || savedDub ? 'not-allowed' : 'pointer' }}>
+{savedDub ? 'Saved to My Videos ✓' : savingDub ? 'Saving...' : 'Save to My Videos'}
+</button>
+{saveDubError && <p style={{ color: '#B54A2B', marginTop: '0.6rem', fontSize: '0.8rem' }}>{saveDubError}</p>}
+</div>
+{trimDuration > 0 && (
+<div style={{ marginBottom: '1.25rem', paddingBottom: '1.25rem', borderBottom: '1px solid #E5E5EA' }}>
+<p style={{ fontSize: '0.8rem', fontWeight: 600, marginBottom: '0.5rem', color: '#1A1A1A' }}>
+Clip length for lip sync: {(trimEnd - trimStart).toFixed(1)}s
+</p>
+<p style={{ fontSize: '0.75rem', color: '#9A9AA4', marginBottom: '0.75rem' }}>
+Pick the part of the video to lip sync — shorter clips cost less and process faster.
+</p>
+<div style={{ marginBottom: '0.5rem' }}>
+<label style={{ fontSize: '0.75rem', color: '#6B6B76' }}>Start: {trimStart.toFixed(1)}s</label>
+<input type="range" min={0} max={trimDuration} step={0.1} value={trimStart} onChange={(e) => { const v = Number(e.target.value); if (v < trimEnd) setTrimStart(v) }} style={{ width: '100%' }} />
+</div>
+<div>
+<label style={{ fontSize: '0.75rem', color: '#6B6B76' }}>End: {trimEnd.toFixed(1)}s</label>
+<input type="range" min={0} max={trimDuration} step={0.1} value={trimEnd} onChange={(e) => { const v = Number(e.target.value); if (v > trimStart) setTrimEnd(v) }} style={{ width: '100%' }} />
+</div>
+</div>
+)}
 <button onClick={() => handleLipSync(activeLang)} disabled={results[activeLang].lipSyncing} style={{ background: results[activeLang].lipSyncing ? '#D1D1D8' : '#1A1A1A', color: 'white', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '8px', fontSize: '0.95rem', fontWeight: 600, cursor: results[activeLang].lipSyncing ? 'not-allowed' : 'pointer' }}>
 {results[activeLang].lipSyncing ? (results[activeLang].lipSyncStatus || 'Working...') : 'Lip sync my video'}
 </button>
@@ -513,6 +792,13 @@ Lip sync — {LANGUAGES.find((l) => l.code === activeLang)?.name}
 {results[activeLang].lipSyncVideoUrl && (
 <div style={{ marginTop: '1.25rem' }}>
 <video controls src={results[activeLang].lipSyncVideoUrl} style={{ width: '100%', borderRadius: '8px' }} />
+<button
+onClick={() => handleSaveVideo(activeLang)}
+disabled={savingVideo || savedVideo}
+style={{ marginTop: '0.75rem', background: savedVideo ? '#EAF7F1' : '#1D9E75', color: savedVideo ? '#1D9E75' : 'white', border: savedVideo ? '1px solid #1D9E75' : 'none', padding: '0.6rem 1.25rem', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 600, cursor: savingVideo || savedVideo ? 'not-allowed' : 'pointer' }}
+>
+{savedVideo ? 'Saved to My Videos ✓' : savingVideo ? 'Saving...' : 'Save to My Videos'}
+</button>
 </div>
 )}
 </>
@@ -523,6 +809,8 @@ Lip sync — {LANGUAGES.find((l) => l.code === activeLang)?.name}
 )}
 </>
 )}
+</div>
+</div>
 </div>
 </main>
 )
