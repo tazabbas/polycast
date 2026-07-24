@@ -3,14 +3,17 @@ import Stripe from 'stripe'
 import { createClient } from '@supabase/supabase-js'
 
 const PLAN_PRICE_IDS: Record<string, string> = {
+  [process.env.NEXT_PUBLIC_STRIPE_STARTER_PRICE_ID || '']: 'starter',
   [process.env.NEXT_PUBLIC_STRIPE_CREATOR_PRICE_ID || '']: 'creator',
-  [process.env.NEXT_PUBLIC_STRIPE_STUDIO_PRICE_ID || '']: 'studio',
+  [process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID || '']: 'pro',
 }
 
 const CREDIT_PACK_MINUTES: Record<string, number> = {
-  [process.env.NEXT_PUBLIC_STRIPE_LIPSYNC_STARTER_PRICE_ID || '']: 10,
-  [process.env.NEXT_PUBLIC_STRIPE_LIPSYNC_GROWTH_PRICE_ID || '']: 30,
-  [process.env.NEXT_PUBLIC_STRIPE_LIPSYNC_SCALE_PRICE_ID || '']: 100,
+  [process.env.NEXT_PUBLIC_STRIPE_LIPSYNC_TRIAL_PRICE_ID || '']: 2,
+  [process.env.NEXT_PUBLIC_STRIPE_LIPSYNC_SMALL_PRICE_ID || '']: 5,
+  [process.env.NEXT_PUBLIC_STRIPE_LIPSYNC_MEDIUM_PRICE_ID || '']: 15,
+  [process.env.NEXT_PUBLIC_STRIPE_LIPSYNC_LARGE_PRICE_ID || '']: 40,
+  [process.env.NEXT_PUBLIC_STRIPE_LIPSYNC_BULK_PRICE_ID || '']: 100,
 }
 
 export async function POST(request: NextRequest) {
