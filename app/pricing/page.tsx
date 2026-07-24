@@ -83,7 +83,7 @@ export default function PricingPage() {
             <div style={{ fontSize: '2rem', fontWeight: 700, color: '#7C3AED', margin: '0.75rem 0' }}>£90<span style={{ fontSize: '1rem', fontWeight: 400, color: '#6B6B76' }}>/mo</span></div>
             <p style={{ fontSize: '0.85rem', color: '#6B6B76', marginBottom: '1.5rem' }}>For serious creators and businesses</p>
             <ul style={{ listStyle: 'none', padding: 0, textAlign: 'left', marginBottom: '1.5rem' }}>
-              {['50+ languages', 'Everything in Creator', '10% off all lip sync credit packs', 'Priority processing', 'Dedicated support'].map(f => (
+              {['35+ languages', 'Everything in Creator', '10% off all lip sync credit packs', 'Priority processing', 'Dedicated support'].map(f => (
                 <li key={f} style={{ fontSize: '0.85rem', color: '#4A4A54', padding: '5px 0', display: 'flex', gap: '8px' }}>
                   <span style={{ color: '#7C3AED' }}>✓</span> {f}
                 </li>
