@@ -77,7 +77,7 @@ export default async function Dashboard() {
     errorMsg = 'No Google access token found — try signing out and in again.'
   }
 
-  let plan = 'free'
+  let plan: string | null = null
   let minutesBalance = 0
   try {
     const supabase = createClient(
@@ -95,10 +95,16 @@ export default async function Dashboard() {
       minutesBalance = credits.minutes_balance
     }
   } catch {
-    // Defaults to free/0 if lookup fails
+    // Defaults to null/0 if lookup fails
   }
 
-  const planLabel = plan === 'creator' ? 'Creator' : plan === 'studio' ? 'Studio' : 'Free'
+  const planLabel =
+    plan === 'starter' ? 'Starter' :
+    plan === 'creator' ? 'Creator' :
+    plan === 'pro' ? 'Pro' :
+    'No active plan'
+
+  const planLinkText = plan === 'pro' ? 'Manage plan →' : plan ? 'Upgrade plan →' : 'Subscribe →'
 
   return (
     <main
@@ -234,7 +240,7 @@ export default async function Dashboard() {
                     textDecoration: 'none',
                   }}
                 >
-                  {plan === 'free' ? 'Upgrade to Pro →' : 'Manage plan →'}
+                  {planLinkText}
                 </Link>
               </div>
             </div>
