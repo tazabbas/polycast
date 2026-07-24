@@ -64,8 +64,6 @@ export default function Home() {
           <span style={{ fontWeight: 700, fontSize: '1.2rem', color: '#1D9E75' }}>PolyCast</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-          <Link href="/pricing" style={{ color: '#6B6B76', textDecoration: 'none', fontSize: '0.9rem' }}>Pricing</Link>
-          <Link href="/watch" style={{ color: '#6B6B76', textDecoration: 'none', fontSize: '0.9rem' }}>Demo</Link>
           <Show when="signed-out">
             <SignInButton mode="modal">
               <button style={{ background: 'transparent', color: '#6B6B76', border: '1px solid #D1D1D8', padding: '0.5rem 1.25rem', borderRadius: '8px', fontSize: '0.9rem', cursor: 'pointer' }}>
@@ -74,16 +72,11 @@ export default function Home() {
             </SignInButton>
             <SignUpButton mode="modal">
               <button style={{ background: '#1D9E75', color: 'white', border: 'none', padding: '0.5rem 1.25rem', borderRadius: '8px', fontSize: '0.9rem', cursor: 'pointer', fontWeight: 500 }}>
-                Get started free
+                Sign up
               </button>
             </SignUpButton>
           </Show>
           <Show when="signed-in">
-            <Link href="/dashboard">
-              <button style={{ background: '#1D9E75', color: 'white', border: 'none', padding: '0.5rem 1.25rem', borderRadius: '8px', fontSize: '0.9rem', cursor: 'pointer' }}>
-                Dashboard
-              </button>
-            </Link>
             <UserButton />
           </Show>
         </div>
@@ -147,13 +140,6 @@ export default function Home() {
                   I&apos;m a creator
                 </button>
               </SignUpButton>
-            </Show>
-            <Show when="signed-in">
-              <Link href="/pricing">
-                <button style={{ display: 'flex', alignItems: 'center', gap: '10px', background: '#1D9E75', color: 'white', border: 'none', padding: '1rem 2rem', borderRadius: '50px', fontSize: '1.05rem', cursor: 'pointer', fontWeight: 600, boxShadow: '0 0 40px rgba(29,158,117,0.35)' }}>
-                  Subscribe
-                </button>
-              </Link>
             </Show>
           </div>
 
