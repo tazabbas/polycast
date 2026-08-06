@@ -13,7 +13,7 @@ const PLAN_LANGUAGES: Record<string, string[]> = {
 }
 
 function isLanguageAllowed(plan: string | null, code: string): boolean {
-  if (plan === 'pro') return true
+  if (plan === 'pro' || plan === 'business') return true
   if (plan === 'creator') return PLAN_LANGUAGES.creator.includes(code)
   if (plan === 'starter') return PLAN_LANGUAGES.starter.includes(code)
   return false
