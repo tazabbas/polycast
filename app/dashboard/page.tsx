@@ -102,9 +102,10 @@ export default async function Dashboard() {
     plan === 'starter' ? 'Starter' :
     plan === 'creator' ? 'Creator' :
     plan === 'pro' ? 'Pro' :
+    plan === 'business' ? 'Business' :
     'No active plan'
 
-  const planLinkText = plan === 'pro' ? 'Manage plan →' : plan ? 'Upgrade plan →' : 'Subscribe →'
+  const planLinkText = plan === 'pro' || plan === 'business' ? 'Manage plan →' : plan ? 'Upgrade plan →' : 'Subscribe →'
 
   return (
     <main
