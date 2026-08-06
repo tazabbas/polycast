@@ -8,7 +8,7 @@ export async function POST(request: NextRequest) {
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
-    const { priceId, mode } = await request.json()
+    const { priceId, mode, companyName, companyWebsite } = await request.json()
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 
     const checkoutMode: 'subscription' | 'payment' = mode === 'payment' ? 'payment' : 'subscription'
@@ -26,6 +26,8 @@ export async function POST(request: NextRequest) {
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/pricing`,
       metadata: {
         userId,
+        ...(companyName ? { companyName } : {}),
+        ...(companyWebsite ? { companyWebsite } : {}),
       },
     })
     return NextResponse.json({ url: session.url })
