@@ -452,40 +452,39 @@ export default async function Dashboard() {
                 }}
               >
                 {videos.map((video) => (
-                  <a key={video.id} href={`https://www.youtube.com/watch?v=${video.id}`} target="_blank" rel="noopener noreferrer"
+                  <div key={video.id}
                     style={{
                       border: '1px solid rgba(255,255,255,0.12)',
                       borderRadius: '12px',
                       overflow: 'hidden',
                       background: 'rgba(255,255,255,0.04)',
-                      textDecoration: 'none',
-                      color: 'inherit',
-                      display: 'block',
                       transition: 'transform 0.15s ease, border-color 0.15s ease',
                     }}
                     className="polycast-video-card"
                   >
-                    <div style={{ position: 'relative', paddingBottom: '56.25%', background: '#000' }}>
-                      <img
-                        src={video.thumbnail}
-                        alt={video.title}
-                        style={{
-                          position: 'absolute',
-                          top: 0,
-                          left: 0,
-                          width: '100%',
-                          height: '100%',
-                          objectFit: 'cover',
-                          display: 'block',
-                        }}
-                      />
-                    </div>
+                    <a href={`https://www.youtube.com/watch?v=${video.id}`} target="_blank" rel="noopener noreferrer" style={{ display: 'block' }}>
+                      <div style={{ position: 'relative', paddingBottom: '56.25%', background: '#000' }}>
+                        <img
+                          src={video.thumbnail}
+                          alt={video.title}
+                          style={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover',
+                            display: 'block',
+                          }}
+                        />
+                      </div>
+                    </a>
                     <div style={{ padding: '0.85rem 1rem' }}>
                       <p
                         style={{
                           fontSize: '0.9rem',
                           fontWeight: 500,
-                          margin: 0,
+                          margin: '0 0 10px',
                           lineHeight: 1.4,
                           color: '#FFFFFF',
                           overflow: 'hidden',
@@ -497,8 +496,28 @@ export default async function Dashboard() {
                       >
                         {video.title}
                       </p>
+                      {plan && (
+                        <Link
+                          href={`/dashboard/studio?youtube=${encodeURIComponent(`https://www.youtube.com/watch?v=${video.id}`)}`}
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            fontSize: '0.8rem',
+                            fontWeight: 600,
+                            color: '#5DCAA5',
+                            textDecoration: 'none',
+                            background: 'rgba(93,202,165,0.12)',
+                            border: '1px solid rgba(93,202,165,0.4)',
+                            borderRadius: '8px',
+                            padding: '0.4rem 0.8rem',
+                          }}
+                        >
+                          ✎ Edit
+                        </Link>
+                      )}
                     </div>
-                  </a>
+                  </div>
                 ))}
               </div>
             ) : (
