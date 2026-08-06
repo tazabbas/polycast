@@ -29,6 +29,17 @@ export async function POST(request: NextRequest) {
         ...(companyName ? { companyName } : {}),
         ...(companyWebsite ? { companyWebsite } : {}),
       },
+      ...(checkoutMode === 'subscription'
+        ? {
+            subscription_data: {
+              metadata: {
+                userId,
+                ...(companyName ? { companyName } : {}),
+                ...(companyWebsite ? { companyWebsite } : {}),
+              },
+            },
+          }
+        : {}),
     })
     return NextResponse.json({ url: session.url })
   } catch (error) {
