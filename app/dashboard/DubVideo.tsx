@@ -76,17 +76,23 @@ const [file, setFile] = useState<File | null>(null)
 const [localPreviewUrl, setLocalPreviewUrl] = useState('')
 const [youtubeUrl, setYoutubeUrl] = useState('')
 
+const [processedYoutubeParam, setProcessedYoutubeParam] = useState('')
+const [rightsConfirmed, setRightsConfirmed] = useState(false)
+
 useEffect(() => {
   const incomingYoutube = searchParams.get('youtube')
-  if (incomingYoutube) {
+  if (incomingYoutube && incomingYoutube !== processedYoutubeParam) {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setProcessedYoutubeParam(incomingYoutube)
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setMode('youtube')
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setYoutubeUrl(incomingYoutube)
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setRightsConfirmed(true)
+    handleFetchYoutube({ url: incomingYoutube, skipRightsCheck: true })
   }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-}, [])
-const [rightsConfirmed, setRightsConfirmed] = useState(false)
+}, [searchParams, processedYoutubeParam])
 
 const [videoUrl, setVideoUrl] = useState('')
 const [videoLabel, setVideoLabel] = useState('')
@@ -292,15 +298,17 @@ setProcessing(false); setProcessingLabel('')
 }
 }
 
-async function handleFetchYoutube() {
-if (!youtubeUrl || !rightsConfirmed) return
+async function handleFetchYoutube(options?: { url?: string; skipRightsCheck?: boolean }) {
+const urlToUse = options?.url || youtubeUrl
+if (!urlToUse) return
+if (!options?.skipRightsCheck && !rightsConfirmed) return
 setProcessing(true); setError(''); resetAll()
 try {
 setProcessingLabel('Fetching video...')
 const fetchRes = await fetch('/api/youtube-fetch', {
 method: 'POST',
 headers: { 'Content-Type': 'application/json' },
-body: JSON.stringify({ youtubeUrl }),
+body: JSON.stringify({ youtubeUrl: urlToUse }),
 })
 const fetchData = await fetchRes.json()
 if (!fetchRes.ok || !fetchData.videoUrl) {
@@ -697,7 +705,7 @@ This videos own audio stays off — sound comes from whichever language pill is 
 <input type="checkbox" checked={rightsConfirmed} onChange={(e) => setRightsConfirmed(e.target.checked)} style={{ marginTop: '2px' }} />
 I own this video or have the rights to dub and use it
 </label>
-<button onClick={handleFetchYoutube} disabled={!youtubeUrl || !rightsConfirmed || processing} style={{ background: youtubeUrl && rightsConfirmed && !processing ? '#1D9E75' : '#D1D1D8', color: 'white', border: 'none', padding: '0.5rem 1rem', borderRadius: '8px', fontSize: '0.82rem', fontWeight: 600, cursor: youtubeUrl && rightsConfirmed && !processing ? 'pointer' : 'not-allowed' }}>
+<button onClick={() => handleFetchYoutube()} disabled={!youtubeUrl || !rightsConfirmed || processing} style={{ background: youtubeUrl && rightsConfirmed && !processing ? '#1D9E75' : '#D1D1D8', color: 'white', border: 'none', padding: '0.5rem 1rem', borderRadius: '8px', fontSize: '0.82rem', fontWeight: 600, cursor: youtubeUrl && rightsConfirmed && !processing ? 'pointer' : 'not-allowed' }}>
 {processing ? processingLabel || 'Working...' : 'Fetch video'}
 </button>
 </>
