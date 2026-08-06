@@ -238,16 +238,16 @@ export default function Home() {
       {/* SECTION 3 — Pricing */}
       <section style={{ position: 'relative', padding: '4rem 2rem', overflow: 'hidden' }}>
         <MatrixOverlay />
-        <div style={{ position: 'relative', zIndex: 1, maxWidth: '1000px', margin: '0 auto', textAlign: 'center' }}>
+        <div style={{ position: 'relative', zIndex: 1, maxWidth: '1200px', margin: '0 auto', textAlign: 'center' }}>
           <h2 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '0.75rem' }}>Simple pricing for creators and businesses</h2>
-          <p style={{ color: '#6B6B76', marginBottom: '2.5rem' }}>Lip sync credits sold separately — you only pay for what you use.</p>
+          <p style={{ color: '#6B6B76', marginBottom: '2.5rem' }}>Bundled lip sync minutes included — extra credits available any time.</p>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
 
             <div style={{ background: '#F7F7F8', border: '1px solid #E5E5EA', borderRadius: '16px', padding: '2rem', textAlign: 'left' }}>
               <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '0.25rem' }}>Starter</h3>
-              <div style={{ fontSize: '2rem', fontWeight: 700, margin: '0.75rem 0' }}>£13<span style={{ fontSize: '1rem', fontWeight: 400, color: '#6B6B76' }}>/mo</span></div>
-              <p style={{ fontSize: '0.85rem', color: '#6B6B76', marginBottom: '1.5rem' }}>For getting started</p>
+              <div style={{ fontSize: '2rem', fontWeight: 700, margin: '0.75rem 0' }}>£15<span style={{ fontSize: '1rem', fontWeight: 400, color: '#6B6B76' }}>/mo</span></div>
+              <p style={{ fontSize: '0.85rem', color: '#6B6B76', marginBottom: '1.5rem' }}>3 min lip sync/mo · getting started</p>
               <Link href="/pricing" style={{ display: 'block', background: 'transparent', color: '#4A4A54', border: '1px solid #D1D1D8', padding: '0.75rem', borderRadius: '8px', textAlign: 'center', textDecoration: 'none', fontSize: '0.9rem' }}>
                 View plan
               </Link>
@@ -256,8 +256,8 @@ export default function Home() {
             <div style={{ background: '#EAF7F1', border: '2px solid #1D9E75', borderRadius: '16px', padding: '2rem', position: 'relative', textAlign: 'left' }}>
               <div style={{ position: 'absolute', top: '-14px', left: '50%', transform: 'translateX(-50%)', background: '#1D9E75', color: 'white', fontSize: '11px', fontWeight: 600, padding: '4px 14px', borderRadius: '20px' }}>MOST POPULAR</div>
               <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '0.25rem' }}>Creator</h3>
-              <div style={{ fontSize: '2rem', fontWeight: 700, color: '#1D9E75', margin: '0.75rem 0' }}>£39<span style={{ fontSize: '1rem', fontWeight: 400, color: '#6B6B76' }}>/mo</span></div>
-              <p style={{ fontSize: '0.85rem', color: '#6B6B76', marginBottom: '1.5rem' }}>For growing channels</p>
+              <div style={{ fontSize: '2rem', fontWeight: 700, color: '#1D9E75', margin: '0.75rem 0' }}>£29<span style={{ fontSize: '1rem', fontWeight: 400, color: '#6B6B76' }}>/mo</span></div>
+              <p style={{ fontSize: '0.85rem', color: '#6B6B76', marginBottom: '1.5rem' }}>8 min lip sync/mo · all 3 platforms</p>
               <Link href="/pricing" style={{ display: 'block', background: '#1D9E75', color: 'white', border: 'none', padding: '0.75rem', borderRadius: '8px', textAlign: 'center', textDecoration: 'none', fontSize: '0.9rem', fontWeight: 600 }}>
                 View plan
               </Link>
@@ -266,9 +266,18 @@ export default function Home() {
             <div style={{ background: '#F2F0FC', border: '1px solid #533AB7', borderRadius: '16px', padding: '2rem', position: 'relative', textAlign: 'left' }}>
               <div style={{ position: 'absolute', top: '-14px', left: '50%', transform: 'translateX(-50%)', background: '#533AB7', color: 'white', fontSize: '11px', fontWeight: 600, padding: '4px 14px', borderRadius: '20px' }}>PREMIUM</div>
               <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '0.25rem' }}>Pro</h3>
-              <div style={{ fontSize: '2rem', fontWeight: 700, color: '#7C3AED', margin: '0.75rem 0' }}>£90<span style={{ fontSize: '1rem', fontWeight: 400, color: '#6B6B76' }}>/mo</span></div>
-              <p style={{ fontSize: '0.85rem', color: '#6B6B76', marginBottom: '1.5rem' }}>For serious creators and businesses</p>
+              <div style={{ fontSize: '2rem', fontWeight: 700, color: '#7C3AED', margin: '0.75rem 0' }}>£59<span style={{ fontSize: '1rem', fontWeight: 400, color: '#6B6B76' }}>/mo</span></div>
+              <p style={{ fontSize: '0.85rem', color: '#6B6B76', marginBottom: '1.5rem' }}>20 min lip sync/mo · all 37 languages</p>
               <Link href="/pricing" style={{ display: 'block', background: '#533AB7', color: 'white', border: 'none', padding: '0.75rem', borderRadius: '8px', textAlign: 'center', textDecoration: 'none', fontSize: '0.9rem', fontWeight: 600 }}>
+                View plan
+              </Link>
+            </div>
+
+            <div style={{ background: '#FFFFFF', border: '1px solid #1D9E75', borderRadius: '16px', padding: '2rem', textAlign: 'left' }}>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '0.25rem' }}>Business</h3>
+              <div style={{ fontSize: '2rem', fontWeight: 700, color: '#1D9E75', margin: '0.75rem 0' }}>£19<span style={{ fontSize: '1rem', fontWeight: 400, color: '#6B6B76' }}>/mo</span></div>
+              <p style={{ fontSize: '0.85rem', color: '#6B6B76', marginBottom: '1.5rem' }}>Pay-as-you-go lip sync · ad campaigns</p>
+              <Link href="/pricing#business" style={{ display: 'block', background: 'transparent', color: '#1D9E75', border: '1px solid #1D9E75', padding: '0.75rem', borderRadius: '8px', textAlign: 'center', textDecoration: 'none', fontSize: '0.9rem', fontWeight: 600 }}>
                 View plan
               </Link>
             </div>
