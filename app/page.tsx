@@ -60,9 +60,10 @@ export default function Home() {
 
       <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.25rem 2rem', borderBottom: '1px solid #E5E5EA', position: 'sticky', top: 0, background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(10px)', zIndex: 100 }}>
         <Show when="signed-in">
-          <Link href="/dashboard" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}>
+          <Link href="/dashboard" title="Go to dashboard" className="polycast-logo-link" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none', padding: '6px 10px', borderRadius: '8px', transition: 'background 0.15s ease' }}>
             <img src="/logo.svg" alt="PolyCast logo" style={{ width: '36px', height: '36px' }} />
             <span style={{ fontWeight: 700, fontSize: '1.2rem', color: '#1D9E75' }}>PolyCast</span>
+            <span className="polycast-logo-hint" style={{ fontSize: '0.75rem', color: '#1D9E75', opacity: 0, transition: 'opacity 0.15s ease', marginLeft: '2px' }}>→ Dashboard</span>
           </Link>
         </Show>
         <Show when="signed-out">
@@ -165,6 +166,12 @@ export default function Home() {
           @keyframes polycastPulse {
             from { opacity: 0.3; transform: scale(0.8); }
             to { opacity: 1; transform: scale(1.3); }
+          }
+          .polycast-logo-link:hover {
+            background: #EAF7F1;
+          }
+          .polycast-logo-link:hover .polycast-logo-hint {
+            opacity: 1;
           }
         `}</style>
       </section>
