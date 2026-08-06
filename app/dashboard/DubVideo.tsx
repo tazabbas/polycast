@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect, useRef, type ChangeEvent } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { upload } from '@vercel/blob/client'
 import { FFmpeg } from '@ffmpeg/ffmpeg'
@@ -61,6 +61,7 @@ return ffmpeg
 export default function DubVideo() {
 const router = useRouter()
 const [mode, setMode] = useState<'upload' | 'youtube'>('upload')
+const searchParams = useSearchParams()
 
 const [plan, setPlan] = useState<string | null>(null)
 const [planLoading, setPlanLoading] = useState(true)
@@ -74,6 +75,17 @@ setPlan(data.plan || null)
 const [file, setFile] = useState<File | null>(null)
 const [localPreviewUrl, setLocalPreviewUrl] = useState('')
 const [youtubeUrl, setYoutubeUrl] = useState('')
+
+useEffect(() => {
+  const incomingYoutube = searchParams.get('youtube')
+  if (incomingYoutube) {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMode('youtube')
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setYoutubeUrl(incomingYoutube)
+  }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [])
 const [rightsConfirmed, setRightsConfirmed] = useState(false)
 
 const [videoUrl, setVideoUrl] = useState('')
