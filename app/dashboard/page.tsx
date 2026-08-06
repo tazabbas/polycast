@@ -390,47 +390,6 @@ export default async function Dashboard() {
               )}
             </div>
 
-            {plan && (
-              <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginBottom: '2.5rem' }}>
-                <Link
-                  href="/dashboard/studio"
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    background: '#1D9E75',
-                    color: 'white',
-                    padding: '0.9rem 1.75rem',
-                    borderRadius: '10px',
-                    textDecoration: 'none',
-                    fontSize: '0.95rem',
-                    fontWeight: 600,
-                    boxShadow: '0 4px 20px rgba(29, 158, 117, 0.3)',
-                  }}
-                >
-                  Open Studio →
-                </Link>
-                <Link
-                  href="/dashboard/studio"
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    background: 'transparent',
-                    color: '#FFFFFF',
-                    border: '1px solid rgba(255,255,255,0.25)',
-                    padding: '0.9rem 1.75rem',
-                    borderRadius: '10px',
-                    textDecoration: 'none',
-                    fontSize: '0.95rem',
-                    fontWeight: 600,
-                  }}
-                >
-                  Upload a video →
-                </Link>
-              </div>
-            )}
-
             <h2
               style={{
                 fontFamily: "'Syne', sans-serif",
