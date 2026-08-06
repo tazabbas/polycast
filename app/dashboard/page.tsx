@@ -194,14 +194,44 @@ export default async function Dashboard() {
 
         {channelData ? (
           <>
+            {/* Plan + credits summary bar */}
             <div
               style={{
-                display: 'grid',
-                gridTemplateColumns: 'minmax(260px, 1.1fr) repeat(2, 1fr)',
-                gap: '1rem',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                flexWrap: 'wrap',
+                gap: '0.75rem',
+                background: 'rgba(255,255,255,0.05)',
+                border: '1px solid rgba(255,255,255,0.12)',
+                borderRadius: '14px',
+                padding: '1rem 1.5rem',
                 marginBottom: '1rem',
               }}
             >
+              <div>
+                <span style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.55)', marginRight: '8px' }}>Plan</span>
+                <span style={{ fontSize: '0.95rem', fontWeight: 700, color: '#FFFFFF' }}>{planLabel}</span>
+              </div>
+              <div>
+                <span style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.55)', marginRight: '8px' }}>Lip sync credits</span>
+                <span style={{ fontSize: '0.95rem', fontWeight: 700, color: '#5DCAA5' }}>{minutesBalance} mins</span>
+              </div>
+              <Link href="/pricing" style={{ fontSize: '0.85rem', fontWeight: 600, color: '#5DCAA5', textDecoration: 'none' }}>
+                {planLinkText}
+              </Link>
+            </div>
+
+            {/* Platform connection boxes */}
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+                gap: '1rem',
+                marginBottom: '1.75rem',
+              }}
+            >
+              {/* YouTube — included on every plan */}
               <div
                 style={{
                   display: 'flex',
@@ -217,20 +247,20 @@ export default async function Dashboard() {
                   src={channelData.thumbnail}
                   alt="Channel avatar"
                   style={{
-                    width: '56px',
-                    height: '56px',
+                    width: '48px',
+                    height: '48px',
                     borderRadius: '50%',
                     flexShrink: 0,
                     border: '2px solid #1D9E75',
                   }}
                 />
                 <div style={{ minWidth: 0 }}>
-                  <p style={{ fontSize: '0.78rem', color: '#5DCAA5', margin: 0, letterSpacing: '0.02em' }}>
-                    Connected channel
+                  <p style={{ fontSize: '0.75rem', color: '#5DCAA5', margin: 0, letterSpacing: '0.02em' }}>
+                    YouTube · connected
                   </p>
                   <p
                     style={{
-                      fontSize: '1.1rem',
+                      fontSize: '1rem',
                       fontWeight: 700,
                       margin: 0,
                       whiteSpace: 'nowrap',
@@ -242,69 +272,83 @@ export default async function Dashboard() {
                   >
                     {channelData.title}
                   </p>
+                  <p style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.5)', margin: '2px 0 0' }}>
+                    {videos.length} videos synced
+                  </p>
                 </div>
               </div>
 
-              <div
-                style={{
-                  background: 'rgba(255,255,255,0.05)',
-                  border: '1px solid rgba(255,255,255,0.12)',
-                  borderRadius: '14px',
-                  padding: '1.25rem 1.5rem',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'center',
-                }}
-              >
-                <p style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.55)', margin: '0 0 6px' }}>Videos synced</p>
-                <p
-                  style={{
-                    fontSize: '1.8rem',
-                    fontWeight: 800,
-                    margin: 0,
-                    fontFamily: "'Syne', sans-serif",
-                    color: '#5DCAA5',
-                  }}
-                >
-                  {videos.length}
-                </p>
-              </div>
+              {/* TikTok */}
+              {(() => {
+                const tiktokLocked = plan === 'starter' || !plan
+                const accountLimit = plan === 'creator' ? 2 : plan === 'pro' ? 5 : plan === 'business' ? 10 : 0
+                return (
+                  <div
+                    style={{
+                      background: tiktokLocked ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.05)',
+                      border: tiktokLocked ? '1px dashed rgba(255,255,255,0.2)' : '1px solid rgba(255,255,255,0.12)',
+                      borderRadius: '14px',
+                      padding: '1.25rem 1.5rem',
+                    }}
+                  >
+                    <p style={{ fontSize: '0.75rem', color: tiktokLocked ? 'rgba(255,255,255,0.4)' : 'rgba(255,255,255,0.55)', margin: '0 0 4px', letterSpacing: '0.02em' }}>
+                      {tiktokLocked ? '🔒 TikTok' : `TikTok · ${accountLimit} accounts`}
+                    </p>
+                    <p style={{ fontSize: '1rem', fontWeight: 700, margin: '0 0 10px', color: tiktokLocked ? 'rgba(255,255,255,0.35)' : '#FFFFFF', fontFamily: "'Syne', sans-serif" }}>
+                      Not connected
+                    </p>
+                    {tiktokLocked ? (
+                      <Link href="/pricing" style={{ fontSize: '0.78rem', fontWeight: 600, color: '#5DCAA5', textDecoration: 'none' }}>
+                        Upgrade to unlock →
+                      </Link>
+                    ) : (
+                      <button
+                        disabled
+                        title="TikTok integration is coming soon"
+                        style={{ fontSize: '0.78rem', fontWeight: 600, background: 'rgba(93,202,165,0.15)', color: '#5DCAA5', border: '1px solid rgba(93,202,165,0.4)', borderRadius: '8px', padding: '0.45rem 0.9rem', cursor: 'not-allowed' }}
+                      >
+                        Connect TikTok — Coming soon
+                      </button>
+                    )}
+                  </div>
+                )
+              })()}
 
-              <div
-                style={{
-                  background: 'rgba(255,255,255,0.05)',
-                  border: '1px solid rgba(255,255,255,0.12)',
-                  borderRadius: '14px',
-                  padding: '1.25rem 1.5rem',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'center',
-                }}
-              >
-                <p style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.55)', margin: '0 0 6px' }}>Current plan</p>
-                <p
-                  style={{
-                    fontSize: '1.4rem',
-                    fontWeight: 800,
-                    margin: '0 0 6px',
-                    fontFamily: "'Syne', sans-serif",
-                    color: '#FFFFFF',
-                  }}
-                >
-                  {planLabel}
-                </p>
-                <Link
-                  href="/pricing"
-                  style={{
-                    fontSize: '0.8rem',
-                    fontWeight: 600,
-                    color: '#5DCAA5',
-                    textDecoration: 'none',
-                  }}
-                >
-                  {planLinkText}
-                </Link>
-              </div>
+              {/* Instagram */}
+              {(() => {
+                const instaLocked = plan === 'starter' || !plan
+                const accountLimit = plan === 'creator' ? 2 : plan === 'pro' ? 5 : plan === 'business' ? 10 : 0
+                return (
+                  <div
+                    style={{
+                      background: instaLocked ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.05)',
+                      border: instaLocked ? '1px dashed rgba(255,255,255,0.2)' : '1px solid rgba(255,255,255,0.12)',
+                      borderRadius: '14px',
+                      padding: '1.25rem 1.5rem',
+                    }}
+                  >
+                    <p style={{ fontSize: '0.75rem', color: instaLocked ? 'rgba(255,255,255,0.4)' : 'rgba(255,255,255,0.55)', margin: '0 0 4px', letterSpacing: '0.02em' }}>
+                      {instaLocked ? '🔒 Instagram' : `Instagram · ${accountLimit} accounts`}
+                    </p>
+                    <p style={{ fontSize: '1rem', fontWeight: 700, margin: '0 0 10px', color: instaLocked ? 'rgba(255,255,255,0.35)' : '#FFFFFF', fontFamily: "'Syne', sans-serif" }}>
+                      Not connected
+                    </p>
+                    {instaLocked ? (
+                      <Link href="/pricing" style={{ fontSize: '0.78rem', fontWeight: 600, color: '#5DCAA5', textDecoration: 'none' }}>
+                        Upgrade to unlock →
+                      </Link>
+                    ) : (
+                      <button
+                        disabled
+                        title="Instagram integration is coming soon"
+                        style={{ fontSize: '0.78rem', fontWeight: 600, background: 'rgba(93,202,165,0.15)', color: '#5DCAA5', border: '1px solid rgba(93,202,165,0.4)', borderRadius: '8px', padding: '0.45rem 0.9rem', cursor: 'not-allowed' }}
+                      >
+                        Connect Instagram — Coming soon
+                      </button>
+                    )}
+                  </div>
+                )
+              })()}
             </div>
 
             <div
