@@ -268,6 +268,15 @@ setFetchErrorType('')
 setTrimStart(0); setTrimEnd(0); setTrimDuration(0)
 }
 
+function handleRemoveVideo() {
+resetAll()
+setFile(null)
+if (localPreviewUrl) URL.revokeObjectURL(localPreviewUrl)
+setLocalPreviewUrl('')
+setYoutubeUrl('')
+setRightsConfirmed(false)
+}
+
 function handleFileSelect(selected: File | null) {
 resetAll()
 setFile(selected)
@@ -679,7 +688,12 @@ This videos own audio stays off — sound comes from whichever language pill is 
 )}
 
 {videoLabel && !error && (
-<p style={{ fontSize: '0.8rem', color: '#6B6B76', marginBottom: '1.25rem' }}>Source: {videoLabel}</p>
+<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
+<p style={{ fontSize: '0.8rem', color: '#6B6B76', margin: 0 }}>Source: {videoLabel}</p>
+<button onClick={handleRemoveVideo} style={{ fontSize: '0.78rem', fontWeight: 600, color: '#B54A2B', background: 'transparent', border: 'none', cursor: 'pointer', padding: '0.2rem 0.4rem' }}>
+✕ Remove video
+</button>
+</div>
 )}
 
 {videoUrl && !transcript && !processing && isVideoSource && (
