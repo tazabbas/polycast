@@ -167,6 +167,12 @@ useEffect(() => {
 const video = mainVideoRef.current
 if (!video) return
 
+// Explicitly set muted via JS — the React `muted` prop alone doesn't always
+// reliably sync with the actual DOM element, which was causing the original
+// video's audio to play alongside the dubbed track (heard as an echo).
+const hasReadyLanguage = selectedLanguages.some((code) => results[code]?.audioUrl)
+video.muted = hasReadyLanguage && activeLang !== 'original'
+
 function syncActiveAudio() {
 const activeAudio = audioTrackRefs.current[activeLang]
 if (!activeAudio) return
@@ -215,7 +221,7 @@ video.removeEventListener('pause', handlePauseVideo)
 video.removeEventListener('seeked', handleSeeked)
 video.removeEventListener('loadedmetadata', handleLoadedMetadata)
 }
-}, [activeLang, previewUrl])
+}, [activeLang, previewUrl, selectedLanguages, results])
 
 useEffect(() => {
 if (transcript) {
