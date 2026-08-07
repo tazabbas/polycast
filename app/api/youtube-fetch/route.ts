@@ -28,10 +28,8 @@ export async function POST(request: NextRequest) {
     console.error('YouTube fetch error:', error)
     return NextResponse.json(
       {
-        error:
-          "Couldn't fetch this video automatically — it's likely set to Private on YouTube. " +
-          "Private videos can't be auto-fetched by any tool, even for their own owner, since YouTube doesn't provide a way to download them via the API. " +
-          "To use it: either switch it to Public or Unlisted in YouTube Studio and try again, or download it yourself from YouTube Studio and use the Upload file tab instead.",
+        error: "This video couldn't be fetched automatically — it's likely set to Private on YouTube.",
+        errorType: 'private_or_unavailable',
       },
       { status: 500 }
     )

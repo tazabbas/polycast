@@ -108,6 +108,7 @@ const [transcriptionId, setTranscriptionId] = useState('')
 const [processing, setProcessing] = useState(false)
 const [processingLabel, setProcessingLabel] = useState('')
 const [error, setError] = useState('')
+const [fetchErrorType, setFetchErrorType] = useState('')
 
 const [selectedLanguages, setSelectedLanguages] = useState<string[]>([])
 const [results, setResults] = useState<Record<string, LangResult>>({})
@@ -263,6 +264,7 @@ setResults({})
 setSelectedLanguages([])
 setActiveLang('')
 setError('')
+setFetchErrorType('')
 setTrimStart(0); setTrimEnd(0); setTrimDuration(0)
 }
 
@@ -313,6 +315,7 @@ body: JSON.stringify({ youtubeUrl: urlToUse }),
 const fetchData = await fetchRes.json()
 if (!fetchRes.ok || !fetchData.videoUrl) {
 setError(fetchData.error || 'Could not fetch that video')
+setFetchErrorType(fetchData.errorType || '')
 setProcessing(false); setProcessingLabel('')
 return
 }
@@ -681,7 +684,17 @@ This videos own audio stays off — sound comes from whichever language pill is 
 <p style={{ fontSize: '0.85rem', color: '#6B6B76', marginBottom: '1.25rem' }}>{processingLabel || 'Working...'}</p>
 )}
 
-{error && <p style={{ color: '#B54A2B', marginBottom: '1rem', fontSize: '0.9rem' }}>{error}</p>}
+{error && fetchErrorType === 'private_or_unavailable' && (
+  <div style={{ background: '#FDF2EE', border: '1px solid #F0C4B4', borderRadius: '10px', padding: '1rem 1.25rem', marginBottom: '1rem' }}>
+    <p style={{ color: '#B54A2B', fontWeight: 600, fontSize: '0.9rem', margin: '0 0 0.5rem' }}>{error}</p>
+    <p style={{ color: '#B54A2B', fontSize: '0.85rem', margin: '0 0 0.5rem' }}>This is a YouTube limitation, not a PolyCast bug — private videos can&apos;t be auto-fetched even by their own owner, since YouTube&apos;s API has no video download endpoint. Two ways around it:</p>
+    <ol style={{ color: '#B54A2B', fontSize: '0.85rem', margin: 0, paddingLeft: '1.1rem', lineHeight: 1.7 }}>
+      <li>In YouTube Studio, switch this video to <strong>Public</strong> or <strong>Unlisted</strong>, then paste the link here again</li>
+      <li>Or, in YouTube Studio, download the video yourself (Content → select video → ⋮ → Download), then use the <strong>Upload file</strong> tab above instead</li>
+    </ol>
+  </div>
+)}
+{error && fetchErrorType !== 'private_or_unavailable' && <p style={{ color: '#B54A2B', marginBottom: '1rem', fontSize: '0.9rem' }}>{error}</p>}
 </div>
 
 <div style={{ flex: '1 1 380px', minWidth: '300px' }}>
