@@ -446,7 +446,7 @@ if (synthRes.ok && synthData.url) {
 try {
 const ffmpeg = await getFFmpeg()
 await ffmpeg.writeFile(`raw_audio_${code}.mp3`, await fetchFile(synthData.url))
-await ffmpeg.exec(['-i', `raw_audio_${code}.mp3`, '-af', 'volume=7dB', `boosted_audio_${code}.mp3`])
+await ffmpeg.exec(['-i', `raw_audio_${code}.mp3`, '-af', 'volume=7dB,alimiter=limit=0.95', `boosted_audio_${code}.mp3`])
 const boostedData = await ffmpeg.readFile(`boosted_audio_${code}.mp3`)
 const boostedBlob = new Blob([boostedData as unknown as BlobPart], { type: 'audio/mpeg' })
 const boostedFile = new File([boostedBlob], `boosted-${code}.mp3`, { type: 'audio/mpeg' })
