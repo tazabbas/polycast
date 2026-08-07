@@ -7,29 +7,23 @@ export async function POST(request: NextRequest) {
     if (!videoUrl) {
       return NextResponse.json({ error: 'No video URL provided' }, { status: 400 })
     }
-
     const fileRes = await fetch(videoUrl)
     if (!fileRes.ok) {
       return NextResponse.json({ error: 'Could not fetch uploaded file' }, { status: 400 })
     }
     const arrayBuffer = await fileRes.arrayBuffer()
     const contentType = fileRes.headers.get('content-type') || 'video/mp4'
-
     const pathname = new URL(videoUrl).pathname
     const originalName = pathname.substring(pathname.lastIndexOf('/') + 1) || 'upload.mp4'
-
     const file = new File([arrayBuffer], originalName, { type: contentType })
-
     const openai = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY,
     })
-
     const transcription = await openai.audio.transcriptions.create({
       file: file,
-      model: 'whisper-1',
+      model: 'gpt-transcribe',
       language: 'en',
     })
-
     return NextResponse.json({ transcript: transcription.text })
   } catch (error) {
     console.error('Transcription error:', error)
