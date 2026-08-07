@@ -2,6 +2,7 @@ import { auth, clerkClient } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import { createClient } from '@supabase/supabase-js'
 import Link from 'next/link'
+import DashboardDubbedVideos from './DashboardDubbedVideos'
 
 interface VideoItem {
   id: string
@@ -388,6 +389,21 @@ export default async function Dashboard() {
                   Buy lip sync credits →
                 </Link>
               )}
+            </div>
+
+            <h2
+              style={{
+                fontFamily: "'Syne', sans-serif",
+                fontSize: '1.1rem',
+                fontWeight: 700,
+                marginBottom: '1.1rem',
+                color: '#FFFFFF',
+              }}
+            >
+              Your dubbed videos
+            </h2>
+            <div style={{ marginBottom: '2.5rem' }}>
+              <DashboardDubbedVideos />
             </div>
 
             <h2
