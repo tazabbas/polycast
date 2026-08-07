@@ -19,12 +19,6 @@ export async function POST(request: NextRequest) {
         text,
         modelId: 'eleven_multilingual_v2',
         outputFormat: 'mp3_44100_128',
-        voiceSettings: {
-          stability: 0.5,
-          similarityBoost: 0.75,
-          style: 0,
-          useSpeakerBoost: true,
-        },
       }
     )
     const reader = (audioStream as ReadableStream<Uint8Array>).getReader()
