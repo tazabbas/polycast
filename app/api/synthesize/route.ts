@@ -8,8 +8,8 @@ export async function POST(request: NextRequest) {
     if (!rawText) {
       return NextResponse.json({ error: 'No text provided' }, { status: 400 })
     }
-    // eleven_v3 caps requests at 5,000 characters per call
-    const text = rawText.length > 4800 ? rawText.substring(0, 4800) : rawText
+    // eleven_multilingual_v2 supports up to 10,000 characters per request (~10 min of audio)
+    const text = rawText.length > 9500 ? rawText.substring(0, 9500) : rawText
     const client = new ElevenLabsClient({
       apiKey: process.env.ELEVENLABS_API_KEY!,
     })
@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
       voiceId || process.env.ELEVENLABS_VOICE_ID!,
       {
         text,
-        modelId: 'eleven_v3',
+        modelId: 'eleven_multilingual_v2',
         outputFormat: 'mp3_44100_128',
         voiceSettings: {
           stability: 0.5,

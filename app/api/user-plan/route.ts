@@ -13,6 +13,12 @@ export async function GET() {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
+  // Developer override: the app owner always has full Pro-level access for testing,
+  // regardless of what's actually stored in the database.
+  if (process.env.ADMIN_USER_ID && userId === process.env.ADMIN_USER_ID) {
+    return NextResponse.json({ plan: 'pro' })
+  }
+
   const { data } = await supabase
     .from('user_credits')
     .select('plan')
