@@ -400,7 +400,9 @@ let sampleUrl = url
 if (isVideoSource) {
 const ffmpeg = await getFFmpeg()
 await ffmpeg.writeFile('clone_source.mp4', await fetchFile(url))
-await ffmpeg.exec(['-i', 'clone_source.mp4', '-vn', '-acodec', 'libmp3lame', 'clone_sample.mp3'])
+// Light cleanup on the cloning sample only — denoise + gentle adaptive normalization.
+// This is separate from the final dubbed audio, so it can't reintroduce the earlier artifacts.
+await ffmpeg.exec(['-i', 'clone_source.mp4', '-vn', '-af', 'afftdn=nf=-20,dynaudnorm=f=250:g=15', '-acodec', 'libmp3lame', 'clone_sample.mp3'])
 const audioData = await ffmpeg.readFile('clone_sample.mp3')
 const audioBlob = new Blob([audioData as unknown as BlobPart], { type: 'audio/mpeg' })
 const audioFile = new File([audioBlob], 'speaker-sample.mp3', { type: 'audio/mpeg' })
