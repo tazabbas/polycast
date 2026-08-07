@@ -695,6 +695,61 @@ This videos own audio stays off — sound comes from whichever language pill is 
   </div>
 )}
 {error && fetchErrorType !== 'private_or_unavailable' && <p style={{ color: '#B54A2B', marginBottom: '1rem', fontSize: '0.9rem' }}>{error}</p>}
+
+{readyLanguages.length > 0 && activeLang && results[activeLang] && (
+<div style={{ background: '#FFFFFF', border: '1px solid #E5E5EA', borderRadius: '12px', padding: '1.5rem', marginBottom: '1.5rem' }}>
+<p style={{ fontSize: '0.9rem', fontWeight: 700, marginBottom: '0.75rem', color: '#1A1A1A', fontFamily: "'Syne', sans-serif" }}>
+Lip sync — {LANGUAGES.find((l) => l.code === activeLang)?.name}
+</p>
+{isVideoSource ? (
+<>
+<div style={{ marginBottom: '1.25rem', paddingBottom: '1.25rem', borderBottom: '1px solid #E5E5EA' }}>
+<p style={{ fontSize: '0.8rem', fontWeight: 600, marginBottom: '0.6rem', color: '#1A1A1A' }}>Free dub — save the video you are watching now</p>
+<button onClick={() => handleSaveDub(activeLang)} disabled={savingDub || savedDub} style={{ background: savedDub ? '#EAF7F1' : '#1D9E75', color: savedDub ? '#1D9E75' : 'white', border: savedDub ? '1px solid #1D9E75' : 'none', padding: '0.6rem 1.25rem', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 600, cursor: savingDub || savedDub ? 'not-allowed' : 'pointer' }}>
+{savedDub ? 'Saved to My Videos ✓' : savingDub ? 'Saving...' : 'Save to My Videos'}
+</button>
+{saveDubError && <p style={{ color: '#B54A2B', marginTop: '0.6rem', fontSize: '0.8rem' }}>{saveDubError}</p>}
+</div>
+{trimDuration > 0 && (
+<div style={{ marginBottom: '1.25rem', paddingBottom: '1.25rem', borderBottom: '1px solid #E5E5EA' }}>
+<p style={{ fontSize: '0.8rem', fontWeight: 600, marginBottom: '0.5rem', color: '#1A1A1A' }}>
+Clip length for lip sync: {(trimEnd - trimStart).toFixed(1)}s
+</p>
+<p style={{ fontSize: '0.75rem', color: '#9A9AA4', marginBottom: '0.75rem' }}>
+Pick the part of the video to lip sync — shorter clips cost less and process faster.
+</p>
+<div style={{ marginBottom: '0.5rem' }}>
+<label style={{ fontSize: '0.75rem', color: '#6B6B76' }}>Start: {trimStart.toFixed(1)}s</label>
+<input type="range" min={0} max={trimDuration} step={0.1} value={trimStart} onChange={(e) => { const v = Number(e.target.value); if (v < trimEnd) setTrimStart(v) }} style={{ width: '100%' }} />
+</div>
+<div>
+<label style={{ fontSize: '0.75rem', color: '#6B6B76' }}>End: {trimEnd.toFixed(1)}s</label>
+<input type="range" min={0} max={trimDuration} step={0.1} value={trimEnd} onChange={(e) => { const v = Number(e.target.value); if (v > trimStart) setTrimEnd(v) }} style={{ width: '100%' }} />
+</div>
+</div>
+)}
+<button onClick={() => handleLipSync(activeLang)} disabled={results[activeLang].lipSyncing} style={{ background: results[activeLang].lipSyncing ? '#D1D1D8' : '#1A1A1A', color: 'white', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '8px', fontSize: '0.95rem', fontWeight: 600, cursor: results[activeLang].lipSyncing ? 'not-allowed' : 'pointer' }}>
+{results[activeLang].lipSyncing ? (results[activeLang].lipSyncStatus || 'Working...') : 'Lip sync my video'}
+</button>
+{results[activeLang].lipSyncError && <p style={{ color: '#B54A2B', marginTop: '0.75rem', fontSize: '0.85rem' }}>{results[activeLang].lipSyncError}</p>}
+{results[activeLang].lipSyncVideoUrl && (
+<div style={{ marginTop: '1.25rem' }}>
+<video controls src={results[activeLang].lipSyncVideoUrl} style={{ width: '100%', borderRadius: '8px' }} />
+<button
+onClick={() => handleSaveVideo(activeLang)}
+disabled={savingVideo || savedVideo}
+style={{ marginTop: '0.75rem', background: savedVideo ? '#EAF7F1' : '#1D9E75', color: savedVideo ? '#1D9E75' : 'white', border: savedVideo ? '1px solid #1D9E75' : 'none', padding: '0.6rem 1.25rem', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 600, cursor: savingVideo || savedVideo ? 'not-allowed' : 'pointer' }}
+>
+{savedVideo ? 'Saved to My Videos ✓' : savingVideo ? 'Saving...' : 'Save to My Videos'}
+</button>
+</div>
+)}
+</>
+) : (
+<p style={{ fontSize: '0.8rem', color: '#9A9AA4' }}>Video dubbing requires a video file.</p>
+)}
+</div>
+)}
 </div>
 
 <div style={{ flex: '1 1 380px', minWidth: '300px' }}>
@@ -786,60 +841,6 @@ Use the language buttons on the video above to switch instantly, mid-playback.
 </p>
 )}
 
-{readyLanguages.length > 0 && activeLang && results[activeLang] && (
-<div style={{ background: '#FFFFFF', border: '1px solid #E5E5EA', borderRadius: '12px', padding: '1.5rem', marginBottom: '1.5rem' }}>
-<p style={{ fontSize: '0.9rem', fontWeight: 700, marginBottom: '0.75rem', color: '#1A1A1A', fontFamily: "'Syne', sans-serif" }}>
-Lip sync — {LANGUAGES.find((l) => l.code === activeLang)?.name}
-</p>
-{isVideoSource ? (
-<>
-<div style={{ marginBottom: '1.25rem', paddingBottom: '1.25rem', borderBottom: '1px solid #E5E5EA' }}>
-<p style={{ fontSize: '0.8rem', fontWeight: 600, marginBottom: '0.6rem', color: '#1A1A1A' }}>Free dub — save the video you are watching now</p>
-<button onClick={() => handleSaveDub(activeLang)} disabled={savingDub || savedDub} style={{ background: savedDub ? '#EAF7F1' : '#1D9E75', color: savedDub ? '#1D9E75' : 'white', border: savedDub ? '1px solid #1D9E75' : 'none', padding: '0.6rem 1.25rem', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 600, cursor: savingDub || savedDub ? 'not-allowed' : 'pointer' }}>
-{savedDub ? 'Saved to My Videos ✓' : savingDub ? 'Saving...' : 'Save to My Videos'}
-</button>
-{saveDubError && <p style={{ color: '#B54A2B', marginTop: '0.6rem', fontSize: '0.8rem' }}>{saveDubError}</p>}
-</div>
-{trimDuration > 0 && (
-<div style={{ marginBottom: '1.25rem', paddingBottom: '1.25rem', borderBottom: '1px solid #E5E5EA' }}>
-<p style={{ fontSize: '0.8rem', fontWeight: 600, marginBottom: '0.5rem', color: '#1A1A1A' }}>
-Clip length for lip sync: {(trimEnd - trimStart).toFixed(1)}s
-</p>
-<p style={{ fontSize: '0.75rem', color: '#9A9AA4', marginBottom: '0.75rem' }}>
-Pick the part of the video to lip sync — shorter clips cost less and process faster.
-</p>
-<div style={{ marginBottom: '0.5rem' }}>
-<label style={{ fontSize: '0.75rem', color: '#6B6B76' }}>Start: {trimStart.toFixed(1)}s</label>
-<input type="range" min={0} max={trimDuration} step={0.1} value={trimStart} onChange={(e) => { const v = Number(e.target.value); if (v < trimEnd) setTrimStart(v) }} style={{ width: '100%' }} />
-</div>
-<div>
-<label style={{ fontSize: '0.75rem', color: '#6B6B76' }}>End: {trimEnd.toFixed(1)}s</label>
-<input type="range" min={0} max={trimDuration} step={0.1} value={trimEnd} onChange={(e) => { const v = Number(e.target.value); if (v > trimStart) setTrimEnd(v) }} style={{ width: '100%' }} />
-</div>
-</div>
-)}
-<button onClick={() => handleLipSync(activeLang)} disabled={results[activeLang].lipSyncing} style={{ background: results[activeLang].lipSyncing ? '#D1D1D8' : '#1A1A1A', color: 'white', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '8px', fontSize: '0.95rem', fontWeight: 600, cursor: results[activeLang].lipSyncing ? 'not-allowed' : 'pointer' }}>
-{results[activeLang].lipSyncing ? (results[activeLang].lipSyncStatus || 'Working...') : 'Lip sync my video'}
-</button>
-{results[activeLang].lipSyncError && <p style={{ color: '#B54A2B', marginTop: '0.75rem', fontSize: '0.85rem' }}>{results[activeLang].lipSyncError}</p>}
-{results[activeLang].lipSyncVideoUrl && (
-<div style={{ marginTop: '1.25rem' }}>
-<video controls src={results[activeLang].lipSyncVideoUrl} style={{ width: '100%', borderRadius: '8px' }} />
-<button
-onClick={() => handleSaveVideo(activeLang)}
-disabled={savingVideo || savedVideo}
-style={{ marginTop: '0.75rem', background: savedVideo ? '#EAF7F1' : '#1D9E75', color: savedVideo ? '#1D9E75' : 'white', border: savedVideo ? '1px solid #1D9E75' : 'none', padding: '0.6rem 1.25rem', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 600, cursor: savingVideo || savedVideo ? 'not-allowed' : 'pointer' }}
->
-{savedVideo ? 'Saved to My Videos ✓' : savingVideo ? 'Saving...' : 'Save to My Videos'}
-</button>
-</div>
-)}
-</>
-) : (
-<p style={{ fontSize: '0.8rem', color: '#9A9AA4' }}>Video dubbing requires a video file.</p>
-)}
-</div>
-)}
 </>
 )}
 </div>
