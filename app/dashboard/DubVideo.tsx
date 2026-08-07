@@ -351,7 +351,7 @@ try {
 setProcessingLabel('Trimming clip...')
 const ffmpeg = await getFFmpeg()
 await ffmpeg.writeFile('clip_in.mp4', await fetchFile(videoUrl))
-await ffmpeg.exec(['-i', 'clip_in.mp4', '-ss', String(trimStart), '-to', String(trimEnd), '-c', 'copy', 'clip_out.mp4'])
+await ffmpeg.exec(['-i', 'clip_in.mp4', '-ss', String(trimStart), '-to', String(trimEnd), '-c:v', 'libx264', '-c:a', 'aac', '-b:a', '192k', 'clip_out.mp4'])
 const data = await ffmpeg.readFile('clip_out.mp4')
 const trimmedBlob = new Blob([data as unknown as BlobPart], { type: 'video/mp4' })
 const trimmedFile = new File([trimmedBlob], `clip-${label}.mp4`, { type: 'video/mp4' })
